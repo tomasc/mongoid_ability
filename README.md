@@ -41,10 +41,10 @@ end
 
 The lock class will acquire the following fields:
 
-`:subject_type, type: String`
-`:subject_id, type: Moped::BSON::ObjectId`
-`:action, type: Symbol, default: :read`
-`:outcome, type: Boolean, default: false`
+`:subject_type, type: String`  
+`:subject_id, type: Moped::BSON::ObjectId`  
+`:action, type: Symbol, default: :read`  
+`:outcome, type: Boolean, default: false`  
 
 These fields defined what subject (respectively subject type, when referring to a class) the lock applies to, which action is it defined for, and whether the outcome is positive or negative.
 
