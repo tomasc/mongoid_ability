@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/tomasc/mongoid_ability.svg)](https://travis-ci.org/tomasc/mongoid_ability) [![Gem Version](https://badge.fury.io/rb/mongoid_ability.svg)](http://badge.fury.io/rb/mongoid_ability) [![Coverage Status](https://img.shields.io/coveralls/tomasc/mongoid_ability.svg)](https://coveralls.io/r/tomasc/mongoid_ability)
 
-Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization library read permissions stored in Mongo database via the [Mongoid](https://github.com/mongoid/mongoid) gem.
+Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization library store permissions in [MongoDB](http://www.mongodb.org) via the [Mongoid](https://github.com/mongoid/mongoid) gem.
 
 ## Installation
 
