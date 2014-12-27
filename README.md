@@ -48,7 +48,7 @@ The lock class will acquire the following fields:
 
 These fields defined what subject (respectively subject type, when referring to a class) the lock applies to, which action is it defined for, and whether the outcome is positive or negative.
 
-The `Lock` class can be subclassed should you need to customise its behavior, for example per action.
+The `Lock` class can be further subclassed in order to customise its behavior, for example per action.
 
 ### Subject
 
