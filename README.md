@@ -98,7 +98,7 @@ Again, both users and roles can be subclassed, should you need to customise thei
 
 ### CanCanCan
 
-The default `:current_ability` defined by CanCanCan will be automatically overriden by the `Ability` class provided by this gem.
+The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanCommunity/cancancan) will be automatically overriden by the `Ability` class provided by this gem.
 
 ## How it works?
 
