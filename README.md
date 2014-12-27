@@ -68,7 +68,7 @@ class MySubject
 end
 ```
 
-The subject class can be subclassed. Subclasses inherit the default locks (unless overridden), the resulting outcome being correctly calculated bottom-up. 
+The subject class can be subclassed. Subclasses inherit the default locks (unless overridden), the resulting outcome being correctly calculated bottom-up the superclass chain. 
 
 ### Owner
 
