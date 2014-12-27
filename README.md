@@ -39,14 +39,14 @@ class MyLock
 end
 ```
 
-The lock class will acquire the following fields:
+The lock class will have the following fields:
 
 `:subject_type, type: String`  
 `:subject_id, type: Moped::BSON::ObjectId`  
 `:action, type: Symbol, default: :read`  
 `:outcome, type: Boolean, default: false`  
 
-These fields defined what subject (respectively subject type, when referring to a class) the lock applies to, which action is it defined for, and whether the outcome is positive or negative.
+These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
 The `Lock` class can be further subclassed in order to customise its behavior, for example per action.
 
