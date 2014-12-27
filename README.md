@@ -52,7 +52,7 @@ The `Lock` class can be subclassed should you need to customise its behavior, fo
 
 ### Subject
 
-All subjects has to include the `Subject` module, and the run the `has_locks` macro defining the association name and name of the lock class.
+All subjects have to include the `Subject` module, and the run the `has_locks` macro defining the association name and name of the lock class.
 
 Each action to be used for this particular `Subject`, and its default outcome, needs to be defined using the `default_lock` macro.
 
