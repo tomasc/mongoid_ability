@@ -8,7 +8,7 @@ Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunit
 
 Add this line to your application's Gemfile:
 
-```Ruby
+```ruby
 gem 'mongoid_ability'
 ```
 
@@ -32,7 +32,7 @@ The permissions are defined by the `Lock` that applies to a `Subject` and define
 
 The `Lock` class defines the permission itself:
 
-```
+```ruby
 class MyLock
     include Mongoid::Document
     include MongoidAbility::Lock
@@ -56,7 +56,7 @@ All subjects have to include the `Subject` module, and the run the `has_locks` m
 
 Each action and its default outcome (to be used for this subject), needs to be defined using the `default_lock` macro.
 
-```
+```ruby
 class MySubject
     include Mongoid::Document
     include MongoidAbility::Subject
@@ -74,7 +74,7 @@ The subject class can be subclassed. Subclasses inherit the default locks (unles
 
 This gem supports two levels of ownership of a lock: a `User` and a `Role`.
 
-```
+```ruby
 class MyUser
     include Mongoid::Document
     include MongoidAbility::User
@@ -84,7 +84,7 @@ class MyUser
 end
 ```
 
-```
+```ruby
 class MyRole
     include Mongoid::Document
     include MongoidAbility::Role
