@@ -48,7 +48,7 @@ The lock class will have the following fields:
 
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
-The `Lock` class can be further subclassed in order to customise its behavior, for example per action.
+The lock class can be further subclassed in order to customise its behavior, for example per action.
 
 ### Subject
 
