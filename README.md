@@ -24,7 +24,7 @@ Or install it yourself as:
 $ gem install mongoid_ability
 ```
 
-## Usage
+## Setup
 
 The permissions are defined by the `Lock` that applies to a `Subject` and defines access for its owner – `User` or `Role`.
 
@@ -100,9 +100,13 @@ Again, both users and roles can be subclassed, should you need to customise thei
 
 The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanCommunity/cancancan) will be automatically overriden by the `Ability` class provided by this gem.
 
-## How it works?
+## Usage
 
-See the [CanCanCan](https://github.com/CanCanCommunity/cancancan) gem for basic usage (the `can?` and `cannot?` macros).
+1. Setup subject classes and their default locks.
+2. Define permissions using lock objects embedded either in user or role.
+3. Use standard [CanCanCan](https://github.com/CanCanCommunity/cancancan) helpers (`authorize!`, `can?`, `cannot?`) to authorize the current user.
+
+## How it works?
 
 The ability class in this gem looks up and calculates the outcome in the following order:
 
