@@ -26,7 +26,7 @@ $ gem install mongoid_ability
 
 ## Usage
 
-The permissions are defined by the `Lock` that applies to a `Subject` and defines access for its `Owner`.
+The permissions are defined by the `Lock` that applies to a `Subject` and defines access for its owner – `User` or `Role`.
 
 ### Lock
 
