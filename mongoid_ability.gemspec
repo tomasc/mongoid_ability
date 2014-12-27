@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = MongoidAbility::VERSION
   spec.authors       = ["Tomas Celizna"]
   spec.email         = ["tomas.celizna@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.summary       = %q{Custom Ability class that allows CanCanCan authorization library store permissions in MongoDB via the Mongoid gem.}
+  spec.description   = %q{Custom Ability class that allows CanCanCan authorization library store permissions in MongoDB via the Mongoid gem.}
   spec.homepage      = "https://github.com/tomasc/mongoid_ability"
   spec.license       = "MIT"
 
