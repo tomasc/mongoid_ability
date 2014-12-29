@@ -52,6 +52,9 @@ class TestLock
   include MongoidAbility::Lock
 end
 
+class TestLockSub < TestLock
+end
+
 # ---------------------------------------------------------------------
   
 class TestOwnerSuper

@@ -22,6 +22,10 @@ module MongoidAbility
         default_locks << lock_class_name.constantize.new(subject_type: self, action: action, outcome: outcome)
       end
 
+      # ---------------------------------------------------------------------
+      
+      # override if needed
+      # return for example 'MyLock'
       def lock_class_name
         Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
       end

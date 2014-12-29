@@ -4,10 +4,6 @@
 
 Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization library store permissions in [MongoDB](http://www.mongodb.org) via the [Mongoid](https://github.com/mongoid/mongoid) gem.
 
-## ToDo
-
-* Where and how to specify the lock class? The automatic detection does not take into account subclassing, for example.
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -30,11 +26,11 @@ $ gem install mongoid_ability
 
 ## Setup
 
-The permissions are defined by the `Lock` that applies to a `Subject` and defines access for its owner – `User` or `Role`.
+The permissions are defined by a `Lock` that applies to a `Subject` and defines access for its owner – `User` and/or its `Role`.
 
 ### Lock
 
-The `Lock` class defines the permission itself:
+A `Lock` class can be any class that include `MongoidAbility::Lock`.
 
 ```ruby
 class MyLock
@@ -43,7 +39,7 @@ class MyLock
 end
 ```
 
-The lock class will have the following fields:
+This class defines a permission itself using the following fields:
 
 `:subject_type, type: String`  
 `:subject_id, type: Moped::BSON::ObjectId`  
@@ -52,21 +48,24 @@ The lock class will have the following fields:
 
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
-The lock class can be further subclassed in order to customise its behavior, for example per action.
-
-For more specific behavior, it is possible to override the `:calculated_outcome` method (for example when the lock outcome should depend on more factors).
+For more specific behavior, it is possible to override the `#calculated_outcome` method (should, for example, the permission depend on some additional factors).
 
 ```ruby
 def calculated_outcome
-    # custom behaviour, that always returns Boolean
+    # custom behaviour
+    # returns true/false
 end
 ```
 
+If you wish to check the state of a lock directly, please use the convenience methods `#open?` and `#closed?`. These take into account the `#calculated_outcome`. Using the `:outcome` field directly is discouraged.
+
+The lock class can be further subclassed in order to customise its behavior, for example per action.
+
 ### Subject
 
-All subjects have to include the `Subject` module, and the run the `has_locks` macro defining the association name and name of the lock class.
+All subjects (classes which permissions you want to control) have to include the `MongoidAbility::Subject` module.
 
-Each action and its default outcome (to be used for this subject), needs to be defined using the `default_lock` macro.
+Each action and its default outcome, needs to be defined using the `.default_lock` macro.
 
 ```ruby
 class MySubject
@@ -78,9 +77,9 @@ class MySubject
 end
 ```
 
-The subject class can be subclassed. Subclasses inherit the default locks (unless overridden), the resulting outcome being correctly calculated bottom-up the superclass chain. 
+The subject classes can be subclassed. Subclasses inherit the default locks (unless they override them), the resulting outcome being correctly calculated bottom-up the superclass chain. 
 
-The subject also acquires a convenience Mongoid::Criteria named `accessible_by` method. This criteria can be used to query for subject based on the user's ability, such as:
+The subject also acquires a convenience `Mongoid::Criteria` named `.accessible_by`. This criteria can be used to query for subject based on the user's ability:
 
 ```ruby
 ability = MongoidAbility::Ability.new(current_user)
@@ -89,7 +88,7 @@ MySubject.accessible_by(ability, :read)
 
 ### Owner
 
-This gem supports two levels of ownership of a lock: a `User` and a `Role`.
+This gem supports two levels of ownership of a lock: a `User` and its many `Role`s. The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Please make sure to include the `as: :owner` option.
 
 ```ruby
 class MyUser
@@ -98,6 +97,11 @@ class MyUser
 
     embeds_many :locks, class_name: 'MyLock', as: :owner
     has_and_belongs_to_many :roles, class_name: 'MyRole'
+
+    # override if your relation is named differently
+    def self.roles_relation_name
+        :roles
+    end
 end
 ```
 
@@ -111,15 +115,7 @@ class MyRole
 end
 ```
 
-The relations to users' roles is by default expected to be named `:roles`. You can however override it by overriding the following class method:
-
-```ruby
-def self.roles_relation_name
-    :my_roles
-end
-```
-
-Again, both users and roles can be subclassed, should you need to customise their behavior.
+Both users and roles can be further subclassed.
 
 ### CanCanCan
 
@@ -128,14 +124,14 @@ The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanC
 ## Usage
 
 1. Setup subject classes and their default locks.
-2. Define permissions using lock objects embedded either in user or role.
+2. Define permissions using lock objects embedded (or associated to) either in user or role.
 3. Use standard [CanCanCan](https://github.com/CanCanCommunity/cancancan) helpers (`authorize!`, `can?`, `cannot?`) to authorize the current user.
 
 ## How it works?
 
 The ability class in this gem looks up and calculates the outcome in the following order:
 
-1. User locks, defined for `subject_id`, then `subject_type` (then its superclasses), then defined in the subject class itself (via the `default_lock` macro) and its superclasses.
+1. User locks, defined for `:subject_id`, then `:subject_type` (then its superclasses), then defined in the subject class itself (via the `.default_lock` macro) and its superclasses.
 2. Role locks have the same look up chain as the user locks. The role permissions are optimistic, meaning that in case a user has multiple roles, and the roles have locks with conflicting outcomes, the ability favors the positive one.
 
 See the test suite for more details.

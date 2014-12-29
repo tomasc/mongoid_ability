@@ -11,14 +11,19 @@ module MongoidAbility
     # =====================================================================
 
     module ClassMethods
+      # override if needed
+      # return for example :my_locks
       def locks_relation_name
         @locks_relation_name ||= relations.detect{ |name, meta| meta.class_name == lock_class_name }.first.to_sym
       end
 
+      # override if your relation is named differently
       def roles_relation_name
         :roles
       end
 
+      # override if needed
+      # return for example 'MyLock'
       def lock_class_name
         @lock_class_name ||= Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
