@@ -3,8 +3,8 @@ require 'test_helper'
 module MongoidAbility
   describe Subject do
 
-    subject { MySubject.new }
-    let(:subject_super) { MySubjectSuper.new }
+    subject { TestSubject.new }
+    let(:subject_super) { TestSubjectSuper.new }
 
     # =====================================================================
 
@@ -42,13 +42,13 @@ module MongoidAbility
         
       describe '.ancestors_with_default_locks' do
         it 'lists ancestors with default locks' do
-          subject.class.ancestors_with_default_locks.must_equal [MySubjectSuper]
+          subject.class.ancestors_with_default_locks.must_equal [TestSubjectSuper]
         end
       end
 
       describe '.self_and_ancestors_with_default_locks' do
         it 'lists self and ancestors with default locks' do
-          subject.class.self_and_ancestors_with_default_locks.must_equal [MySubject, MySubjectSuper]
+          subject.class.self_and_ancestors_with_default_locks.must_equal [TestSubject, TestSubjectSuper]
         end
       end
 

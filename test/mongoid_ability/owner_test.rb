@@ -3,7 +3,7 @@ require 'test_helper'
 module MongoidAbility
   describe Owner do
 
-    subject { MyOwner.new }
+    subject { TestOwner.new }
 
     # =====================================================================
 
@@ -23,7 +23,7 @@ module MongoidAbility
     describe 'class methods' do
       describe 'lock_class_name' do
         it 'finds class that includes the MongoidAbility::Lock module' do
-          MyOwner.lock_class_name.must_equal 'MongoidAbility::MyLock'
+          TestOwner.lock_class_name.must_equal 'TestLock'
         end
       end
     end
@@ -32,8 +32,8 @@ module MongoidAbility
 
     describe 'instance methods' do
       describe 'cleanup_locks' do
-        let(:closed_lock) { MyLock.new(action: :read, outcome: false, subject_type: Object.to_s) }
-        let(:open_lock) { MyLock.new(action: :read, outcome: true, subject_type: Object.to_s) }
+        let(:closed_lock) { TestLock.new(action: :read, outcome: false, subject_type: Object.to_s) }
+        let(:open_lock) { TestLock.new(action: :read, outcome: true, subject_type: Object.to_s) }
 
         before do
           subject.locks = [open_lock, closed_lock].shuffle

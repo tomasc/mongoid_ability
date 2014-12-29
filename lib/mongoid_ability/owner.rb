@@ -4,7 +4,7 @@ module MongoidAbility
     def self.included base
       base.extend ClassMethods
       base.class_eval do
-        embeds_many :locks, class_name: lock_class_name
+        embeds_many :locks, class_name: lock_class_name, as: :owner
         before_save :cleanup_locks
       end
     end

@@ -47,28 +47,67 @@ end
 
 # =====================================================================
 
-module MongoidAbility
-  class MyLock
-    include Mongoid::Document
-    include MongoidAbility::Lock
-  end
+class TestLock
+  include Mongoid::Document
+  include MongoidAbility::Lock
+end
 
-  class MyOwnerSuper
-    include Mongoid::Document
-    include MongoidAbility::Owner
+# ---------------------------------------------------------------------
+  
+class TestOwnerSuper
+  include Mongoid::Document
+  include MongoidAbility::Owner
+end
 
-    # embeds_many_locks class_name: 'MongoidAbility::MyLock'
-  end
+class TestOwner < TestOwnerSuper
+end
 
-  class MyOwner < MyOwnerSuper
-  end
+# ---------------------------------------------------------------------
+  
+class TestSubjectSuper
+  include Mongoid::Document
+  include MongoidAbility::Subject
+end
 
-  class MySubjectSuper
-    include Mongoid::Document
-    include MongoidAbility::Subject
-  end
+class TestSubject < TestSubjectSuper
+  default_lock :read, true
+end
 
-  class MySubject < MySubjectSuper
-    default_lock :read, true
-  end
+# ---------------------------------------------------------------------
+  
+class TestAbilityResolverSubject
+  include Mongoid::Document
+  include MongoidAbility::Subject
+
+  default_lock :read, true
+end
+
+class TestAbilitySubjectSuper2
+  include Mongoid::Document
+  include MongoidAbility::Subject
+
+  default_lock :read, false
+  default_lock :update, true
+end
+
+class TestAbilitySubjectSuper1 < TestAbilitySubjectSuper2
+end
+
+class TestAbilitySubject < TestAbilitySubjectSuper1
+end
+
+class TestRole
+  include Mongoid::Document
+  include MongoidAbility::Owner
+
+  field :name, type: String
+
+  has_and_belongs_to_many :users, class_name: 'TestUser'
+end  
+
+class TestUser
+  include Mongoid::Document
+  include MongoidAbility::Owner
+
+  has_and_belongs_to_many :roles, class_name: 'TestRole'
 end

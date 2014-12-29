@@ -3,7 +3,7 @@ require 'test_helper'
 module MongoidAbility
   describe Lock do
 
-    subject { MyLock.new }
+    subject { TestLock.new }
     
     # =====================================================================
 

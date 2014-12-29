@@ -20,7 +20,7 @@ module MongoidAbility
       end
 
       def default_lock action, outcome
-        default_locks << MyLock.new(subject_type: self, action: action, outcome: outcome)
+        default_locks << TestLock.new(subject_type: self, action: action, outcome: outcome)
       end
 
       # ---------------------------------------------------------------------
