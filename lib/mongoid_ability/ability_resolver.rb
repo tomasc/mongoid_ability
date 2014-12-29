@@ -51,7 +51,7 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     def roles_outcome
-      locks_for_subject_type = @user.roles.collect(&:locks).flatten.select{ |l| l.subject_type == @subject_type && l.action == @action }
+      locks_for_subject_type = @user.roles_relation.collect(&:locks).flatten.select{ |l| l.subject_type == @subject_type && l.action == @action }
 
       return unless locks_for_subject_type.present?
 

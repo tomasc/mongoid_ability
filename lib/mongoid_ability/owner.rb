@@ -11,10 +11,20 @@ module MongoidAbility
 
     # =====================================================================
 
-    module ClassMethods      
+    module ClassMethods
+      def roles_relation_name
+        :roles
+      end
+
       def lock_class_name
         Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
+    end
+
+    # =====================================================================
+    
+    def roles_relation
+      self.send(self.class.roles_relation_name)
     end
 
     private # =============================================================

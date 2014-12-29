@@ -6,6 +6,12 @@ module MongoidAbility
     subject { TestSubject.new }
     let(:subject_super) { TestSubjectSuper.new }
 
+    let(:user) { TestUser.new }
+    let(:ability) { Ability.new(user) }
+
+    let(:open_lock) { TestLock.new(outcome: true, action: :read, subject: subject) }
+    let(:closed_lock) { TestLock.new(outcome: false, action: :read, subject: subject) }
+
     # =====================================================================
 
     describe 'fields' do
@@ -13,7 +19,7 @@ module MongoidAbility
 
     # =====================================================================
 
-    describe 'associations' do
+    describe 'relations' do
     end
 
     # =====================================================================
@@ -55,34 +61,34 @@ module MongoidAbility
       # ---------------------------------------------------------------------
         
       describe '.accessible_by' do
-        # it 'returns Mongoid::Criteria' do
-        #   subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
-        # end
+        it 'returns Mongoid::Criteria' do
+          subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
+        end
 
-        # describe 'when closed lock on user' do
-        #   before { user.locks = [closed_lock] }
-        #   it 'returns criteria excluding such ids' do
-        #     subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
-        #   end
-        # end
+        describe 'when closed lock on user' do
+          before { user.locks = [closed_lock] }
+          it 'returns criteria excluding such ids' do
+            subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
+          end
+        end
 
-        # describe "when closed lock on user's role" do
-        #   before { user.roles = [FactoryGirl.build(:role, locks: [closed_lock])] }
-        #   it 'returns criteria excluding such ids' do
-        #     subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
-        #   end
-        # end
+        describe "when closed lock on user's role" do
+          before { user.roles = [TestRole.new(locks: [closed_lock])] }
+          it 'returns criteria excluding such ids' do
+            subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
+          end
+        end
 
-        # describe "when class does not permit" do
-        #   before do
-        #     user.locks = [open_lock]
-        #   end
-        #   it 'returns criteria excluding everything but open id_locks' do
-        #     subject.class.stub(:default_locks, [FactoryGirl.build(:closed_lock, action: :read, subject_type: subject.class, outcome: false)]) do
-        #       subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$in', []).must_include subject.id
-        #     end
-        #   end
-        # end
+        describe "when class does not permit" do
+          before do
+            user.locks = [open_lock]
+          end
+          it 'returns criteria excluding everything but open id_locks' do
+            subject.class.stub(:default_locks, [TestLock.new(outcome: false, action: :read, subject_type: subject.class, outcome: false)]) do
+              subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$in', []).must_include subject.id
+            end
+          end
+        end
         
       end
     end

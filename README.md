@@ -4,6 +4,11 @@
 
 Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunity/cancancan) authorization library store permissions in [MongoDB](http://www.mongodb.org) via the [Mongoid](https://github.com/mongoid/mongoid) gem.
 
+## ToDo
+
+* Where and how to specify the lock class? The automatic detection does not take into account subclassing, for example.
+* Add `:calculated_outcome` to the Lock class, that can be overridden.
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -61,8 +66,6 @@ class MySubject
     include Mongoid::Document
     include MongoidAbility::Subject
 
-    has_locks :locks, class_name: 'MyLock'
-
     default_lock :read, true
     default_lock :update, false
 end
@@ -70,9 +73,16 @@ end
 
 The subject class can be subclassed. Subclasses inherit the default locks (unless overridden), the resulting outcome being correctly calculated bottom-up the superclass chain. 
 
+The subject also acquires a convenience Mongoid::Criteria named `accessible_by` method. This criteria can be used to query for subject based on the user's ability, such as:
+
+```ruby
+ability = MongoidAbility::Ability.new(current_user)
+MySubject.accessible_by(ability, :read)
+```
+
 ### Owner
 
-This gem supports two levels of ownership of a lock: a `User` and a `Role`.
+This gem supports two levels of ownership of a lock: a `User` and a `Role`. The locks should be embedded in one of these models (via the `embeds_many` Mongoid relation).
 
 ```ruby
 class MyUser
@@ -89,6 +99,14 @@ class MyRole
     include MongoidAbility::Owner
 
     has_and_belongs_to_many :users, class_name: 'MyUser'
+end
+```
+
+The relations to users' roles is by default expected to be named `:roles`. You can however override it by overriding the following class method:
+
+```ruby
+def self.roles_relation_name
+    :my_roles
 end
 ```
 

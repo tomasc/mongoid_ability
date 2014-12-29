@@ -4,7 +4,6 @@ module MongoidAbility
     def self.included base
       base.extend ClassMethods
       base.class_eval do
-        # TODO: add default locks?
       end
     end
 
@@ -20,7 +19,11 @@ module MongoidAbility
       end
 
       def default_lock action, outcome
-        default_locks << TestLock.new(subject_type: self, action: action, outcome: outcome)
+        default_locks << lock_class_name.constantize.new(subject_type: self, action: action, outcome: outcome)
+      end
+
+      def lock_class_name
+        Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
 
       # ---------------------------------------------------------------------
@@ -35,36 +38,36 @@ module MongoidAbility
 
       # ---------------------------------------------------------------------
         
-      # def accessible_by ability, action=:read
-      #   criteria = Mongoid::Criteria.new(self)
+      def accessible_by ability, action=:read
+        criteria = Mongoid::Criteria.new(self)
 
-      #   return criteria unless ability.user.present?
+        return criteria unless ability.user.present?
 
-      #   id_locks = [
-      #     ability.user,
-      #     ability.user.roles
-      #   ].flatten.collect { |owner|
-      #     owner.locks.for_subject_type(self.to_s).id_locks.for_action(action).to_a
-      #   }.flatten
+        id_locks = [
+          ability.user,
+          ability.user.roles_relation
+        ].flatten.collect { |owner|
+          owner.locks.for_subject_type(self.to_s).id_locks.for_action(action).to_a
+        }.flatten
 
-      #   if ability.can?(action, self)
-      #     criteria.nin({
-      #                    _id: id_locks.map(&:subject_id).select do |subject_id|
-      #                      subject = self.new
-      #                      subject.id = subject_id
-      #                      ability.cannot?(action, subject)
-      #                    end
-      #     })
-      #   else
-      #     criteria.in({
-      #                   _id: id_locks.map(&:subject_id).select do |subject_id|
-      #                     subject = self.new
-      #                     subject.id = subject_id
-      #                     ability.can?(action, subject)
-      #                   end
-      #     })
-      #   end
-      # end
+        if ability.can?(action, self)
+          criteria.nin({
+                         _id: id_locks.map(&:subject_id).select do |subject_id|
+                           subject = self.new
+                           subject.id = subject_id
+                           ability.cannot?(action, subject)
+                         end
+          })
+        else
+          criteria.in({
+                        _id: id_locks.map(&:subject_id).select do |subject_id|
+                          subject = self.new
+                          subject.id = subject_id
+                          ability.can?(action, subject)
+                        end
+          })
+        end
+      end
     end
 
     # =====================================================================
