@@ -7,6 +7,8 @@ require 'mongoid'
 
 require 'mongoid_ability'
 
+# =====================================================================
+  
 if ENV["CI"]
   require "coveralls"
   Coveralls.wear!
@@ -41,4 +43,22 @@ DatabaseCleaner.strategy = :truncation
 class MiniTest::Spec
   before(:each) { DatabaseCleaner.start }
   after(:each) { DatabaseCleaner.clean }
+end
+
+# =====================================================================
+
+module MongoidAbility
+  class MyLock
+    include Mongoid::Document
+    include MongoidAbility::Lock
+  end
+
+  class MySubjectSuper
+    include Mongoid::Document
+    include MongoidAbility::Subject
+  end
+
+  class MySubject < MySubjectSuper
+    default_lock :read, true
+  end
 end

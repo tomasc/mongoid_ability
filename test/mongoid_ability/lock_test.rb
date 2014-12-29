@@ -1,10 +1,5 @@
 require 'test_helper'
 
-class MyLock
-  include Mongoid::Document
-  include MongoidAbility::Lock
-end
-
 module MongoidAbility
   describe Lock do
 

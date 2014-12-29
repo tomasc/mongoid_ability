@@ -1,5 +1,4 @@
 require "mongoid_ability/version"
 
-module MongoidAbility
-  # Your code goes here...
-end
+require "mongoid_ability/lock"
+require "mongoid_ability/subject"
