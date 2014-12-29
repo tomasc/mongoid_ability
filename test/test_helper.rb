@@ -5,6 +5,8 @@ require 'minitest/autorun'
 require 'minitest/spec'
 require 'mongoid'
 
+require 'mongoid_ability'
+
 if ENV["CI"]
   require "coveralls"
   Coveralls.wear!
