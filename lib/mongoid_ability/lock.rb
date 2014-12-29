@@ -21,9 +21,6 @@ module MongoidAbility
           
         scope :for_action, -> action { where(action: action.to_sym) }
 
-        scope :closed, -> { where(outcome: false) }
-        scope :open, -> { where(outcome: true) }
-
         scope :for_subject_type, -> subject_type { where(subject_type: subject_type.to_s) }
         scope :for_subject_id, -> subject_id { where(subject_id: subject_id) }
         scope :for_subject, -> subject { where(subject_type: subject.class.model_name, subject_id: subject.id) }
@@ -39,9 +36,15 @@ module MongoidAbility
     end
 
     # =====================================================================
-      
+    
+    def calculated_outcome
+      self.outcome
+    end
+
+    # ---------------------------------------------------------------------
+    
     def open?
-      self.outcome?
+      self.calculated_outcome == true
     end
 
     def closed?

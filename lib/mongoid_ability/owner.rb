@@ -30,8 +30,8 @@ module MongoidAbility
     private # =============================================================
 
     def cleanup_locks
-      locks.open.each do |lock|
-        lock.destroy if locks.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id).closed.exists?
+      locks.select(&:open?).each do |lock|
+        lock.destroy if locks.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id).any?(&:closed?)
       end
     end
 

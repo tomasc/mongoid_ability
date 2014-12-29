@@ -38,14 +38,14 @@ module MongoidAbility
       # return outcome if user defines lock for id
       if @subject.present?
         id_locks = locks_for_subject_type.id_locks.for_subject_id(@subject_id)
-        return false if id_locks.closed.exists?
-        return true if id_locks.open.exists?
+        return false if id_locks.any?(&:closed?)
+        return true if id_locks.any?(&:open?)
       end
 
       # return outcome if user defines lock for subject_type
       class_locks = locks_for_subject_type.class_locks
-      return false if class_locks.class_locks.closed.exists?
-      return true if class_locks.class_locks.open.exists?
+      return false if class_locks.class_locks.any?(&:closed?)
+      return true if class_locks.class_locks.any?(&:open?)
     end
 
     # ---------------------------------------------------------------------

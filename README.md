@@ -7,7 +7,6 @@ Custom `Ability` class that allows [CanCanCan](https://github.com/CanCanCommunit
 ## ToDo
 
 * Where and how to specify the lock class? The automatic detection does not take into account subclassing, for example.
-* Add `:calculated_outcome` to the Lock class, that can be overridden.
 
 ## Installation
 
@@ -54,6 +53,14 @@ The lock class will have the following fields:
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
 The lock class can be further subclassed in order to customise its behavior, for example per action.
+
+For more specific behavior, it is possible to override the `:calculated_outcome` method (for example when the lock outcome should depend on more factors).
+
+```ruby
+def calculated_outcome
+    # custom behaviour, that always returns Boolean
+end
+```
 
 ### Subject
 
