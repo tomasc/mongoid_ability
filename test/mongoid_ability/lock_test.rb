@@ -9,8 +9,8 @@ module MongoidAbility
   describe Lock do
 
     subject { MyLock.new }
-
-    # ---------------------------------------------------------------------
+    
+    # =====================================================================
 
     describe 'fields' do
       it 'has :action' do
@@ -24,8 +24,8 @@ module MongoidAbility
       end
     end
 
-    # ---------------------------------------------------------------------
-
+    # =====================================================================
+      
     describe 'associations' do
       it 'embedded in :owner' do
         subject.must_respond_to :owner
@@ -38,8 +38,8 @@ module MongoidAbility
         subject.must_respond_to :subject_id
       end
     end
-
-    # ---------------------------------------------------------------------
+    
+    # =====================================================================
 
     describe 'instance methods' do
       it 'has #open?' do
