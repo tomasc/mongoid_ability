@@ -77,20 +77,18 @@ This gem supports two levels of ownership of a lock: a `User` and a `Role`.
 ```ruby
 class MyUser
     include Mongoid::Document
-    include MongoidAbility::User
+    include MongoidAbility::Owner
 
     has_and_belongs_to_many :roles, class_name: 'MyRole'
-    embeds_user_locks :my_locks, class_name: 'MyLock', role_relation_name: :roles
 end
 ```
 
 ```ruby
 class MyRole
     include Mongoid::Document
-    include MongoidAbility::Role
+    include MongoidAbility::Owner
 
     has_and_belongs_to_many :users, class_name: 'MyUser'
-    embeds_role_locks :locks, class_name: 'MyLock', user_relation_name: :users
 end
 ```
 

@@ -53,6 +53,16 @@ module MongoidAbility
     include MongoidAbility::Lock
   end
 
+  class MyOwnerSuper
+    include Mongoid::Document
+    include MongoidAbility::Owner
+
+    # embeds_many_locks class_name: 'MongoidAbility::MyLock'
+  end
+
+  class MyOwner < MyOwnerSuper
+  end
+
   class MySubjectSuper
     include Mongoid::Document
     include MongoidAbility::Subject
