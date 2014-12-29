@@ -57,7 +57,7 @@ module MongoidAbility
       describe 'when defined for superclass' do
         before do
           user.tap do |u|
-            u.locks = [TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)]
+            u.test_locks = [TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)]
           end
         end
         it 'applies the superclass lock' do
@@ -73,7 +73,7 @@ module MongoidAbility
         before do
           user.tap do |u|
             u.roles = [
-              TestRole.new(locks: [
+              TestRole.new(test_locks: [
                 TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)
               ])
             ]

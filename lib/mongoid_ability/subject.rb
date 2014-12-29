@@ -47,7 +47,7 @@ module MongoidAbility
           ability.user,
           ability.user.roles_relation
         ].flatten.collect { |owner|
-          owner.locks.for_subject_type(self.to_s).id_locks.for_action(action).to_a
+          owner.locks_relation.for_subject_type(self.to_s).id_locks.for_action(action).to_a
         }.flatten
 
         if ability.can?(action, self)

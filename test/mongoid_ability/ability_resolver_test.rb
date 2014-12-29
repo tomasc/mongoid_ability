@@ -36,11 +36,11 @@ module MongoidAbility
       describe 'when locks on both user and its roles' do
         before do
           user.roles = [
-            role_sysop.tap { |r| r.locks = [
+            role_sysop.tap { |r| r.test_locks = [
               TestLock.new(action: :read, outcome: true, subject_type: TestAbilityResolverSubject.to_s)
             ]}
           ]
-          user.locks = [
+          user.test_locks = [
             TestLock.new(action: :read, outcome: false, subject_type: TestAbilityResolverSubject.to_s)
           ]
         end
@@ -51,7 +51,7 @@ module MongoidAbility
       describe 'when locks on roles and on class' do
         before do
           user.roles = [
-            role_sysop.tap { |r| r.locks = [
+            role_sysop.tap { |r| r.test_locks = [
               TestLock.new(action: :read, outcome: false, subject_type: TestAbilityResolverSubject.to_s)
             ]}
           ]
@@ -73,14 +73,14 @@ module MongoidAbility
 
       describe 'id locks' do
         it 'returns outcome' do
-          user.locks = [
+          user.test_locks = [
             TestLock.new(action: :read, subject: ability_resolver_subject, outcome: true)
           ]
           subject_with_id.user_outcome.must_equal true
         end
 
         it 'prefers negative outcome' do
-          user.locks = [
+          user.test_locks = [
             TestLock.new(action: :read, subject: ability_resolver_subject, outcome: true),
             TestLock.new(action: :read, subject: ability_resolver_subject, outcome: false)
           ]
@@ -90,14 +90,14 @@ module MongoidAbility
 
       describe 'class locks' do
         it 'returns outcome' do
-          user.locks = [
+          user.test_locks = [
             TestLock.new(action: :read, subject_type: TestAbilityResolverSubject.to_s, outcome: true)
           ]
           subject.user_outcome.must_equal true
         end
 
         it 'prefers negative outcome' do
-          user.locks = [
+          user.test_locks = [
             TestLock.new(action: :read, subject_type: TestAbilityResolverSubject.to_s, outcome: true),
             TestLock.new(action: :read, subject_type: TestAbilityResolverSubject.to_s, outcome: false)
           ]
@@ -118,7 +118,7 @@ module MongoidAbility
       describe 'id locks' do
         it 'returns outcome' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject: ability_resolver_subject, action: :read, outcome: true)
             ]},
             role_editor
@@ -128,7 +128,7 @@ module MongoidAbility
 
         it 'prefers negative outcome across one role' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject: ability_resolver_subject, action: :read, outcome: true),
               TestLock.new(subject: ability_resolver_subject, action: :read, outcome: false)
             ]},
@@ -139,10 +139,10 @@ module MongoidAbility
 
         it 'prefers positive outcome across multiple roles' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject: ability_resolver_subject, action: :read, outcome: true)
             ]},
-            role_editor.tap{ |r| r.locks = [
+            role_editor.tap{ |r| r.test_locks = [
               TestLock.new(subject: ability_resolver_subject, action: :read, outcome: false)
             ]}
           ]
@@ -153,7 +153,7 @@ module MongoidAbility
       describe 'class locks' do
         it 'returns outcome' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: true)
             ]},
             role_editor
@@ -163,7 +163,7 @@ module MongoidAbility
 
         it 'prefers negative outcome across one role' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: true),
               TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: false)
             ]},
@@ -174,10 +174,10 @@ module MongoidAbility
 
         it 'prefers positive outcome across multiple roles' do
           user.roles = [
-            role_sysop.tap{ |r| r.locks = [
+            role_sysop.tap{ |r| r.test_locks = [
               TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: true)
             ]},
-            role_editor.tap{ |r| r.locks = [
+            role_editor.tap{ |r| r.test_locks = [
               TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: false)
             ]}
           ]

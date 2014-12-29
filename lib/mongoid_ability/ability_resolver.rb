@@ -31,7 +31,7 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     def user_outcome
-      locks_for_subject_type = @user.locks.for_action(@action).for_subject_type(@subject_type)
+      locks_for_subject_type = @user.locks_relation.for_action(@action).for_subject_type(@subject_type)
 
       return unless locks_for_subject_type.exists?
 
@@ -51,7 +51,7 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     def roles_outcome
-      locks_for_subject_type = @user.roles_relation.collect(&:locks).flatten.select{ |l| l.subject_type == @subject_type && l.action == @action }
+      locks_for_subject_type = @user.roles_relation.collect(&@user.class.locks_relation_name).flatten.select{ |l| l.subject_type == @subject_type && l.action == @action }
 
       return unless locks_for_subject_type.present?
 

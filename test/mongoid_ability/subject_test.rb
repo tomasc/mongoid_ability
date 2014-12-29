@@ -66,14 +66,14 @@ module MongoidAbility
         end
 
         describe 'when closed lock on user' do
-          before { user.locks = [closed_lock] }
+          before { user.test_locks = [closed_lock] }
           it 'returns criteria excluding such ids' do
             subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
           end
         end
 
         describe "when closed lock on user's role" do
-          before { user.roles = [TestRole.new(locks: [closed_lock])] }
+          before { user.roles = [TestRole.new(test_locks: [closed_lock])] }
           it 'returns criteria excluding such ids' do
             subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
           end
@@ -81,7 +81,7 @@ module MongoidAbility
 
         describe "when class does not permit" do
           before do
-            user.locks = [open_lock]
+            user.test_locks = [open_lock]
           end
           it 'returns criteria excluding everything but open id_locks' do
             subject.class.stub(:default_locks, [TestLock.new(outcome: false, action: :read, subject_type: subject.class, outcome: false)]) do

@@ -57,6 +57,8 @@ end
 class TestOwnerSuper
   include Mongoid::Document
   include MongoidAbility::Owner
+
+  embeds_many :test_locks, class_name: 'TestLock', as: :owner
 end
 
 class TestOwner < TestOwnerSuper
@@ -102,6 +104,7 @@ class TestRole
 
   field :name, type: String
 
+  embeds_many :test_locks, class_name: 'TestLock', as: :owner
   has_and_belongs_to_many :users, class_name: 'TestUser'
 end  
 
@@ -109,5 +112,6 @@ class TestUser
   include Mongoid::Document
   include MongoidAbility::Owner
 
+  embeds_many :test_locks, class_name: 'TestLock', as: :owner
   has_and_belongs_to_many :roles, class_name: 'TestRole'
 end

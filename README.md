@@ -89,13 +89,14 @@ MySubject.accessible_by(ability, :read)
 
 ### Owner
 
-This gem supports two levels of ownership of a lock: a `User` and a `Role`. The locks should be embedded in one of these models (via the `embeds_many` Mongoid relation).
+This gem supports two levels of ownership of a lock: a `User` and a `Role`.
 
 ```ruby
 class MyUser
     include Mongoid::Document
     include MongoidAbility::Owner
 
+    embeds_many :locks, class_name: 'MyLock', as: :owner
     has_and_belongs_to_many :roles, class_name: 'MyRole'
 end
 ```
@@ -105,6 +106,7 @@ class MyRole
     include Mongoid::Document
     include MongoidAbility::Owner
 
+    embeds_many :locks, class_name: 'MyLock', as: :owner
     has_and_belongs_to_many :users, class_name: 'MyUser'
 end
 ```
