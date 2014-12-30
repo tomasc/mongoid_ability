@@ -8,8 +8,10 @@ require "mongoid_ability/subject"
 
 # ---------------------------------------------------------------------
 
-# class ActionController::Base
-#   def current_ability
-#     @current_ability ||= MongoidAbility::Ability.new(current_user)
-#   end
-# end
+if defined?(Rails)
+  class ActionController::Base
+    def current_ability
+      @current_ability ||= MongoidAbility::Ability.new(current_user)
+    end
+  end
+end

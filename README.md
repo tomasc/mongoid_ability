@@ -36,6 +36,8 @@ A `Lock` class can be any class that include `MongoidAbility::Lock`.
 class MyLock
     include Mongoid::Document
     include MongoidAbility::Lock
+
+    embedded_in :owner, polymorphic: true
 end
 ```
 

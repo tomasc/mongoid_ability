@@ -8,8 +8,7 @@ module MongoidAbility
         field :outcome, type: Boolean, default: false
 
         # ---------------------------------------------------------------------
-          
-        embedded_in :owner, polymorphic: true
+        
         belongs_to :subject, polymorphic: true, touch: true
 
         # ---------------------------------------------------------------------

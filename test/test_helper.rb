@@ -50,6 +50,8 @@ end
 class TestLock
   include Mongoid::Document
   include MongoidAbility::Lock
+
+  embedded_in :owner, polymorphic: true
 end
 
 class TestLockSub < TestLock
