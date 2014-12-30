@@ -119,6 +119,13 @@ end
 
 Both users and roles can be further subclassed.
 
+The owner also gains the `#can?` and `#cannot?` methods, that are delegate to the user's ability. It is then easy to perform permission checks per user:
+
+```ruby
+current_user.can?(:read, resource)
+other_user.can?(:read, resource)
+```
+
 ### CanCanCan
 
 The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanCommunity/cancancan) will be automatically overriden by the `Ability` class provided by this gem.
