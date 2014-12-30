@@ -4,6 +4,8 @@ module MongoidAbility
     def self.included base
       base.extend ClassMethods
       base.class_eval do
+        delegate :can?, :cannot?, to: :ability
+
         before_save :cleanup_locks
       end
     end
@@ -30,13 +32,19 @@ module MongoidAbility
     end
 
     # =====================================================================
-    
+
     def locks_relation
       self.send(self.class.locks_relation_name)
     end
 
     def roles_relation
       self.send(self.class.roles_relation_name)
+    end
+
+    # ---------------------------------------------------------------------
+
+    def ability
+      @ability ||= MongoidAbility::Ability.new(self)
     end
 
     private # =============================================================
