@@ -1,0 +1,14 @@
+language: ruby
+cache: bundler
+script: 'bundle exec rake'
+rvm:
+  - 2.1.2
+services:
+  - mongodb
+
+notifications:
+  email:
+    recipients:
+      - tomas.celizna@gmail.com
+    on_failure: change
+    on_success: never
