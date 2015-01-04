@@ -123,7 +123,7 @@ The owner also gains the `#can?` and `#cannot?` methods, that are delegate to th
 
 ```ruby
 current_user.can?(:read, resource)
-other_user.can?(:read, resource)
+other_user.can?(:read, ResourceClass)
 ```
 
 ### CanCanCan
