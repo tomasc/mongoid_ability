@@ -134,7 +134,7 @@ The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanC
 
 1. Setup subject classes and their default locks.
 2. Define permissions using lock objects embedded (or associated to) either in user or role.
-3. Use standard [CanCanCan](https://github.com/CanCanCommunity/cancancan) helpers (`authorize!`, `can?`, `cannot?`) to authorize the current user.
+3. Use standard [CanCanCan](https://github.com/CanCanCommunity/cancancan) helpers (`.authorize!`, `#can?`, `#cannot?`) to authorize the current user.
 
 ## How it works?
 
