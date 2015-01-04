@@ -90,7 +90,7 @@ MySubject.accessible_by(ability, :read)
 
 ### Owner
 
-This gem supports two levels of ownership of a lock: a `User` and its many `Role`s. The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Please make sure to include the `as: :owner` option.
+This gem supports two levels of ownership of a lock: a `User` and its many `Role`s. The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Make sure to include the `as: :owner` option.
 
 ```ruby
 class MyUser
