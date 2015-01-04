@@ -30,7 +30,7 @@ The permissions are defined by a `Lock` that applies to a `Subject` and defines 
 
 ### Lock
 
-A `Lock` class can be any class that include `MongoidAbility::Lock`.
+A `Lock` class can be any class that include `MongoidAbility::Lock`. There should be only one such class in an application.
 
 ```ruby
 class MyLock
