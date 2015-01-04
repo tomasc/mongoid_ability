@@ -65,7 +65,7 @@ The lock class can be further subclassed in order to customise its behavior, for
 
 ### Subject
 
-All subjects (classes which permissions you want to control) have to include the `MongoidAbility::Subject` module.
+All subjects (classes which permissions you want to control) will include the `MongoidAbility::Subject` module.
 
 Each action and its default outcome, needs to be defined using the `.default_lock` macro.
 
