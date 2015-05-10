@@ -69,6 +69,24 @@ module MongoidAbility
     # ---------------------------------------------------------------------
     
     describe 'role locks' do
+      describe 'when multiple roles' do
+        before do
+          user.tap do |u|
+            u.roles = [
+              TestRole.new(name: 'Editor', test_locks: [
+                TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)
+              ]),
+              TestRole.new(name: 'SysOp', test_locks: [
+                TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: false)
+              ])
+            ]
+          end
+        end
+        it 'prefers positive outcome' do
+          ability.can?(:read, TestAbilitySubjectSuper2).must_equal true
+        end
+      end
+
       describe 'when defined for superclass' do
         before do
           user.tap do |u|
@@ -87,5 +105,56 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
     
+    describe 'combined locks' do
+      describe 'user and role locks' do
+        before do
+          user.tap do |u|
+            u.test_locks = [
+              TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: false) 
+            ]
+            u.roles = [
+              TestRole.new(test_locks: [
+                TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)
+              ])
+            ]
+          end
+        end
+        it 'prefers user locks' do
+          ability.can?(:read, TestAbilitySubjectSuper2).must_equal false
+        end
+      end
+
+      describe 'roles and default locks' do
+        before do
+          user.tap do |u|
+            u.roles = [
+              TestRole.new(test_locks: [
+                TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: true)
+              ])
+            ]
+          end
+        end
+        it 'prefers role locks' do
+          ability.can?(:read, TestAbilitySubjectSuper2).must_equal true
+        end
+      end
+    end
+
+    # ---------------------------------------------------------------------
+    
+    describe 'class locks' do
+      it 'prefers negative outcome across same class' do
+        TestAbilityResolverSubject.stub(:default_locks, [
+          TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: false),
+          TestLock.new(subject_type: TestAbilityResolverSubject.to_s, action: :read, outcome: true)
+        ]) do
+          ability.can?(:read, TestAbilityResolverSubject).must_equal false
+        end
+      end
+    end
+
   end
 end
+
+
+

@@ -72,12 +72,12 @@ module MongoidAbility
           end
         end
 
-        describe "when closed lock on user's role" do
-          before { user.roles = [TestRole.new(test_locks: [closed_lock])] }
-          it 'returns criteria excluding such ids' do
-            subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
-          end
-        end
+        # describe "when closed lock on user's role" do
+        #   before { user.roles = [TestRole.new(test_locks: [closed_lock])] }
+        #   it 'returns criteria excluding such ids' do
+        #     subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
+        #   end
+        # end
 
         describe "when class does not permit" do
           before do
