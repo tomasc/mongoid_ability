@@ -6,6 +6,9 @@ module MongoidAbility
     subject { TestSubject.new }
     let(:subject_super) { TestSubjectSuper.new }
 
+    let(:embedded_subject) { EmbeddedTestSubject.new }
+    let(:embedded_owner) { EmbeddedTestSubjectOwner.create!(embedded_test_subjects: [embedded_subject]) }
+
     let(:user) { TestUser.new }
     let(:ability) { Ability.new(user) }
 
@@ -20,6 +23,9 @@ module MongoidAbility
     # =====================================================================
 
     describe 'relations' do
+      it 'returns embedded relations' do
+        embedded_owner.embedded_test_subjects.accessible_by(ability).embedded?.must_equal true
+      end
     end
 
     # =====================================================================

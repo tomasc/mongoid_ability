@@ -43,7 +43,7 @@ module MongoidAbility
       # ---------------------------------------------------------------------
         
       def accessible_by ability, action=:read
-        criteria = Mongoid::Criteria.new(self)
+        criteria = self.criteria
 
         return criteria unless ability.user.present?
 

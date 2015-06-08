@@ -70,7 +70,7 @@ class TestOwner < TestOwnerSuper
 end
 
 # ---------------------------------------------------------------------
-  
+
 class TestSubjectSuper
   include Mongoid::Document
   include MongoidAbility::Subject
@@ -78,6 +78,17 @@ end
 
 class TestSubject < TestSubjectSuper
   default_lock :read, true
+end
+
+class EmbeddedTestSubjectOwner
+  include Mongoid::Document
+  include MongoidAbility::Subject
+
+  embeds_many :embedded_test_subjects
+end
+
+class EmbeddedTestSubject < TestSubject
+  embedded_in :embedded_test_subject_owner
 end
 
 # ---------------------------------------------------------------------
