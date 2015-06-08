@@ -6,19 +6,14 @@ module MongoidAbility
     subject { TestSubject.new }
     let(:subject_super) { TestSubjectSuper.new }
 
-    let(:embedded_subject) { EmbeddedTestSubject.new }
-    let(:embedded_owner) { EmbeddedTestSubjectOwner.create!(embedded_test_subjects: [embedded_subject]) }
+    let(:embedded_test_subject) { EmbeddedTestSubject.new }
+    let(:embedded_owner) { EmbeddedTestSubjectOwner.new(embedded_test_subjects: [ embedded_test_subject ]) }
 
     let(:user) { TestUser.new }
     let(:ability) { Ability.new(user) }
 
     let(:open_lock) { TestLock.new(outcome: true, action: :read, subject: subject) }
     let(:closed_lock) { TestLock.new(outcome: false, action: :read, subject: subject) }
-
-    # =====================================================================
-
-    describe 'fields' do
-    end
 
     # =====================================================================
 
@@ -51,7 +46,7 @@ module MongoidAbility
       end
 
       # ---------------------------------------------------------------------
-        
+
       describe '.ancestors_with_default_locks' do
         it 'lists ancestors with default locks' do
           subject.class.ancestors_with_default_locks.must_equal [TestSubjectSuper]
@@ -65,10 +60,15 @@ module MongoidAbility
       end
 
       # ---------------------------------------------------------------------
-        
+
       describe '.accessible_by' do
         it 'returns Mongoid::Criteria' do
           subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
+          embedded_owner.embedded_test_subjects.first.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
+        end
+
+        describe 'when closed lock on class' do
+          it 'returns empty array'
         end
 
         describe 'when closed lock on user' do
@@ -78,24 +78,40 @@ module MongoidAbility
           end
         end
 
-        # describe "when closed lock on user's role" do
-        #   before { user.roles = [TestRole.new(test_locks: [closed_lock])] }
-        #   it 'returns criteria excluding such ids' do
-        #     subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
-        #   end
-        # end
-
         describe "when class does not permit" do
           before do
             user.test_locks = [open_lock]
           end
+
           it 'returns criteria excluding everything but open id_locks' do
-            subject.class.stub(:default_locks, [TestLock.new(outcome: false, action: :read, subject_type: subject.class, outcome: false)]) do
+            subject.class.stub(:default_locks, [TestLock.new(action: :read, subject_type: subject.class, outcome: false)]) do
               subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$in', []).must_include subject.id
             end
           end
         end
-        
+
+        describe 'for embeddded' do
+          describe 'when class lock does not permit' do
+            it 'returns nothing' do
+              embedded_test_subject.class.stub(:default_locks, [TestLock.new(action: :read, subject_type: embedded_test_subject.class, outcome: false)]) do
+                embedded_owner.embedded_test_subjects.accessible_by(ability).must_be :empty?
+              end
+            end
+          end
+
+
+          describe 'when id lock does not permit' do
+            before do
+              user.test_locks = [ TestLock.new(action: :read, subject: embedded_test_subject, outcome: false) ]
+            end
+
+            it 'returns criteria excluding the closed id_locks' do
+              embedded_owner.embedded_test_subjects.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include embedded_test_subject.id
+            end
+
+          end
+        end
+
       end
     end
   end

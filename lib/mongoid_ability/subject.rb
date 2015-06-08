@@ -43,9 +43,9 @@ module MongoidAbility
       # ---------------------------------------------------------------------
         
       def accessible_by ability, action=:read
-        criteria = self.criteria
+        cr = self.criteria
 
-        return criteria unless ability.user.present?
+        return cr unless ability.user.present?
 
         id_locks = [
           ability.user,
@@ -55,7 +55,7 @@ module MongoidAbility
         }.flatten
 
         if ability.can?(action, self)
-          criteria.nin({
+          cr.nin({
                          _id: id_locks.map(&:subject_id).select do |subject_id|
                            subject = self.new
                            subject.id = subject_id
@@ -63,7 +63,7 @@ module MongoidAbility
                          end
           })
         else
-          criteria.in({
+          cr.in({
                         _id: id_locks.map(&:subject_id).select do |subject_id|
                           subject = self.new
                           subject.id = subject_id
