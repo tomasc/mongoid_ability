@@ -3,25 +3,29 @@ require 'test_helper'
 module MongoidAbility
   describe Subject do
 
+    def default_lock subject_cls, outcome
+      TestLock.new(subject_type: subject_cls.to_s, action: :read, outcome: outcome)
+    end
+
+    def subject_lock subject, outcome
+      TestLock.new(subject: subject, action: :read, outcome: outcome)
+    end
+
+    # ---------------------------------------------------------------------
+
     subject { TestSubject.new }
+
+    let(:subject_test_1) { TestSubject.create! }
+    let(:subject_test_2) { TestSubject.create! }
+
     let(:subject_super) { TestSubjectSuper.new }
 
-    let(:embedded_test_subject) { EmbeddedTestSubject.new }
-    let(:embedded_owner) { EmbeddedTestSubjectOwner.new(embedded_test_subjects: [ embedded_test_subject ]) }
+    let(:embedded_test_subject_1) { EmbeddedTestSubject.new }
+    let(:embedded_test_subject_2) { EmbeddedTestSubject.new }
+    let(:embedded_test_subject_owner) { EmbeddedTestSubjectOwner.new(embedded_test_subjects: [ embedded_test_subject_1, embedded_test_subject_2 ]) }
 
     let(:user) { TestUser.new }
     let(:ability) { Ability.new(user) }
-
-    let(:open_lock) { TestLock.new(outcome: true, action: :read, subject: subject) }
-    let(:closed_lock) { TestLock.new(outcome: false, action: :read, subject: subject) }
-
-    # =====================================================================
-
-    describe 'relations' do
-      it 'returns embedded relations' do
-        embedded_owner.embedded_test_subjects.accessible_by(ability).embedded?.must_equal true
-      end
-    end
 
     # =====================================================================
 
@@ -45,7 +49,7 @@ module MongoidAbility
         end
       end
 
-      # ---------------------------------------------------------------------
+      # =====================================================================
 
       describe '.ancestors_with_default_locks' do
         it 'lists ancestors with default locks' do
@@ -59,66 +63,128 @@ module MongoidAbility
         end
       end
 
-      # ---------------------------------------------------------------------
+      # =====================================================================
 
       describe '.accessible_by' do
+
         it 'returns Mongoid::Criteria' do
           subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
-          embedded_owner.embedded_test_subjects.first.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
+          embedded_test_subject_1.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
         end
 
-        describe 'when closed lock on class' do
-          it 'returns empty array'
-        end
-
-        describe 'when closed lock on user' do
-          before { user.test_locks = [closed_lock] }
-          it 'returns criteria excluding such ids' do
-            subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include subject.id
+        describe 'embedded relations' do
+          it 'returns correct criteria type' do
+            embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).embedded?.must_equal true
           end
         end
 
-        describe "when class does not permit" do
-          before do
-            user.test_locks = [open_lock]
-          end
+        # ---------------------------------------------------------------------
 
-          it 'returns criteria excluding everything but open id_locks' do
-            subject.class.stub(:default_locks, [TestLock.new(action: :read, subject_type: subject.class, outcome: false)]) do
-              subject.class.accessible_by(ability).selector.fetch('_id', {}).fetch('$in', []).must_include subject.id
+        describe 'default locks' do
+          describe 'referenced relations' do
+            it 'returns everything when open' do
+              subject_test_1
+              subject_test_2
+
+              subject.class.stub(:default_locks, [ default_lock(subject_test_1.class, true) ]) do
+                subject.class.accessible_by(ability).must_include subject_test_1
+                subject.class.accessible_by(ability).must_include subject_test_2
+              end
             end
-          end
-        end
 
-        describe 'for embeddded' do
-          describe 'when class lock does not permit' do
-            it 'returns nothing' do
-              embedded_test_subject.class.stub(:default_locks, [TestLock.new(action: :read, subject_type: embedded_test_subject.class, outcome: false)]) do
-                embedded_owner.embedded_test_subjects.accessible_by(ability).must_be :empty?
+            it 'returns nothing when closed' do
+              subject.class.stub(:default_locks, [ default_lock(subject_test_1.class, false) ]) do
+                subject.class.accessible_by(ability).must_be :empty?
               end
             end
           end
 
-
-          describe 'when id lock does not permit' do
-            before do
-              user.test_locks = [ TestLock.new(action: :read, subject: embedded_test_subject, outcome: false) ]
+          describe 'embedded relations' do
+            it 'returns everything when open' do
+              subject.class.stub(:default_locks, [ default_lock(embedded_test_subject_1.class, true) ]) do
+                embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_include embedded_test_subject_1
+                embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_include embedded_test_subject_2
+              end
             end
 
-            it 'returns criteria excluding the closed id_locks' do
-              embedded_owner.embedded_test_subjects.accessible_by(ability).selector.fetch('_id', {}).fetch('$nin', []).must_include embedded_test_subject.id
+            it 'returns nothing when closed' do
+              subject.class.stub(:default_locks, [ default_lock(embedded_test_subject_1.class, false) ]) do
+                embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_be :empty?
+              end
+            end
+          end
+        end
+
+        # ---------------------------------------------------------------------
+
+        describe 'id locks' do
+          describe 'referenced relations' do
+            it 'excludes subject when closed' do
+              user.test_locks = [ subject_lock(subject_test_1, true), subject_lock(subject_test_2, false) ]
+              subject.class.accessible_by(ability).must_include subject_test_1
+              subject.class.accessible_by(ability).wont_include subject_test_2
+            end
+          end
+
+          describe 'embedded relations' do
+            it 'excludes subject when closed' do
+              user.test_locks = [ subject_lock(embedded_test_subject_1, true), subject_lock(embedded_test_subject_2, false) ]
+              embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_include embedded_test_subject_1
+              embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).wont_include embedded_test_subject_2
+            end
+          end
+        end
+
+        # ---------------------------------------------------------------------
+
+        describe 'default locks & id locks' do
+          describe 'referenced relations' do
+            describe 'default open' do
+              it 'excludes subject when id lock closed' do
+                subject.class.stub(:default_locks, [ default_lock(subject_test_1.class, true) ]) do
+                  user.test_locks = [ subject_lock(subject_test_2, false) ]
+                  subject.class.accessible_by(ability).must_include subject_test_1
+                  subject.class.accessible_by(ability).wont_include subject_test_2
+                end
+              end
             end
 
+            describe 'default closed' do
+              it 'includes subject when id lock open' do
+                subject.class.stub(:default_locks, [ default_lock(subject_test_1.class, false) ]) do
+                  user.test_locks = [ subject_lock(subject_test_2, true) ]
+                  subject.class.accessible_by(ability).wont_include subject_test_1
+                  subject.class.accessible_by(ability).must_include subject_test_2
+                end
+              end
+            end
+          end
+
+          describe 'embedded relations' do
+            describe 'default open' do
+              it 'excludes subject when id lock closed' do
+                subject.class.stub(:default_locks, [ default_lock(embedded_test_subject_1.class, true) ]) do
+                  user.test_locks = [ subject_lock(embedded_test_subject_2, false) ]
+                  embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_include embedded_test_subject_1
+                  embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).wont_include embedded_test_subject_2
+                end
+              end
+            end
+
+            describe 'default closed' do
+              it 'includes subject when id lock open' do
+                subject.class.stub(:default_locks, [ default_lock(embedded_test_subject_1.class, false) ]) do
+                  user.test_locks = [ subject_lock(embedded_test_subject_2, true) ]
+                  embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).wont_include embedded_test_subject_1
+                  embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).must_include embedded_test_subject_2
+                end
+              end
+            end
           end
         end
 
       end
     end
-  end
-
-  # =====================================================================
-
-  describe 'instance methods' do
   end
 
 end
