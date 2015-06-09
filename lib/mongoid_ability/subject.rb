@@ -42,6 +42,7 @@ module MongoidAbility
 
       # ---------------------------------------------------------------------
 
+      # TODO: obviously this could be cleaner
       def accessible_by ability, action=:read
         cr = self.criteria
 
