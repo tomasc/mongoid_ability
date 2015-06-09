@@ -27,7 +27,7 @@ module MongoidAbility
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
-        Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
+        Object.descendants.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
 
       # ---------------------------------------------------------------------
@@ -49,7 +49,7 @@ module MongoidAbility
         return cr unless ability.user.present?
 
         supercls = self.ancestors_with_default_locks.last || self
-        subject_classes = [supercls].concat(supercls.subclasses)
+        subject_classes = [supercls].concat(supercls.descendants)
 
         subject_classes.each do |cls|
 
