@@ -24,8 +24,8 @@ module MongoidAbility
         scope :for_subject_id, -> subject_id { where(subject_id: subject_id) }
         scope :for_subject, -> subject { where(subject_type: subject.class.model_name, subject_id: subject.id) }
 
-        scope :class_locks, -> { ne(subject_type: nil).where(subject_id: nil) }
-        scope :id_locks, -> { ne(subject_type: nil, subject_id: nil) }
+        scope :class_locks, -> { where(subject_id: nil) }
+        scope :id_locks, -> { ne(subject_id: nil) }
       end
     end
 
@@ -58,6 +58,15 @@ module MongoidAbility
 
     def id_lock?
       self.subject_id.present?
+    end
+
+    # ---------------------------------------------------------------------
+    
+    def conditions
+      res = { _type: subject_type }
+      res = res.merge(_id: subject_id) if subject_id.present?
+      res = { '$not' => res } if calculated_outcome == false
+      res
     end
 
   end

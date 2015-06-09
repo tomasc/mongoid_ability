@@ -71,25 +71,35 @@ end
 
 # ---------------------------------------------------------------------
 
-class TestSubjectSuper
+class SubjectTest
   include Mongoid::Document
   include MongoidAbility::Subject
-end
 
-class TestSubject < TestSubjectSuper
   default_lock :read, true
 end
 
-class EmbeddedTestSubjectOwner
-  include Mongoid::Document
-  include MongoidAbility::Subject
-
-  embeds_many :embedded_test_subjects
+class SubjectTestOne < SubjectTest
 end
 
-class EmbeddedTestSubject < TestSubject
-  embedded_in :embedded_test_subject_owner
+class SubjectTestTwo < SubjectTest
 end
+
+
+
+# class EmbeddedTestSubjectOwner
+#   include Mongoid::Document
+#   include MongoidAbility::Subject
+
+#   embeds_many :embedded_test_subjects
+# end
+
+# class EmbeddedTestSubject < TestSubject
+#   embedded_in :embedded_test_subject_owner
+# end
+
+# class EmbeddedTestSubjectTwo < TestSubject
+#   embedded_in :embedded_test_subject_owner
+# end
 
 # ---------------------------------------------------------------------
   
@@ -114,6 +124,8 @@ end
 class TestAbilitySubject < TestAbilitySubjectSuper1
 end
 
+# ---------------------------------------------------------------------
+  
 class TestRole
   include Mongoid::Document
   include MongoidAbility::Owner

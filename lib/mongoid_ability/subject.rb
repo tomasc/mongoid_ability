@@ -23,7 +23,7 @@ module MongoidAbility
       end
 
       # ---------------------------------------------------------------------
-      
+
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
@@ -31,7 +31,7 @@ module MongoidAbility
       end
 
       # ---------------------------------------------------------------------
-        
+
       def self_and_ancestors_with_default_locks
         self.ancestors.select{ |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
       end
@@ -41,36 +41,51 @@ module MongoidAbility
       end
 
       # ---------------------------------------------------------------------
-        
+
       def accessible_by ability, action=:read
         cr = self.criteria
 
         return cr unless ability.user.present?
 
-        id_locks = [
-          ability.user,
-          ability.user.roles_relation
-        ].flatten.collect { |owner|
-          owner.locks_relation.for_subject_type(self.to_s).id_locks.for_action(action).to_a
-        }.flatten
+        supercls = self.ancestors_with_default_locks.last || self
+        subject_classes = [supercls].concat(supercls.subclasses)
 
-        if ability.can?(action, self)
-          cr.nin({
-                         _id: id_locks.map(&:subject_id).select do |subject_id|
-                           subject = self.new
-                           subject.id = subject_id
-                           ability.cannot?(action, subject)
-                         end
-          })
-        else
-          cr.in({
-                        _id: id_locks.map(&:subject_id).select do |subject_id|
-                          subject = self.new
-                          subject.id = subject_id
-                          ability.can?(action, subject)
-                        end
-          })
+        subject_classes.each do |cls|
+
+          roles_id_locks = ability.user.roles_relation.collect{ |role| role.locks_relation.for_subject_type(cls.to_s).id_locks.for_action(action) }.flatten
+          user_id_locks = ability.user.locks_relation.for_subject_type(cls.to_s).id_locks.for_action(action)
+
+          closed_roles_id_locks = roles_id_locks.to_a.select(&:closed?)
+          open_roles_id_locks = roles_id_locks.to_a.select(&:open?)
+
+          closed_user_id_locks = user_id_locks.to_a.select(&:closed?)
+          open_user_id_locks = user_id_locks.to_a.select(&:open?)
+
+          if ability.can?(action, cls)
+            excluded_ids = []
+
+            id_locks = closed_roles_id_locks.
+              reject{ |cl| open_roles_id_locks.any?{ |ol| ol.subject_id == cl.subject_id } }.
+              reject{ |cl| open_user_id_locks.any?{ |ol| ol.subject_id == cl.subject_id } }
+
+            id_locks += closed_user_id_locks
+            
+            excluded_ids << id_locks.map(&:subject_id)
+
+            cr = cr.or(_type: cls.to_s, :_id.nin => excluded_ids.flatten)
+          else
+            included_ids = []
+
+            id_locks = open_roles_id_locks
+            id_locks += open_user_id_locks
+
+            included_ids << id_locks.map(&:subject_id)
+
+            cr = cr.or(_type: cls.to_s, :_id.in => included_ids.flatten)
+          end
         end
+
+        cr
       end
     end
 
