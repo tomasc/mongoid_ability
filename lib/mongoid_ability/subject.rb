@@ -27,7 +27,7 @@ module MongoidAbility
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
-        Object.descendants.detect{ |cls| cls < MongoidAbility::Lock }.name
+        @lock_class_name ||= Object.descendants.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
 
       # ---------------------------------------------------------------------
@@ -73,7 +73,11 @@ module MongoidAbility
             
             excluded_ids << id_locks.map(&:subject_id)
 
-            cr = cr.or(_type: cls.to_s, :_id.nin => excluded_ids.flatten)
+            if subject_classes.count == 1
+              cr = cr.or(:_id.nin => excluded_ids.flatten)
+            else
+              cr = cr.or(_type: cls.to_s, :_id.nin => excluded_ids.flatten)
+            end
           else
             included_ids = []
 
@@ -82,7 +86,11 @@ module MongoidAbility
 
             included_ids << id_locks.map(&:subject_id)
 
-            cr = cr.or(_type: cls.to_s, :_id.in => included_ids.flatten)
+            if subject_classes.count == 1
+              cr = cr.or(:_id.in => included_ids.flatten)
+            else
+              cr = cr.or(_type: cls.to_s, :_id.in => included_ids.flatten)
+            end
           end
         end
 

@@ -15,12 +15,10 @@ module MongoidAbility
 
     subject { SubjectTest.new }
 
+    let(:subject_single_test) { SubjectSingleTest.create! }
+
     let(:subject_test_1) { SubjectTestOne.create! }
     let(:subject_test_2) { SubjectTestTwo.create! }
-
-    # let(:embedded_test_subject_1) { EmbeddedTestSubject.new }
-    # let(:embedded_test_subject_2) { EmbeddedTestSubjectTwo.new }
-    # let(:embedded_test_subject_owner) { EmbeddedTestSubjectOwner.new(embedded_test_subjects: [ embedded_test_subject_1, embedded_test_subject_2 ]) }
 
     let(:role_1) { TestRole.new }
     let(:role_2) { TestRole.new }
@@ -70,33 +68,41 @@ module MongoidAbility
         before do
           subject_test_1
           subject_test_2
+          subject_single_test
         end
 
         it 'returns Mongoid::Criteria' do
           subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
-          # embedded_test_subject_1.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
         end
-
-        # describe 'embedded relations' do
-        #   it 'returns correct criteria type' do
-        #     embedded_test_subject_owner.embedded_test_subjects.accessible_by(ability).embedded?.must_equal true
-        #   end
-        # end
 
         # ---------------------------------------------------------------------
 
         describe 'default locks' do
-          describe 'referenced relations' do
+          it 'returns everything when open' do
+            subject.class.stub(:default_locks, [ subject_type_lock(subject.class, true) ]) do
+              subject.class.accessible_by(ability).must_include subject_test_1
+              subject.class.accessible_by(ability).must_include subject_test_2
+            end
+          end
+
+          describe 'single class' do
             it 'returns everything when open' do
-              subject.class.stub(:default_locks, [ subject_type_lock(subject.class, true) ]) do
-                subject.class.accessible_by(ability).must_include subject_test_1
-                subject.class.accessible_by(ability).must_include subject_test_2
+              subject_single_test.class.stub(:default_locks, [ subject_type_lock(subject_single_test.class, true) ]) do
+                subject_single_test.class.accessible_by(ability).must_include subject_single_test
               end
             end
+          end
 
+          it 'returns nothing when closed' do
+            subject.class.stub(:default_locks, [ subject_type_lock(subject.class, false) ]) do
+              subject.class.accessible_by(ability).must_be :empty?
+            end
+          end
+
+          describe 'single class' do
             it 'returns nothing when closed' do
-              subject.class.stub(:default_locks, [ subject_type_lock(subject.class, false) ]) do
-                subject.class.accessible_by(ability).must_be :empty?
+              subject_single_test.class.stub(:default_locks, [ subject_type_lock(subject_single_test.class, false) ]) do
+                subject_single_test.class.accessible_by(ability).wont_include subject_single_test
               end
             end
           end

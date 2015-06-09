@@ -84,22 +84,12 @@ end
 class SubjectTestTwo < SubjectTest
 end
 
+class SubjectSingleTest
+  include Mongoid::Document
+  include MongoidAbility::Subject
 
-
-# class EmbeddedTestSubjectOwner
-#   include Mongoid::Document
-#   include MongoidAbility::Subject
-
-#   embeds_many :embedded_test_subjects
-# end
-
-# class EmbeddedTestSubject < TestSubject
-#   embedded_in :embedded_test_subject_owner
-# end
-
-# class EmbeddedTestSubjectTwo < TestSubject
-#   embedded_in :embedded_test_subject_owner
-# end
+  default_lock :read, true
+end
 
 # ---------------------------------------------------------------------
   
