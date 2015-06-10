@@ -71,10 +71,6 @@ module MongoidAbility
           subject_single_test
         end
 
-        it 'returns Mongoid::Criteria' do
-          subject.class.accessible_by(ability).must_be_kind_of Mongoid::Criteria
-        end
-
         # ---------------------------------------------------------------------
 
         describe 'default locks' do

@@ -27,7 +27,9 @@ module MongoidAbility
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
-        @lock_class_name ||= Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
+        lock_classes = ObjectSpace.each_object(Class).select{ |cls| cls < MongoidAbility::Lock }
+        lock_superclasses = lock_classes.reject{ |cls| lock_classes.any?{ |c| cls < c } }
+        @lock_class_name ||= lock_superclasses.first.name
       end
 
       # ---------------------------------------------------------------------
@@ -42,59 +44,8 @@ module MongoidAbility
 
       # ---------------------------------------------------------------------
 
-      # TODO: obviously this could be cleaner
       def accessible_by ability, action=:read
-        cr = self.criteria
-
-        return cr unless ability.user.present?
-
-        supercls = self.ancestors_with_default_locks.last || self
-        subject_classes = [supercls].concat(supercls.descendants)
-
-        subject_classes.each do |cls|
-
-          roles_id_locks = ability.user.roles_relation.collect{ |role| role.locks_relation.for_subject_type(cls.to_s).id_locks.for_action(action) }.flatten
-          user_id_locks = ability.user.locks_relation.for_subject_type(cls.to_s).id_locks.for_action(action)
-
-          closed_roles_id_locks = roles_id_locks.to_a.select(&:closed?)
-          open_roles_id_locks = roles_id_locks.to_a.select(&:open?)
-
-          closed_user_id_locks = user_id_locks.to_a.select(&:closed?)
-          open_user_id_locks = user_id_locks.to_a.select(&:open?)
-
-          if ability.can?(action, cls)
-            excluded_ids = []
-
-            id_locks = closed_roles_id_locks.
-              reject{ |cl| open_roles_id_locks.any?{ |ol| ol.subject_id == cl.subject_id } }.
-              reject{ |cl| open_user_id_locks.any?{ |ol| ol.subject_id == cl.subject_id } }
-
-            id_locks += closed_user_id_locks
-            
-            excluded_ids << id_locks.map(&:subject_id)
-
-            if subject_classes.count == 1
-              cr = cr.or(:_id.nin => excluded_ids.flatten)
-            else
-              cr = cr.or(_type: cls.to_s, :_id.nin => excluded_ids.flatten)
-            end
-          else
-            included_ids = []
-
-            id_locks = open_roles_id_locks
-            id_locks += open_user_id_locks
-
-            included_ids << id_locks.map(&:subject_id)
-
-            if subject_classes.count == 1
-              cr = cr.or(:_id.in => included_ids.flatten)
-            else
-              cr = cr.or(_type: cls.to_s, :_id.in => included_ids.flatten)
-            end
-          end
-        end
-
-        cr
+        AccessibleQueryBuilder.call(self, ability, action)
       end
     end
 

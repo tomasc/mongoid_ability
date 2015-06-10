@@ -27,7 +27,9 @@ module MongoidAbility
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
-        @lock_class_name ||= Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
+        lock_classes = ObjectSpace.each_object(Class).select{ |cls| cls < MongoidAbility::Lock }
+        lock_superclasses = lock_classes.reject{ |cls| lock_classes.any?{ |c| cls < c } }
+        @lock_class_name ||= lock_superclasses.first.name
       end
     end
 
