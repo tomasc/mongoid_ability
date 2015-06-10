@@ -27,7 +27,7 @@ module MongoidAbility
       # override if needed
       # return for example 'MyLock'
       def lock_class_name
-        @lock_class_name ||= Object.descendants.detect{ |cls| cls < MongoidAbility::Lock }.name
+        @lock_class_name ||= Object.subclasses.detect{ |cls| cls < MongoidAbility::Lock }.name
       end
 
       # ---------------------------------------------------------------------
