@@ -29,13 +29,19 @@ module MongoidAbility
     # =====================================================================
 
     describe 'class methods' do
-      it 'has .default_locks' do
+      it '.default_locks' do
         subject.class.must_respond_to :default_locks
         subject.class.default_locks.must_be_kind_of Array
       end
 
-      it 'has .default_lock' do
+      it '.default_lock' do
         subject.class.must_respond_to :default_lock
+      end
+
+      it 'default_locks_with_inherited' do
+        subject.class.must_respond_to :default_locks_with_inherited
+        subject.class.default_locks_with_inherited.must_be_kind_of Array
+        subject_test_1.class.default_locks_with_inherited.must_equal subject.class.default_locks
       end
 
       describe '.default_lock' do

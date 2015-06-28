@@ -14,6 +14,11 @@ module MongoidAbility
         @default_locks ||= []
       end
 
+      def default_locks_with_inherited
+        return default_locks unless superclass.respond_to?(:default_locks_with_inherited)
+        superclass.default_locks_with_inherited.concat(default_locks)
+      end
+
       def default_locks= val
         @default_locks = val
       end
