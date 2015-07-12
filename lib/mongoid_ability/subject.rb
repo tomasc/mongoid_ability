@@ -24,7 +24,11 @@ module MongoidAbility
       end
 
       def default_lock action, outcome
-        default_locks << lock_class_name.constantize.new(subject_type: self, action: action, outcome: outcome)
+        if existing_lock = default_locks.detect{ |l| l.action.to_s == action.to_s }
+          existing_lock.outcome = outcome
+        else
+          default_locks << lock_class_name.constantize.new(subject_type: self, action: action, outcome: outcome)
+        end
       end
 
       # ---------------------------------------------------------------------

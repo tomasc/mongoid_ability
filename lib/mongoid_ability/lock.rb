@@ -8,16 +8,17 @@ module MongoidAbility
         field :outcome, type: Boolean, default: false
 
         # ---------------------------------------------------------------------
-        
+
         belongs_to :subject, polymorphic: true, touch: true
 
         # ---------------------------------------------------------------------
-          
+
+        # TODO: validate that action is defined on subject or its superclasses
         validates :action, presence: true, uniqueness: { scope: [ :subject_type, :subject_id, :outcome ] }
         validates :outcome, presence: true
 
         # ---------------------------------------------------------------------
-          
+
         scope :for_action, -> action { where(action: action.to_sym) }
 
         scope :for_subject_type, -> subject_type { where(subject_type: subject_type.to_s) }
@@ -30,18 +31,18 @@ module MongoidAbility
     end
 
     # =====================================================================
-      
+
     module ClassMethods
     end
 
     # =====================================================================
-    
+
     def calculated_outcome
       self.outcome
     end
 
     # ---------------------------------------------------------------------
-    
+
     def open?
       self.calculated_outcome == true
     end
@@ -51,7 +52,7 @@ module MongoidAbility
     end
 
     # ---------------------------------------------------------------------
-      
+
     def class_lock?
       !id_lock?
     end
@@ -61,7 +62,7 @@ module MongoidAbility
     end
 
     # ---------------------------------------------------------------------
-    
+
     def conditions
       res = { _type: subject_type }
       res = res.merge(_id: subject_id) if subject_id.present?

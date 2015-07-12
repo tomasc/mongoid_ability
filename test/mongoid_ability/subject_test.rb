@@ -52,6 +52,19 @@ module MongoidAbility
           lock.subject_id.must_be_nil
           lock.action.must_equal :read
         end
+
+        describe 'when trying to insert another lock for same action' do
+          before do
+            subject.class.default_lock :read, false
+          end
+
+          it 'does not create duplicate' do
+            subject.class.default_locks.select{ |l| l.action == :read }.length.must_equal 1
+          end
+          it 'sets the new outcome' do
+            subject.class.default_locks.select{ |l| l.action == :read }.first.outcome.must_equal false
+          end
+        end
       end
 
       # =====================================================================
