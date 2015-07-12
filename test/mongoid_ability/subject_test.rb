@@ -54,9 +54,8 @@ module MongoidAbility
         end
 
         describe 'when trying to insert another lock for same action' do
-          before do
-            subject.class.default_lock :read, false
-          end
+          before { subject.class.default_lock :read, false }
+          after { subject.class.default_lock :read, true }
 
           it 'does not create duplicate' do
             subject.class.default_locks.select{ |l| l.action == :read }.length.must_equal 1
