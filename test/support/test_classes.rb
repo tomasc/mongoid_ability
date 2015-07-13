@@ -9,7 +9,7 @@ class TestLockSub < TestLock
 end
 
 # ---------------------------------------------------------------------
-  
+
 class TestOwnerSuper
   include Mongoid::Document
   include MongoidAbility::Owner
@@ -43,7 +43,7 @@ class SubjectSingleTest
 end
 
 # ---------------------------------------------------------------------
-  
+
 class TestAbilityResolverSubject
   include Mongoid::Document
   include MongoidAbility::Subject
@@ -66,7 +66,7 @@ class TestAbilitySubject < TestAbilitySubjectSuper1
 end
 
 # ---------------------------------------------------------------------
-  
+
 class TestRole
   include Mongoid::Document
   include MongoidAbility::Owner
@@ -75,7 +75,7 @@ class TestRole
 
   embeds_many :test_locks, class_name: 'TestLock', as: :owner
   has_and_belongs_to_many :users, class_name: 'TestUser'
-end  
+end
 
 class TestUser
   include Mongoid::Document

@@ -7,15 +7,13 @@ module MongoidAbility
     let(:ability) { Ability.new(user) }
 
     # ---------------------------------------------------------------------
-    
-    describe 'user' do
-      it 'exposes user' do
-        ability.user.must_equal user
-      end
+
+    it 'exposes owner' do
+      ability.owner.must_equal user
     end
 
     # ---------------------------------------------------------------------
-    
+
     describe 'default locks' do
       it 'propagates from superclass to all subclasses' do
         ability.can?(:update, TestAbilitySubjectSuper1).must_equal true
@@ -35,7 +33,7 @@ module MongoidAbility
           ]) do
             ability.can?(:read, TestAbilitySubject).must_equal true
           end
-        end      
+        end
       end
 
       describe 'when defined for some superclasses' do
@@ -47,12 +45,12 @@ module MongoidAbility
           ]) do
             ability.can?(:read, TestAbilitySubject).must_equal true
           end
-        end  
+        end
       end
     end
 
     # ---------------------------------------------------------------------
-    
+
     describe 'user locks' do
       describe 'when defined for superclass' do
         before do
@@ -67,7 +65,7 @@ module MongoidAbility
     end
 
     # ---------------------------------------------------------------------
-    
+
     describe 'role locks' do
       describe 'when multiple roles' do
         before do
@@ -104,13 +102,13 @@ module MongoidAbility
     end
 
     # ---------------------------------------------------------------------
-    
+
     describe 'combined locks' do
       describe 'user and role locks' do
         before do
           user.tap do |u|
             u.test_locks = [
-              TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: false) 
+              TestLock.new(subject_type: TestAbilitySubjectSuper2.to_s, action: :read, outcome: false)
             ]
             u.roles = [
               TestRole.new(test_locks: [
@@ -141,7 +139,7 @@ module MongoidAbility
     end
 
     # ---------------------------------------------------------------------
-    
+
     describe 'class locks' do
       it 'prefers negative outcome across same class' do
         TestAbilityResolverSubject.stub(:default_locks, [
@@ -155,6 +153,3 @@ module MongoidAbility
 
   end
 end
-
-
-
