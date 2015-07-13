@@ -43,21 +43,23 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
-    def user
-      ability.user
+    def owner
+      ability.owner
     end
 
     def roles
-      user.roles_relation
+      return unless owner.respond_to?(owner.class.roles_relation_name)
+      owner.roles_relation
     end
 
     # ---------------------------------------------------------------------
 
     def user_id_locks_for_subject_type cls
-      user.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
+      owner.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
     end
 
     def roles_ids_locks_for_subject_type cls
+      return [] unless roles
       roles.collect { |role| role.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s) }.flatten
     end
 
