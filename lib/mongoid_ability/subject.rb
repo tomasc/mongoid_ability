@@ -12,18 +12,19 @@ module MongoidAbility
         @default_locks ||= []
       end
 
+      # TODO: prevent duplicates, allow override
       def default_lock lock_cls, action, outcome
         default_locks << lock_cls.new(subject_type: self, action: action, outcome: outcome)
-        subclasses.each { |cls| cls.default_lock lock_cls, action, outcome }
+        # subclasses.each { |cls| cls.default_lock lock_cls, action, outcome }
       end
 
       def self_and_ancestors_with_default_locks
         ancestors.select { |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
       end
 
-      # def accessible_by ability, action=:read
-      #   AccessibleQueryBuilder.call(self, ability, action)
-      # end
+      def accessible_by ability, action=:read
+        AccessibleQueryBuilder.call(self, ability, action)
+      end
     end
   end
 end

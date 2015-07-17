@@ -30,7 +30,8 @@ CONFIG = {
       database: database_id,
       hosts: [ "#{HOST}:#{PORT}" ]
     }
-  }
+  },
+  options: { preload_models: true }
 }
 
 Mongoid.configure do |config|

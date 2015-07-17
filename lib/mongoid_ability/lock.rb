@@ -9,8 +9,8 @@ module MongoidAbility
         field :outcome, type: Boolean, default: false
 
         belongs_to :subject, polymorphic: true, touch: true
-        # TODO: validate that action is defined on subject or its superclasses
 
+        # TODO: validate that action is defined on subject or its superclasses
         validates :action, presence: true, uniqueness: { scope: [ :subject_type, :subject_id, :outcome ] }
         validates :outcome, presence: true
 
@@ -25,12 +25,12 @@ module MongoidAbility
 
     # =====================================================================
 
-    # TODO: override for more complicated results
+    # NOTE: override for more complicated results
     def calculated_outcome options={}
       outcome
     end
 
-    # TODO: override for more complicated results
+    # NOTE: override for more complicated results
     def conditions
       res = { _type: subject_type }
       res = res.merge(_id: subject_id) if subject_id.present?
@@ -47,7 +47,7 @@ module MongoidAbility
     def closed? options={}
       !open?(options)
     end
-    
+
     def class_lock?
       !id_lock?
     end
