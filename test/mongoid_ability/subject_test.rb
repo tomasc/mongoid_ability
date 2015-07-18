@@ -19,11 +19,6 @@ module MongoidAbility
           MySubject.default_lock MyLock_1, :read, false
         end
 
-        after do
-          MySubject.default_lock MyLock, :read, true
-            MySubject.default_lock MyLock_1, :read, true
-        end
-
         it 'does not allow multiple locks for same action' do
           MySubject.default_locks.select{ |l| l.action == :read }.count.must_equal 1
         end
