@@ -16,10 +16,8 @@ module MongoidAbility
         @default_locks = DefaultLocksExtension.new(locks)
       end
 
-      # TODO: apply to subclasses?
-      def default_lock lock_cls, action, outcome
-        default_locks << lock_cls.new(subject_type: self.to_s, action: action, outcome: outcome)
-        # subclasses.each { |cls| cls.default_lock lock_cls, action, outcome }
+      def default_lock lock_cls, action, outcome, attrs={}
+        default_locks << lock_cls.new( { subject_type: self.to_s, action: action, outcome: outcome }.merge(attrs))
       end
 
       def self_and_ancestors_with_default_locks
