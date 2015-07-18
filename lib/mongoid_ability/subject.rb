@@ -40,14 +40,12 @@ module MongoidAbility
     require 'forwardable'
     class DefaultLocksExtension
       extend Forwardable
-      def_delegators :@default_locks, :any?, :delete, :detect, :first, :map, :push, :select
+      def_delegators :@default_locks, :any?, :collect, :delete, :detect, :first, :map, :push, :select
+
+      attr_reader :default_locks
 
       def initialize default_locks=[]
         @default_locks = default_locks
-      end
-
-      def default_locks
-        DefaultLocksExtension.new(@default_locks)
       end
 
       # def for_action action
