@@ -7,10 +7,10 @@ module MongoidAbility
       let(:owner) { MyOwner.new }
       let(:my_subject) { MySubject.new }
 
-      before do
-        MySubject.default_lock MyLock, :my_read, true
-      end
+      before { MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :my_read, outcome: true) ] }
 
+      # ---------------------------------------------------------------------
+      
       it 'returns it' do
         ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal true
         ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject).must_equal true

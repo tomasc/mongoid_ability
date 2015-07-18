@@ -4,10 +4,12 @@ module MongoidAbility
     def call
       uo = user_outcome
       return uo if uo != nil
+
       if owner.respond_to?(owner.class.inherit_from_relation_name) && owner.inherit_from_relation != nil
         io = owner.inherit_from_relation.collect { |inherited_owner| inherited_owner_outcome(inherited_owner) }.compact
         return io.any?{ |o| o == true } unless io.empty?
       end
+
       default_outcome
     end
 
