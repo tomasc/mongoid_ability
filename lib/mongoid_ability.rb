@@ -1,11 +1,17 @@
 require "mongoid_ability/version"
 
 require "mongoid_ability/ability"
-require "mongoid_ability/ability_resolver"
-require "mongoid_ability/accessible_query_builder"
+
 require "mongoid_ability/lock"
 require "mongoid_ability/owner"
 require "mongoid_ability/subject"
+
+require "mongoid_ability/resolve_locks"
+require "mongoid_ability/resolve_default_locks"
+require "mongoid_ability/resolve_inherited_locks"
+require "mongoid_ability/resolve_owner_locks"
+
+require "mongoid_ability/accessible_query_builder"
 
 # ---------------------------------------------------------------------
 
