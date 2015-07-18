@@ -50,16 +50,16 @@ This class defines a permission itself using the following fields:
 
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
-For more specific behavior, it is possible to override the `#calculated_outcome` method (should, for example, the permission depend on some additional factors).
+For more specific behavior, it is possible to override the `#calculated_outcome` method (should, for example, the permission depend on some additional factors). The `#calculated_outcome` method receives options that are passed when checking the permissions using for example `can? :read, MyClass, { option_1: 1 }`
 
 ```ruby
-def calculated_outcome
+def calculated_outcome options={}
     # custom behaviour
-    # returns true/false
+    # return true/false
 end
 ```
 
-If you wish to check the state of a lock directly, please use the convenience methods `#open?` and `#closed?`. These take into account the `#calculated_outcome`. Using the `:outcome` field directly is discouraged.
+If you wish to check the state of a lock directly, please use the convenience methods `#open?` and `#closed?`. These take into account the `#calculated_outcome`. Using the `:outcome` field directly is discouraged as it just returns the boolean attribute.
 
 The lock class can be further subclassed in order to customise its behavior, for example per action.
 
@@ -74,23 +74,23 @@ class MySubject
     include Mongoid::Document
     include MongoidAbility::Subject
 
-    default_lock :read, true
-    default_lock :update, false
+    default_lock MyLock, :read, true
+    default_lock MyLock, :update, false
 end
 ```
 
-The subject classes can be subclassed. Subclasses inherit the default locks (unless they override them), the resulting outcome being correctly calculated bottom-up the superclass chain. 
+The subject classes can be subclassed. Subclasses inherit the default locks (unless they override them), the resulting outcome being correctly calculated bottom-up the superclass chain.
 
 The subject also acquires a convenience `Mongoid::Criteria` named `.accessible_by`. This criteria can be used to query for subject based on the user's ability:
 
 ```ruby
 ability = MongoidAbility::Ability.new(current_user)
-MySubject.accessible_by(ability, :read)
+MySubject.accessible_by(ability, :read, options={})
 ```
 
 ### Owner
 
-This gem supports two levels of ownership of a lock: a `User` and its many `Role`s. The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Make sure to include the `as: :owner` option.
+This `Ability` class supports two levels of inheritance (for example User and its Roles). The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Make sure to include the `as: :owner` option.
 
 ```ruby
 class MyUser
@@ -101,8 +101,13 @@ class MyUser
     has_and_belongs_to_many :roles, class_name: 'MyRole'
 
     # override if your relation is named differently
-    def self.roles_relation_name
-        :roles
+    def self.locks_relation_name
+      :locks
+    end
+
+    # override if your relation is named differently
+    def self.inherit_from_relation_name
+      :roles
     end
 end
 ```
@@ -122,8 +127,8 @@ Both users and roles can be further subclassed.
 The owner also gains the `#can?` and `#cannot?` methods, that are delegate to the user's ability. It is then easy to perform permission checks per user:
 
 ```ruby
-current_user.can?(:read, resource)
-other_user.can?(:read, ResourceClass)
+current_user.can?(:read, resource, options)
+other_user.can?(:read, ResourceClass, options)
 ```
 
 ### CanCanCan
