@@ -34,10 +34,36 @@ module MongoidAbility
     include Mongoid::Document
     include MongoidAbility::Owner
 
-    embeds_many :locks, class_name: 'MongoidAbility::MyLock', as: :owner
+    embeds_many :my_locks, class_name: 'MongoidAbility::MyLock', as: :owner
+    has_and_belongs_to_many :my_roles
+
+    def self.locks_relation_name
+      :my_locks
+    end
+
+    def self.inherit_from_relation_name
+      :my_roles
+    end
   end
 
   class MyOwner_1 < MyOwner
+  end
+
+  # ---------------------------------------------------------------------
+
+  class MyRole
+    include Mongoid::Document
+    include MongoidAbility::Owner
+
+    embeds_many :locks, class_name: 'MongoidAbility::MyLock', as: :owner
+    has_and_belongs_to_many :my_owners
+
+    def self.locks_relation_name
+      :my_locks
+    end
+  end
+
+  class MyRole_1 < MyRole
   end
 end
 
