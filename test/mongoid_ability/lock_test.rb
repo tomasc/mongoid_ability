@@ -5,7 +5,7 @@ module MongoidAbility
 
     subject { MyLock.new }
     let(:my_subject) { MySubject.new }
-    let(:inherited_lock) { MyLock_1.new }
+    let(:inherited_lock) { MyLock1.new }
 
     # ---------------------------------------------------------------------
 

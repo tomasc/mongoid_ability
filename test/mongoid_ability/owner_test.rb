@@ -6,7 +6,7 @@ module MongoidAbility
 
     describe '#cleanup_locks' do
       let(:closed_lock) { MyLock.new(action: :read, outcome: false, subject_type: Object.to_s) }
-      let(:open_lock) { MyLock_1.new(action: :read, outcome: true, subject_type: Object.to_s) }
+      let(:open_lock) { MyLock1.new(action: :read, outcome: true, subject_type: Object.to_s) }
 
       before do
         subject.my_locks = [open_lock, closed_lock].shuffle

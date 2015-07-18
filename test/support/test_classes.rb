@@ -5,7 +5,7 @@ module MongoidAbility
     embedded_in :owner, polymorphic: true
   end
 
-  class MyLock_1 < MyLock
+  class MyLock1 < MyLock
     def calculated_outcome opts={}
       opts.fetch(:override, outcome)
     end
@@ -18,14 +18,14 @@ module MongoidAbility
     include MongoidAbility::Subject
 
     default_lock MyLock, :read, true
-    default_lock MyLock_1, :update, false
+    default_lock MyLock1, :update, false
   end
 
-  class MySubject_1 < MySubject
+  class MySubject1 < MySubject
     default_lock MyLock, :read, false
   end
 
-  class MySubject_2 < MySubject_1
+  class MySubject2 < MySubject1
   end
 
   # ---------------------------------------------------------------------
@@ -46,7 +46,7 @@ module MongoidAbility
     end
   end
 
-  class MyOwner_1 < MyOwner
+  class MyOwner1 < MyOwner
   end
 
   # ---------------------------------------------------------------------
@@ -63,7 +63,7 @@ module MongoidAbility
     end
   end
 
-  class MyRole_1 < MyRole
+  class MyRole1 < MyRole
   end
 end
 

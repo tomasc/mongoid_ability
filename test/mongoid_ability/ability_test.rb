@@ -13,42 +13,42 @@ module MongoidAbility
       before do
         # NOTE: we might need to use the .default_lock macro in case we propagate down directly
         MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: true) ]
-        MySubject_1.default_locks = []
-        MySubject_2.default_locks = []
+        MySubject1.default_locks = []
+        MySubject2.default_locks = []
       end
 
       it 'propagates from superclass to all subclasses' do
         ability.can?(:update, MySubject).must_equal true
-        ability.can?(:update, MySubject_1).must_equal true
-        ability.can?(:update, MySubject_2).must_equal true
+        ability.can?(:update, MySubject1).must_equal true
+        ability.can?(:update, MySubject2).must_equal true
       end
     end
 
     describe 'when defined for all superclasses' do
       before do
         MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-        MySubject_1.default_locks = [ MyLock.new(subject_type: MySubject_1, action: :read, outcome: true) ]
-        MySubject_2.default_locks = [ MyLock.new(subject_type: MySubject_2, action: :read, outcome: false) ]
+        MySubject1.default_locks = [ MyLock.new(subject_type: MySubject1, action: :read, outcome: true) ]
+        MySubject2.default_locks = [ MyLock.new(subject_type: MySubject2, action: :read, outcome: false) ]
       end
 
       it 'respects the definitions' do
         ability.can?(:read, MySubject).must_equal false
-        ability.can?(:read, MySubject_1).must_equal true
-        ability.can?(:read, MySubject_2).must_equal false
+        ability.can?(:read, MySubject1).must_equal true
+        ability.can?(:read, MySubject2).must_equal false
       end
     end
 
     describe 'when defined for some superclasses' do
       before do
         MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-        MySubject_1.default_locks = []
-        MySubject_2.default_locks = [ MyLock.new(subject_type: MySubject_2, action: :read, outcome: true) ]
+        MySubject1.default_locks = []
+        MySubject2.default_locks = [ MyLock.new(subject_type: MySubject2, action: :read, outcome: true) ]
       end
 
       it 'propagates default locks to subclasses' do
         ability.can?(:read, MySubject).must_equal false
-        ability.can?(:read, MySubject_1).must_equal false
-        ability.can?(:read, MySubject_2).must_equal true
+        ability.can?(:read, MySubject1).must_equal false
+        ability.can?(:read, MySubject2).must_equal true
       end
     end
 
@@ -58,13 +58,13 @@ module MongoidAbility
       describe 'when defined for superclass' do
         before do
           MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-          MySubject_1.default_locks = []
-          MySubject_2.default_locks = []
+          MySubject1.default_locks = []
+          MySubject2.default_locks = []
           owner.my_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]
         end
 
         it 'applies the superclass lock' do
-          ability.can?(:read, MySubject_2).must_equal true
+          ability.can?(:read, MySubject2).must_equal true
         end
       end
     end
@@ -89,13 +89,13 @@ module MongoidAbility
       describe 'when defined for superclass' do
         before do
           MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-          MySubject_1.default_locks = []
-          MySubject_2.default_locks = []
+          MySubject1.default_locks = []
+          MySubject2.default_locks = []
           owner.my_roles = [ MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]) ]
         end
 
         it 'applies the superclass lock' do
-          ability.can?(:read, MySubject_2).must_equal true
+          ability.can?(:read, MySubject2).must_equal true
         end
       end
     end
