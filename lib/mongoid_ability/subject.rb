@@ -46,12 +46,6 @@ module MongoidAbility
         @default_locks = default_locks
       end
 
-      # def for_action action
-      #   DefaultLocksExtension.new(
-      #     @default_locks.select { |l| l.action.to_s == action.to_s }
-      #   )
-      # end
-
       def << lock
         if existing_lock = self.detect{ |l| l.action.to_s == lock.action.to_s }
           @default_locks.delete(existing_lock)
@@ -62,14 +56,3 @@ module MongoidAbility
 
   end
 end
-
-
-
-
-
-# GRAVEYARD
-
-#       def default_locks_with_inherited
-#         return default_locks unless superclass.respond_to?(:default_locks_with_inherited)
-#         superclass.default_locks_with_inherited.concat(default_locks)
-#       end
