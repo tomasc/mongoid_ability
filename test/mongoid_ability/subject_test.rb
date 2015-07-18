@@ -3,18 +3,23 @@ require 'test_helper'
 module MongoidAbility
   describe Subject do
     describe '.default_locks' do
-      it 'stores them' do
-        MySubject.default_locks.map(&:action).map(&:to_s).sort.must_equal %w(read update)
+
+      before do
+        MySubject.default_locks = []
+        MySubject_1.default_locks = []
+
+        MySubject.default_lock MyLock, :read, true
+        MySubject_1.default_lock MyLock_1, :update, false
       end
 
-      it 'propagates them to subclasses' do
-        skip
-        MySubject_1.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
-        MySubject_2.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
+      it 'stores them' do
+        MySubject.default_locks.map(&:action).map(&:to_s).sort.must_equal %w(read)
+        MySubject_1.default_locks.map(&:action).map(&:to_s).sort.must_equal %w(update)
       end
 
       describe 'prevents conflicts' do
         before do
+          # FIXME: this permanently adjusts the default test locks – ideally do this other way, stubs etc.
           MySubject.default_lock MyLock, :read, false
           MySubject.default_lock MyLock_1, :read, false
         end

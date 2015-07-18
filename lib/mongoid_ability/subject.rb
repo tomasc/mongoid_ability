@@ -9,12 +9,16 @@ module MongoidAbility
 
     module ClassMethods
       def default_locks
-        @@default_locks ||= DefaultLocksExtension.new
+        @default_locks ||= DefaultLocksExtension.new
+      end
+
+      def default_locks= locks
+        @default_locks = DefaultLocksExtension.new(locks)
       end
 
       # TODO: apply to subclasses?
       def default_lock lock_cls, action, outcome
-        default_locks << lock_cls.new(subject_type: self, action: action, outcome: outcome)
+        default_locks << lock_cls.new(subject_type: self.to_s, action: action, outcome: outcome)
         # subclasses.each { |cls| cls.default_lock lock_cls, action, outcome }
       end
 
@@ -36,7 +40,7 @@ module MongoidAbility
     require 'forwardable'
     class DefaultLocksExtension
       extend Forwardable
-      def_delegators :@default_locks, :delete, :select, :detect, :map, :push, :any?
+      def_delegators :@default_locks, :any?, :delete, :detect, :first, :map, :push, :select
 
       attr_reader :default_locks
 
@@ -45,7 +49,9 @@ module MongoidAbility
       end
 
       def for_action action
-        @default_locks.select { |l| l.action == action }
+        DefaultLocksExtension.new(
+          @default_locks.select { |l| l.action.to_s == action.to_s }
+        )
       end
 
       def << lock

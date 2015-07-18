@@ -11,6 +11,10 @@ module MongoidAbility
     # =====================================================================
 
     describe '#outcome' do
+      before do
+        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+      end
+
       describe 'no locks' do
         it { subject.must_be_nil }
       end

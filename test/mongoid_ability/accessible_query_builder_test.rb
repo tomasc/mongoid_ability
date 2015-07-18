@@ -12,6 +12,10 @@ module MongoidAbility
 
     subject { AccessibleQueryBuilder.call(base_class, ability, action) }
 
+    before do
+      MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+    end
+
     it 'returns Mongoid::Criteria' do
       subject.must_be_kind_of Mongoid::Criteria
     end

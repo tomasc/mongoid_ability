@@ -6,8 +6,8 @@ module MongoidAbility
   end
 
   class MyLock_1 < MyLock
-    def calculated_outcome options={}
-      options[:override] || outcome
+    def calculated_outcome opts={}
+      opts.fetch(:override, outcome)
     end
   end
 
@@ -55,7 +55,7 @@ module MongoidAbility
     include Mongoid::Document
     include MongoidAbility::Owner
 
-    embeds_many :locks, class_name: 'MongoidAbility::MyLock', as: :owner
+    embeds_many :my_locks, class_name: 'MongoidAbility::MyLock', as: :owner
     has_and_belongs_to_many :my_owners
 
     def self.locks_relation_name
