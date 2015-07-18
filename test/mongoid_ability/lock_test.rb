@@ -2,9 +2,12 @@ require 'test_helper'
 
 module MongoidAbility
   describe Lock do
+
     subject { MyLock.new }
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock_1.new }
+
+    # ---------------------------------------------------------------------
 
     it { subject.must_respond_to :action }
     it { subject.must_respond_to :outcome }
@@ -12,6 +15,8 @@ module MongoidAbility
     it { subject.must_respond_to :subject_id }
     it { subject.must_respond_to :subject_type }
     it { subject.must_respond_to :owner }
+
+    # ---------------------------------------------------------------------
 
     it '#open?' do
       subject.must_respond_to :open?
@@ -27,6 +32,8 @@ module MongoidAbility
     it '#id_lock?' do
       subject.must_respond_to :id_lock?
     end
+
+    # ---------------------------------------------------------------------
 
     describe '#criteria' do
       let(:open_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
@@ -63,5 +70,6 @@ module MongoidAbility
         end
       end
     end
+
   end
 end
