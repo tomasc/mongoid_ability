@@ -3,10 +3,10 @@ require "test_helper"
 module MongoidAbility
   describe AccessibleQueryBuilder do
 
-    let(:base_class) { SubjectTest }
-    
-    let(:user) { TestUser.new }
-    let(:ability) { Ability.new(user) }
+    let(:base_class) { MySubject }
+
+    let(:owner) { MyOwner.new }
+    let(:ability) { Ability.new(owner) }
 
     let(:action) { :read }
 
