@@ -1,27 +1,45 @@
 require 'test_helper'
 
 module MongoidAbility
-  describe Subject do    
+  describe Subject do
     describe '.default_locks' do
-      it 'propagates them to subclasses' do
+      it 'stores them' do
         MySubject.default_locks.map(&:action).map(&:to_s).sort.must_equal %w(read update)
-        # MySubject_1.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
-        # MySubject_2.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
       end
 
-      it 'does not allow multiple locks for same action' do
-        MySubject.default_lock MyLock, :read, false
-        MySubject.default_locks.select{ |l| l.action == :read }.count.must_equal 1
+      it 'propagates them to subclasses' do
+        skip
+        MySubject_1.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
+        MySubject_2.default_locks.map(&:action).map(&:to_s).must_equal %w(read update)
       end
 
-      it 'relplace existing locks with new attributes' do
-        MySubject.default_lock MyLock, :read, false
-        MySubject.default_locks.detect{ |l| l.action == :read }.outcome.must_equal false
-      end
+      describe 'prevents conflicts' do
+        before do
+          MySubject.default_lock MyLock, :read, false
+          MySubject.default_lock MyLock_1, :read, false
+        end
 
-      it 'replaces existing locks with new one' do
-        MySubject.default_lock MyLock_1, :read, false
-        MySubject.default_locks.detect{ |l| l.action == :read }.class.must_equal MyLock_1
+        after do
+          MySubject.default_lock MyLock, :read, true
+            MySubject.default_lock MyLock_1, :read, true
+        end
+
+        it 'does not allow multiple locks for same action' do
+          MySubject.default_locks.select{ |l| l.action == :read }.count.must_equal 1
+        end
+
+        it 'replace existing locks with new attributes' do
+          MySubject.default_locks.detect{ |l| l.action == :read }.outcome.must_equal false
+        end
+
+        it 'replaces existing locks with new one' do
+          MySubject.default_locks.detect{ |l| l.action == :read }.class.must_equal MyLock_1
+        end
+
+        it 'emulates .for_action scope on the default_locks array' do
+          MySubject.default_locks.for_action(:read).first.outcome.must_equal false
+        end
+
       end
     end
   end

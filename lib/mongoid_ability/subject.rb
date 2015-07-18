@@ -1,25 +1,15 @@
 module MongoidAbility
   module Subject
+
     def self.included base
       base.extend ClassMethods
-      base.class_eval do
-        attr_reader :default_locks
-
-        def default_locks.<< lock
-          if existing_lock = self.detect{ |l| l.action == lock.action }
-            self.push lock
-            self.delete(existing_lock)
-          else
-            self.push lock
-          end
-        end
-
-      end
     end
+
+    # ---------------------------------------------------------------------
 
     module ClassMethods
       def default_locks
-        @default_locks ||= []
+        @@default_locks ||= DefaultLocksExtension.new
       end
 
       # TODO: apply to subclasses?
@@ -32,10 +22,40 @@ module MongoidAbility
         ancestors.select { |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
       end
 
-      def accessible_by ability, action=:read
-        AccessibleQueryBuilder.call(self, ability, action)
+      def ancestors_with_default_locks
+        self_and_ancestors_with_default_locks - [self]
+      end
+
+      def accessible_by ability, action=:read, options={}
+        AccessibleQueryBuilder.call(self, ability, action, options)
       end
     end
+
+    # ---------------------------------------------------------------------
+
+    require 'forwardable'
+    class DefaultLocksExtension
+      extend Forwardable
+      def_delegators :@default_locks, :delete, :select, :detect, :map, :push, :any?
+
+      attr_reader :default_locks
+
+      def initialize default_locks=[]
+        @default_locks = default_locks
+      end
+
+      def for_action action
+        @default_locks.select { |l| l.action == action }
+      end
+
+      def << lock
+        if existing_lock = self.for_action(lock.action).first
+          @default_locks.delete(existing_lock)
+        end
+        @default_locks.push lock
+      end
+    end
+
   end
 end
 
@@ -48,8 +68,4 @@ end
 #       def default_locks_with_inherited
 #         return default_locks unless superclass.respond_to?(:default_locks_with_inherited)
 #         superclass.default_locks_with_inherited.concat(default_locks)
-#       end
-#
-#       def ancestors_with_default_locks
-#         self_and_ancestors_with_default_locks - [self]
 #       end
