@@ -9,7 +9,7 @@ module MongoidAbility
     private # =============================================================
 
     def default_locks
-      subject_class.default_locks.for_action(action)
+      subject_class.default_locks.select{ |l| l.action.to_s == action.to_s }
     end
   end
 end

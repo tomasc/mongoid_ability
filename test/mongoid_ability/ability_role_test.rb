@@ -9,6 +9,12 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
+    before do
+      MySubject.default_locks = [ MyLock.new(action: :read, outcome: true) ]
+    end
+
+    # ---------------------------------------------------------------------
+
     it 'role can?' do
       ability.can?(:read, MySubject).must_equal false
     end

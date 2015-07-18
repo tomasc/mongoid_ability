@@ -35,10 +35,6 @@ module MongoidAbility
         it 'replaces existing locks with new one' do
           MySubject.default_locks.detect{ |l| l.action == :read }.class.must_equal MyLock1
         end
-
-        it 'emulates .for_action scope on the default_locks array' do
-          MySubject.default_locks.for_action(:read).first.outcome.must_equal false
-        end
       end
 
     end

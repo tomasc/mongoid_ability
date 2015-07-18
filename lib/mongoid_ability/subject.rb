@@ -42,20 +42,22 @@ module MongoidAbility
       extend Forwardable
       def_delegators :@default_locks, :any?, :delete, :detect, :first, :map, :push, :select
 
-      attr_reader :default_locks
-
       def initialize default_locks=[]
         @default_locks = default_locks
       end
 
-      def for_action action
-        DefaultLocksExtension.new(
-          @default_locks.select { |l| l.action.to_s == action.to_s }
-        )
+      def default_locks
+        DefaultLocksExtension.new(@default_locks)
       end
 
+      # def for_action action
+      #   DefaultLocksExtension.new(
+      #     @default_locks.select { |l| l.action.to_s == action.to_s }
+      #   )
+      # end
+
       def << lock
-        if existing_lock = self.for_action(lock.action).first
+        if existing_lock = self.detect{ |l| l.action.to_s == lock.action.to_s }
           @default_locks.delete(existing_lock)
         end
         @default_locks.push lock
