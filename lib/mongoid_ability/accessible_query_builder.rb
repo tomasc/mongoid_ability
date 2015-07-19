@@ -8,12 +8,19 @@ module MongoidAbility
     # =====================================================================
 
     def call
-      criteria = base_criteria
-      base_class_and_descendants.each { |cls| criteria = criteria.merge(criteria_for_class(cls)) }
-      criteria
+      if defined? Rails
+        # FIXME: this is a bit of a dirty hack, since the marshalling of criteria does not preserve the embedded attributes
+        Rails.cache.fetch( [ 'ability-query', base_class, ability.cache_key, action, ability.options_cache_key(options) ] ) { _call }.tap { |criteria| criteria.embedded = base_criteria.embedded }
+      else
+        _call
+      end
     end
 
     private # =============================================================
+
+    def _call
+      base_class_and_descendants.inject(base_criteria) { |criteria, cls| criteria.merge!(criteria_for_class(cls)) }
+    end
 
     def base_criteria
       @base_criteria ||= base_class.criteria
