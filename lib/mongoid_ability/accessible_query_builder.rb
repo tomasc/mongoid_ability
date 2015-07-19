@@ -8,12 +8,16 @@ module MongoidAbility
     # =====================================================================
 
     def call
-      if defined? Rails
-        # FIXME: this is a bit of a dirty hack, since the marshalling of criteria does not preserve the embedded attributes
-        Rails.cache.fetch( [ 'ability-query', base_class, ability.cache_key, action, ability.options_cache_key(options) ] ) { _call }.tap { |criteria| criteria.embedded = base_criteria.embedded }
-      else
-        _call
-      end
+      _call
+
+      # if defined? Rails
+      #   # FIXME: this is a bit of a dirty hack, since the marshalling of criteria does not preserve the embedded attributes
+      #   Rails.cache.fetch( [ 'ability-query', base_class, ability.cache_key, action, ability.options_cache_key(options) ] ) do
+      #     _call
+      #   end.tap { |c| c.embedded = base_criteria.embedded }
+      # else
+      #   _call
+      # end
     end
 
     private # =============================================================
