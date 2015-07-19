@@ -16,15 +16,16 @@ module MongoidAbility
     private # =============================================================
 
     def user_outcome
-      ResolveOwnerLocks.call(owner, action, subject_class, subject, options)
+      @user_outcome ||= ResolveOwnerLocks.call(owner, action, subject_class, subject, options)
     end
 
     def inherited_owner_outcome inherited_owner
-      ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject, options)
+      @inherited_owner_outcome ||= {}
+      @inherited_owner_outcome[inherited_owner] ||= ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject, options)
     end
 
     def default_outcome
-      ResolveDefaultLocks.call(nil, action, subject_class, nil, options)
+      @default_outcome ||= ResolveDefaultLocks.call(nil, action, subject_class, nil, options)
     end
 
   end
