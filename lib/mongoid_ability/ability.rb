@@ -10,13 +10,15 @@ module MongoidAbility
       @owner = owner
 
       can do |action, subject_type, subject, options|
-        if defined? Rails
-          ::Rails.cache.fetch( [ cache_key ] + cache_keys(action, subject_type, subject, options) ) do
-            _can(action, subject_type, subject, options)
-          end
-        else
-          _can(action, subject_type, subject, options)
-        end
+        _can(action, subject_type, subject, options)
+        
+        # if defined? Rails
+        #   ::Rails.cache.fetch( [ cache_key ] + cache_keys(action, subject_type, subject, options) ) do
+        #     _can(action, subject_type, subject, options)
+        #   end
+        # else
+        #   _can(action, subject_type, subject, options)
+        # end
       end
     end
 
