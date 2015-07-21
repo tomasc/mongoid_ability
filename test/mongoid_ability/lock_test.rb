@@ -35,6 +35,20 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
+    describe '.subject_id' do
+      it 'converts legal id String to BSON' do
+        id = BSON::ObjectId.new
+        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_be_kind_of BSON::ObjectId
+      end
+
+      it 'converts empty String to nil' do
+        id = ''
+        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_equal nil
+      end
+    end
+
+    # ---------------------------------------------------------------------
+
     describe '#criteria' do
       let(:open_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
       let(:closed_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
