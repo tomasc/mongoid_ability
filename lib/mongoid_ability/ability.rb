@@ -69,15 +69,9 @@ module MongoidAbility
     # .select(&current_ability.can_destroy)
     # etc.
     def method_missing name, *args
-      return super unless name.to_s =~ /\Acan_/
-      return unless action = name.to_s.gsub(/\Acan_/, '').to_sym
-      lambda { |doc| can? action, doc }
-    end
-
-    def method_missing name, *args
-      return super unless name.to_s =~ /\Acannot_/
-      return unless action = name.to_s.gsub(/\Acannot_/, '').to_sym
-      lambda { |doc| cannot? action, doc }
+      return super unless name.to_s =~ /\A(can|cannot)_/
+      return unless action = name.to_s.gsub(/\A(can|cannot)_/, '').to_sym
+      name =~ /can_/ ? lambda { |doc| can? action, doc } : lambda { |doc| cannot? action, doc }
     end
 
   end
