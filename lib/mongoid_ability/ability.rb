@@ -6,6 +6,16 @@ module MongoidAbility
 
     attr_reader :owner
 
+    def self.subject_classes
+      Object.descendants.select{ |cls| cls.included_modules.include?(MongoidAbility::Subject) }
+    end
+
+    def self.subject_root_classes
+      subject_classes.reject{ |cls| cls.superclass.included_modules.include?(MongoidAbility::Subject) }
+    end
+
+    # =====================================================================
+
     def initialize owner
       @owner = owner
 
