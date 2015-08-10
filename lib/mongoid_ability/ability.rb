@@ -74,5 +74,11 @@ module MongoidAbility
       lambda { |doc| can? action, doc }
     end
 
+    def method_missing name, *args
+      return super unless name.to_s =~ /\Acannot_/
+      return unless action = name.to_s.gsub(/\Acannot_/, '').to_sym
+      lambda { |doc| cannot? action, doc }
+    end
+
   end
 end
