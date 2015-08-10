@@ -11,7 +11,7 @@ module MongoidAbility
 
       can do |action, subject_type, subject, options|
         _can(action, subject_type, subject, options)
-        
+
         # if defined? Rails
         #   ::Rails.cache.fetch( [ cache_key ] + cache_keys(action, subject_type, subject, options) ) do
         #     _can(action, subject_type, subject, options)
@@ -59,6 +59,19 @@ module MongoidAbility
     def inherit_from_relation_cache_keys
       return unless owner.respond_to?(owner.class.inherit_from_relation_name) && owner.inherit_from_relation != nil
       owner.inherit_from_relation.map(&:cache_key)
+    end
+
+    # ---------------------------------------------------------------------
+
+    # lambda for easy permission checking:
+    # .select(&current_ability.can_read)
+    # .select(&current_ability.can_update)
+    # .select(&current_ability.can_destroy)
+    # etc.
+    def method_missing name, *args
+      return super unless name.to_s =~ /\Acan_/
+      return unless action = name.to_s.gsub(/\Acan_/, '').to_sym
+      lambda { |doc| can? action, doc }
     end
 
   end
