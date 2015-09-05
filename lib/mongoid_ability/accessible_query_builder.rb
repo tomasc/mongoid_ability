@@ -1,3 +1,5 @@
+# FIXME: this is extremely slow and not suitable for use, yet
+
 module MongoidAbility
   class AccessibleQueryBuilder < Struct.new(:base_class, :ability, :action, :options)
 
@@ -8,23 +10,10 @@ module MongoidAbility
     # =====================================================================
 
     def call
-      _call
-
-      # if defined? Rails
-      #   # FIXME: this is a bit of a dirty hack, since the marshalling of criteria does not preserve the embedded attributes
-      #   Rails.cache.fetch( [ 'ability-query', base_class, ability.cache_key, action, ability.options_cache_key(options) ] ) do
-      #     _call
-      #   end.tap { |c| c.embedded = base_criteria.embedded }
-      # else
-      #   _call
-      # end
+      base_class_and_descendants.inject(base_criteria) { |criteria, cls| criteria.merge!(criteria_for_class(cls)) }
     end
 
     private # =============================================================
-
-    def _call
-      base_class_and_descendants.inject(base_criteria) { |criteria, cls| criteria.merge!(criteria_for_class(cls)) }
-    end
 
     def base_criteria
       @base_criteria ||= base_class.criteria
