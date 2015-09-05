@@ -66,6 +66,11 @@ module MongoidAbility
         subject_lock.inherited_outcome.must_equal false
         subject_type_lock.inherited_outcome.must_equal true
       end
+
+      it 'returns calculated_outcome for default locks' do
+        lock = MySubject.default_locks.detect{ |l| l.action == :read }
+        lock.inherited_outcome.must_equal true
+      end
     end
 
     # ---------------------------------------------------------------------

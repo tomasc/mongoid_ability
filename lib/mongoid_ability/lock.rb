@@ -42,7 +42,7 @@ module MongoidAbility
 
     # calculates outcome as if this lock is not present
     def inherited_outcome
-      return unless owner.present?
+      return calculated_outcome unless owner.present?
       cloned_owner = owner.clone
       cloned_owner.locks_relation = cloned_owner.locks_relation - [self]
       MongoidAbility::Ability.new(cloned_owner).can? action, (id_lock? ? subject : subject_class)
