@@ -26,6 +26,10 @@ module MongoidAbility
       self.send(self.class.locks_relation_name)
     end
 
+    def locks_relation= val
+      self.send "#{self.class.locks_relation_name}=", val
+    end
+
     def inherit_from_relation
       self.send(self.class.inherit_from_relation_name)
     end

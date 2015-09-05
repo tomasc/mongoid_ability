@@ -49,6 +49,27 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
+    describe '#inherited_outcome' do
+      let(:my_subject) { MySubject.new }
+      let(:subject_type_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+      let(:subject_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+      let(:owner) { MyOwner.new(my_locks: [subject_type_lock, subject_lock]) }
+      let(:ability) { Ability.new(owner) }
+
+      before { ability } # initialize owner
+
+      it 'does not affect calculated_outcome' do
+        ability.can?(:read, my_subject).must_equal true
+      end
+
+      it 'returns calculated_outcome without this lock' do
+        subject_lock.inherited_outcome.must_equal false
+        subject_type_lock.inherited_outcome.must_equal true
+      end
+    end
+
+    # ---------------------------------------------------------------------
+
     describe '#criteria' do
       let(:open_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
       let(:closed_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
