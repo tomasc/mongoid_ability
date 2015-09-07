@@ -42,19 +42,5 @@ module MongoidAbility
       end
     end
 
-    describe '#inherited_locks' do
-      let(:subject_type_lock) { MyLock.new(action: :read, subject_type: MySubject) }
-      let(:subject_lock) { MyLock.new(action: :read, subject: MySubject.new) }
-      let(:owner) { MyOwner.new(my_locks: [subject_type_lock, subject_lock]) }
-
-      it 'returns array' do
-        owner.inherited_locks.must_be_kind_of Array
-      end
-
-      it 'includes locks for missing actions' do
-        owner.inherited_locks.map(&:action).must_equal %w(update)
-      end
-    end
-
   end
 end
