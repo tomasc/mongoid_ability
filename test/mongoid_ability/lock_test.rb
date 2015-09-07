@@ -6,6 +6,11 @@ module MongoidAbility
     subject { MyLock.new }
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
+    # ---------------------------------------------------------------------
+
+    before do
+      MySubject.default_locks = [ MyLock.new(action: :read, outcome: true), MyLock.new(action: :update, outcome: false) ]
+    end
 
     # ---------------------------------------------------------------------
 
@@ -54,12 +59,13 @@ module MongoidAbility
       let(:subject_type_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
       let(:subject_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
       let(:owner) { MyOwner.new(my_locks: [subject_type_lock, subject_lock]) }
-      let(:ability) { Ability.new(owner) }
 
-      before { ability } # initialize owner
+      before do
+        @ability = Ability.new(owner) # initialize owner
+      end
 
       it 'does not affect calculated_outcome' do
-        ability.can?(:read, my_subject).must_equal true
+        @ability.can?(:read, my_subject).must_equal true
       end
 
       it 'returns calculated_outcome without this lock' do
@@ -76,11 +82,11 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     describe '#criteria' do
-      let(:open_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
-      let(:closed_subject_type_lock) {  MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+      let(:open_subject_type_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+      let(:closed_subject_type_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
 
-      let(:open_subject_lock) {  MyLock.new(subject: my_subject, action: :read, outcome: true) }
-      let(:closed_subject_lock) {  MyLock.new(subject: my_subject, action: :read, outcome: false) }
+      let(:open_subject_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+      let(:closed_subject_lock) { MyLock.new(subject: my_subject, action: :read, outcome: false) }
 
       it 'returns conditions Hash' do
         open_subject_type_lock.conditions.must_be_kind_of Hash

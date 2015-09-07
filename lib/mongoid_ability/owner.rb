@@ -38,6 +38,12 @@ module MongoidAbility
       @ability ||= MongoidAbility::Ability.new(self)
     end
 
+    # ---------------------------------------------------------------------
+
+    def has_lock? lock
+      locks_relation.where(_type: lock.class.to_s, action: lock.action, subject_type: lock.subject_type.to_s, subject_id: lock.subject_id.presence).exists?
+    end
+
     private # =============================================================
 
     def cleanup_locks
