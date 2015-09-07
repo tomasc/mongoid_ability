@@ -7,8 +7,6 @@ module MongoidAbility
       end
     end
 
-    # ---------------------------------------------------------------------
-
     module ClassMethods
       def default_locks
         @default_locks ||= []
@@ -19,14 +17,24 @@ module MongoidAbility
       end
 
       def default_lock lock_cls, action, outcome, attrs={}
+        unless is_root_class?
+          unless root_class.has_default_lock_for_action?(action)
+            raise StandardError, "action is not defined on root class (#{root_class})"
+          end
+        end
+
         lock = lock_cls.new( { subject_type: self.to_s, action: action, outcome: outcome }.merge(attrs))
 
-        if existing_lock = default_locks.detect{ |l| l.action.to_s == lock.action.to_s }
+        # remove any existing locks
+        if existing_lock = default_locks.detect{ |l| l.action == lock.action }
           default_locks.delete(existing_lock)
         end
 
+        # add new lock
         default_locks.push lock
       end
+
+      # ---------------------------------------------------------------------
 
       def self_and_ancestors_with_default_locks
         ancestors.select { |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
@@ -35,6 +43,26 @@ module MongoidAbility
       def ancestors_with_default_locks
         self_and_ancestors_with_default_locks - [self]
       end
+
+      def is_root_class?
+        root_class == self
+      end
+
+      def root_class
+        self_and_ancestors_with_default_locks.last
+      end
+
+      # ---------------------------------------------------------------------
+
+      def default_lock_for_action action
+        default_locks.detect{ |lock| lock.action == action.to_sym }
+      end
+
+      def has_default_lock_for_action? action
+        default_lock_for_action(action).present?
+      end
+
+      # ---------------------------------------------------------------------
 
       def accessible_by ability, action=:read, options={}
         AccessibleQueryBuilder.call(self, ability, action, options)
