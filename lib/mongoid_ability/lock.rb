@@ -7,6 +7,7 @@ module MongoidAbility
       base.class_eval do
         field :action, type: Symbol, default: :read
         field :outcome, type: Boolean, default: false
+        field :options, type: Hash, default: {}
 
         belongs_to :subject, polymorphic: true, touch: true
 
@@ -41,11 +42,16 @@ module MongoidAbility
     end
 
     # calculates outcome as if this lock is not present
-    def inherited_outcome
-      return calculated_outcome unless owner.present?
+    def inherited_outcome options=default_options
+      return calculated_outcome(options) unless owner.present?
       cloned_owner = owner.clone
       cloned_owner.locks_relation = cloned_owner.locks_relation - [self]
-      MongoidAbility::Ability.new(cloned_owner).can? action, (subject.present? ? subject : subject_class)
+      MongoidAbility::Ability.new(cloned_owner).can? action, (subject.present? ? subject : subject_class), options
+    end
+
+    # this is used when calculating inherited outcome
+    def default_options
+      {}
     end
 
     # ---------------------------------------------------------------------
