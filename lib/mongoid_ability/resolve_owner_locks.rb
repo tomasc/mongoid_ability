@@ -2,6 +2,9 @@ module MongoidAbility
   class ResolveOwnerLocks < ResolveLocks
 
     def call
+      # FIXME: this is not a very nice fix
+      return unless owner.respond_to?(:locks_relation)
+
       locks_for_subject_type = owner.locks_relation.for_action(action).for_subject_type(subject_type)
 
       return unless locks_for_subject_type.exists?
