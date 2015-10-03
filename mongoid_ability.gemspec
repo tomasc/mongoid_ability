@@ -6,7 +6,7 @@ require 'mongoid_ability/version'
 Gem::Specification.new do |spec|
   spec.name          = "mongoid_ability"
   spec.version       = MongoidAbility::VERSION
-  spec.authors       = ["Tomas Celizna"]
+  spec.authors       = ["Tomáš Celizna"]
   spec.email         = ["tomas.celizna@gmail.com"]
   spec.summary       = %q{Custom Ability class that allows CanCanCan authorization library store permissions in MongoDB via the Mongoid gem.}
   spec.description   = %q{Custom Ability class that allows CanCanCan authorization library store permissions in MongoDB via the Mongoid gem.}
@@ -19,11 +19,11 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "cancancan", "~> 1.9"
-  spec.add_dependency "mongoid", "~> 4.0"
+  spec.add_dependency "mongoid", "~> 5.0"
 
   spec.add_development_dependency "bundler", "~> 1.6"
   spec.add_development_dependency "coveralls"
-  spec.add_development_dependency "database_cleaner"
+  spec.add_development_dependency "database_cleaner", ">= 1.5.1"
   spec.add_development_dependency "guard"
   spec.add_development_dependency "guard-minitest"
   spec.add_development_dependency "minitest"
