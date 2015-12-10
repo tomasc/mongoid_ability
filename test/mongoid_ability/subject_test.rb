@@ -20,16 +20,16 @@ module MongoidAbility
       end
     end
 
-    describe 'when lock not defined on superclass' do
-      before do
-        MySubject.default_locks = []
-        MySubject1.default_locks = []
-      end
-
-      it 'must raise error' do
-        -> { MySubject1.default_lock MyLock, :test, true }.must_raise StandardError
-      end
-    end
+    # describe 'when lock not defined on superclass' do
+    #   before do
+    #     MySubject.default_locks = []
+    #     MySubject1.default_locks = []
+    #   end
+    #
+    #   it 'must raise error' do
+    #     -> { MySubject1.default_lock MyLock, :test, true }.must_raise StandardError
+    #   end
+    # end
 
     describe 'prevents conflicts' do
       before do

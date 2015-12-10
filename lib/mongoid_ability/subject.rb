@@ -17,11 +17,11 @@ module MongoidAbility
       end
 
       def default_lock lock_cls, action, outcome, options={}
-        unless is_root_class?
-          unless root_class.has_default_lock_for_action?(action)
-            raise StandardError, "action is not defined on root class (#{root_class})"
-          end
-        end
+        # unless is_root_class?
+        #   unless root_class.has_default_lock_for_action?(action)
+        #     raise StandardError, "action is not defined on root class (#{root_class})"
+        #   end
+        # end
 
         lock = lock_cls.new( subject_type: self.to_s, action: action, outcome: outcome, options: options )
 
