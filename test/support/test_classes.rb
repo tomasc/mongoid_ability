@@ -28,10 +28,6 @@ module MongoidAbility
   class MySubject2 < MySubject1
   end
 
-  class MySubject3 < MySubject
-    default_lock MyLock, :deliver, false
-  end
-
   # ---------------------------------------------------------------------
 
   class MyOwner

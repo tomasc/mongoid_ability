@@ -22,7 +22,7 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     def base_class_superclass
-      @base_class_superclass ||= (base_class.ancestors_with_default_locks_for_action(action).last || base_class)
+      @base_class_superclass ||= (base_class.ancestors_with_default_locks.last || base_class)
     end
 
     def base_class_descendants

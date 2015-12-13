@@ -24,7 +24,7 @@ module MongoidAbility
         outcome = nil
         options ||= {}
 
-        subject_class.self_and_ancestors_with_default_locks_for_action(action).each do |cls|
+        subject_class.self_and_ancestors_with_default_locks.each do |cls|
           outcome = ResolveInheritedLocks.call(owner, action, cls, subject, options)
           break if outcome != nil
         end

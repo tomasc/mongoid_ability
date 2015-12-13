@@ -23,9 +23,9 @@ module MongoidAbility
       ability.cannot?(:read, MySubject).must_equal true
     end
 
-    # it 'is accessible by' do
-    #   MySubject.accessible_by(ability, :read).must_be_kind_of Mongoid::Criteria
-    # end
+    it 'is accessible by' do
+      MySubject.accessible_by(ability, :read).must_be_kind_of Mongoid::Criteria
+    end
 
   end
 end
