@@ -127,5 +127,17 @@ module MongoidAbility
       end
     end
 
+    # ---------------------------------------------------------------------
+
+    describe 'different lock on subclass' do
+      before do
+        owner.my_roles = [ MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject3, action: :deliver, outcome: true) ]) ]
+      end
+
+      it 'allows permission check on subclass' do
+        ability.can?(:deliver, MySubject3).must_equal true
+      end
+    end
+
   end
 end

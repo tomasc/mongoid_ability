@@ -40,8 +40,18 @@ module MongoidAbility
         ancestors.select { |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
       end
 
+      def self_and_ancestors_with_default_locks_for_action action
+        self_and_ancestors_with_default_locks.select do |cls|
+          cls.default_locks.any?{ |lock| lock.action.to_s == action.to_s }
+        end
+      end
+
       def ancestors_with_default_locks
         self_and_ancestors_with_default_locks - [self]
+      end
+
+      def ancestors_with_default_locks_for_action action
+        self_and_ancestors_with_default_locks_for_action(action) - [self]
       end
 
       def is_root_class?
@@ -65,7 +75,8 @@ module MongoidAbility
       # ---------------------------------------------------------------------
 
       def accessible_by ability, action=:read, options={}
-        AccessibleQueryBuilder.call(self, ability, action, options)
+        raise NotImplemented
+        # AccessibleQueryBuilder.call(self, ability, action, options)
       end
     end
 
