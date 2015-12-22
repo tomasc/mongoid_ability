@@ -81,13 +81,6 @@ end
 
 The subject classes can be subclassed. Subclasses inherit the default locks (unless they override them), the resulting outcome being correctly calculated bottom-up the superclass chain.
 
-The subject also acquires a convenience `Mongoid::Criteria` named `.accessible_by`. This criteria can be used to query for subject based on the user's ability:
-
-```ruby
-ability = MongoidAbility::Ability.new(current_user)
-MySubject.accessible_by(ability, :read, options={})
-```
-
 ### Owner
 
 This `Ability` class supports two levels of inheritance (for example User and its Roles). The locks can be either embedded (via `.embeds_many`) or associated (via `.has_many`). Make sure to include the `as: :owner` option.
