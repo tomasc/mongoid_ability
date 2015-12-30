@@ -28,3 +28,7 @@ class MiniTest::Spec
   before(:each) { DatabaseCleaner.start }
   after(:each) { DatabaseCleaner.clean }
 end
+
+class Object
+  include MongoidAbility::Expectations
+end

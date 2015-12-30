@@ -13,13 +13,13 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     before do
-      MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]
+      MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
     end
 
     # ---------------------------------------------------------------------
 
     describe 'when lock for subject' do
-      before { owner.my_locks = [ subject_lock ] }
+      before { owner.my_locks = [subject_lock] }
 
       it 'applies it' do
         ability.can?(:read, subject.class).must_equal true
@@ -30,13 +30,12 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     describe 'when lock for subject type' do
-      before { owner.my_locks = [ subject_type_lock ] }
+      before { owner.my_locks = [subject_type_lock] }
 
       it 'applies it' do
         ability.can?(:read, subject.class).must_equal false
         ability.can?(:read, subject).must_equal false
       end
     end
-
   end
 end

@@ -1,6 +1,7 @@
 module MongoidAbility
   class MyOwner
     include Mongoid::Document
+    include Mongoid::Timestamps
     include MongoidAbility::Owner
 
     embeds_many :my_locks, class_name: 'MongoidAbility::MyLock', as: :owner
