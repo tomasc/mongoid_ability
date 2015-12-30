@@ -5,7 +5,7 @@ module MongoidAbility
     subject { MyLock.new }
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
-    
+
     # ---------------------------------------------------------------------
 
     before do
@@ -27,13 +27,16 @@ module MongoidAbility
       subject.must_respond_to :open?
       subject.open?.must_equal false
     end
+
     it '#closed?' do
       subject.must_respond_to :closed?
       subject.closed?.must_equal true
     end
+
     it '#class_lock?' do
       subject.must_respond_to :class_lock?
     end
+
     it '#id_lock?' do
       subject.must_respond_to :id_lock?
     end
