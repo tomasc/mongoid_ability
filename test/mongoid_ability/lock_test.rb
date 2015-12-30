@@ -2,14 +2,14 @@ require 'test_helper'
 
 module MongoidAbility
   describe Lock do
-
     subject { MyLock.new }
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
+    
     # ---------------------------------------------------------------------
 
     before do
-      MySubject.default_locks = [ MyLock.new(action: :read, outcome: true), MyLock.new(action: :update, outcome: false) ]
+      MySubject.default_locks = [MyLock.new(action: :read, outcome: true), MyLock.new(action: :update, outcome: false)]
     end
 
     # ---------------------------------------------------------------------
@@ -74,7 +74,7 @@ module MongoidAbility
       end
 
       it 'returns calculated_outcome for default locks' do
-        lock = MySubject.default_locks.detect{ |l| l.action == :read }
+        lock = MySubject.default_locks.detect { |l| l.action == :read }
         lock.inherited_outcome.must_equal true
       end
     end
@@ -98,24 +98,23 @@ module MongoidAbility
 
       describe 'when open' do
         it 'includes subject_type' do
-          open_subject_type_lock.conditions.must_equal({ _type: open_subject_type_lock.subject_type })
+          open_subject_type_lock.conditions.must_equal(_type: open_subject_type_lock.subject_type)
         end
 
         it 'includes id' do
-          open_subject_lock.conditions.must_equal({ _type: open_subject_type_lock.subject_type, _id: open_subject_lock.subject_id })
+          open_subject_lock.conditions.must_equal(_type: open_subject_type_lock.subject_type, _id: open_subject_lock.subject_id)
         end
       end
 
       describe 'when closed' do
         it 'excludes subject_type' do
-          closed_subject_type_lock.conditions.must_equal({ '$not' => { _type: open_subject_type_lock.subject_type }})
+          closed_subject_type_lock.conditions.must_equal('$not' => { _type: open_subject_type_lock.subject_type })
         end
 
         it 'includes id' do
-          closed_subject_lock.conditions.must_equal({ '$not' => { _type: open_subject_type_lock.subject_type, _id: open_subject_lock.subject_id }})
+          closed_subject_lock.conditions.must_equal('$not' => { _type: open_subject_type_lock.subject_type, _id: open_subject_lock.subject_id })
         end
       end
     end
-
   end
 end
