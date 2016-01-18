@@ -111,11 +111,11 @@ module MongoidAbility
 
       describe 'when closed' do
         it 'excludes subject_type' do
-          closed_subject_type_lock.conditions.must_equal('$not' => { _type: open_subject_type_lock.subject_type })
+          closed_subject_type_lock.conditions.must_equal(:_type.ne => open_subject_type_lock.subject_type)
         end
 
         it 'includes id' do
-          closed_subject_lock.conditions.must_equal('$not' => { _type: open_subject_type_lock.subject_type, _id: open_subject_lock.subject_id })
+          closed_subject_lock.conditions.must_equal(:_type.ne => open_subject_type_lock.subject_type, :_id.ne => open_subject_lock.subject_id)
         end
       end
     end
