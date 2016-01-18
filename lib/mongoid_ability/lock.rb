@@ -86,10 +86,6 @@ module MongoidAbility
           res = res.merge(:_id => subject_id) if subject_id.present?
         end
         res
-        # res = { _type: subject_type }
-        # res = res.merge(_id: subject_id) if subject_id.present?
-        # res = { '$not' => res } if calculated_outcome == false
-        # res
       end
     end
   end
