@@ -6,28 +6,30 @@ module MongoidAbility
 
     # =====================================================================
 
+    # TODO: cleanup
     def call
-      base_class_and_descendants.inject(base_criteria) do |criteria, cls|
-        conditions = []
-        if ability.cannot?(action, cls)
-          lock = default_lock(cls, action).dup.tap do |lock|
-            lock.subject_type = cls
-            lock.outcome = false
-          end
-          conditions << lock.conditions
-        end
+      closed_classes = [] # [cls]
+      open_ids = [] # [cls, id]
+      closed_ids = [] # [id]
 
+      base_class_and_descendants.each do |cls|
+        closed_classes << cls if ability.cannot?(action, cls, options)
+        
         id_locks(cls).each do |lock|
-          lock = lock.dup
-          lock.subject_type = cls
-          lock.outcome = ability.can?(action, cls.new(_id: lock.subject_id))
-          conditions << lock.conditions
-        end
-
-        if conditions.present? then criteria.merge!(criteria.and(:$or => conditions))
-        else criteria
+          if ability.can?(action, cls.new(_id: lock.subject_id), options)
+            open_ids << [cls, lock.subject_id]
+          else
+            closed_ids << lock.subject_id
+          end
         end
       end
+
+      closed_classes_condition = { :_type.nin => closed_classes }
+      open_ids_condition = { :_type.in => open_ids.map(&:first), :_id.in => open_ids.map(&:last) }
+      closed_ids_condition = { :_id.nin => closed_ids }
+      or_conditions = [ closed_classes_condition, open_ids_condition ].reject(&:blank?)
+
+      base_criteria.where( :$and => [ { :$or => or_conditions }, closed_ids_condition ])
     end
 
     private # =============================================================

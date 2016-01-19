@@ -73,20 +73,5 @@ module MongoidAbility
         subject_type.constantize
       end
     end
-
-    concerning :AccessibleQueryBuilder do
-      # NOTE: override for more complicated results
-      def conditions
-        res = {}
-        if !calculated_outcome
-          res = { :_type.ne => subject_type }
-          res = res.merge(:_id.ne => subject_id) if subject_id.present?
-        else
-          res = { :_type => subject_type }
-          res = res.merge(:_id => subject_id) if subject_id.present?
-        end
-        res
-      end
-    end
   end
 end

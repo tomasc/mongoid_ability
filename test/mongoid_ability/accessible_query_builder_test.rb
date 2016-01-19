@@ -8,6 +8,10 @@ module MongoidAbility
     let(:action) { :read }
     let(:options) { Hash.new }
 
+    before do
+      MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]
+    end
+
     subject { AccessibleQueryBuilder.call(base_class, ability, action, options) }
 
     it 'returns Mongoid::Criteria' do
