@@ -21,7 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "cancancan", "~> 1.9"
   spec.add_dependency "mongoid", "~> 5.0"
 
-  spec.add_development_dependency "bundler", "~> 1.11"
+  spec.add_development_dependency "bundler"
   spec.add_development_dependency "coveralls"
   spec.add_development_dependency "database_cleaner", ">= 1.5.1"
   spec.add_development_dependency "guard"
