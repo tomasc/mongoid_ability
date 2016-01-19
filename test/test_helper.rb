@@ -9,8 +9,8 @@ require 'mongoid_ability'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-if ENV["CI"]
-  require "coveralls"
+if ENV['CI']
+  require 'coveralls'
   Coveralls.wear!
 end
 
@@ -27,4 +27,8 @@ DatabaseCleaner.strategy = :truncation
 class MiniTest::Spec
   before(:each) { DatabaseCleaner.start }
   after(:each) { DatabaseCleaner.clean }
+end
+
+class Object
+  include MongoidAbility::Expectations
 end

@@ -1,16 +1,35 @@
-# FIXME: this is extremely slow and not suitable for use, yet
-
 module MongoidAbility
   class AccessibleQueryBuilder < Struct.new(:base_class, :ability, :action, :options)
-
-    def self.call *args
+    def self.call(*args)
       new(*args).call
     end
 
     # =====================================================================
 
+    # TODO: cleanup
     def call
-      base_class_and_descendants.inject(base_criteria) { |criteria, cls| criteria.merge!(criteria_for_class(cls)) }
+      closed_classes = [] # [cls]
+      open_ids = [] # [cls, id]
+      closed_ids = [] # [id]
+
+      base_class_and_descendants.each do |cls|
+        closed_classes << cls.to_s if ability.cannot?(action, cls, options)
+
+        id_locks(cls).each do |lock|
+          if ability.can?(action, cls.new(_id: lock.subject_id), options)
+            open_ids << [cls.to_s, lock.subject_id]
+          else
+            closed_ids << lock.subject_id
+          end
+        end
+      end
+
+      closed_classes_condition = { :_type.nin => closed_classes }
+      open_ids_condition = { :_type.in => open_ids.map(&:first), :_id.in => open_ids.map(&:last) }
+      closed_ids_condition = { :_id.nin => closed_ids }
+      or_conditions = [ closed_classes_condition, open_ids_condition ].reject(&:blank?)
+
+      base_criteria.where( :$and => [ { :$or => or_conditions }, closed_ids_condition ])
     end
 
     private # =============================================================
@@ -25,16 +44,12 @@ module MongoidAbility
       @base_class_superclass ||= (base_class.ancestors_with_default_locks.last || base_class)
     end
 
-    def base_class_descendants
-      @base_class_descendants ||= ObjectSpace.each_object(Class).select{ |cls| cls < base_class_superclass }
+    def default_lock(_cls, action)
+      base_class_superclass.default_locks.detect { |l| l.action.to_s == action.to_s }
     end
 
     def base_class_and_descendants
-      @base_class_and_descendants ||= [base_class].concat(base_class_descendants)
-    end
-
-    def hereditary?
-      base_class_and_descendants.count > 1
+      @base_class_and_descendants ||= [base_class].concat(base_class.descendants)
     end
 
     # ---------------------------------------------------------------------
@@ -50,79 +65,21 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
-    def owner_id_locks_for_subject_type cls
+    def id_locks(cls)
+      (Array(owner_id_locks_for_subject_type(cls)) + Array(inherited_from_relation_ids_locks_for_subject_type(cls))).flatten
+    end
+
+    def owner_id_locks_for_subject_type(cls)
       @owner_id_locks_for_subject_type ||= {}
       @owner_id_locks_for_subject_type[cls] ||= owner.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
     end
 
-    def inherited_from_relation_ids_locks_for_subject_type cls
+    def inherited_from_relation_ids_locks_for_subject_type(cls)
       return [] unless inherited_from_relation
       @inherited_from_relation_ids_locks_for_subject_type ||= {}
-      @inherited_from_relation_ids_locks_for_subject_type[cls] ||= inherited_from_relation.collect { |o|
+      @inherited_from_relation_ids_locks_for_subject_type[cls] ||= inherited_from_relation.collect do |o|
         o.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
-      }.flatten
+      end.flatten
     end
-
-    # ---------------------------------------------------------------------
-
-    def role_has_open_id_lock? cls, subject_id
-      @role_has_open_id_lock ||= {}
-      @role_has_open_id_lock["#{cls}_#{subject_id}"] ||= begin
-        inherited_from_relation_ids_locks_for_subject_type(cls).
-          select{ |l| l.open?(options) }.
-          map(&:subject_id).
-          include?(subject_id)
-      end
-    end
-
-    def owner_has_open_id_lock? cls, subject_id
-      @owner_has_open_id_lock ||= {}
-      @owner_has_open_id_lock["#{cls}_#{subject_id}"] ||= begin
-        owner_id_locks_for_subject_type(cls).
-          select{ |l| l.open?(options) }.
-          map(&:subject_id).
-          include?(subject_id)
-      end
-    end
-
-    # ---------------------------------------------------------------------
-
-    def criteria_for_class cls
-      @criteria_for_class ||= {}
-      @criteria_for_class[cls] ||= ability.can?(action, cls, options) ? exclude_criteria(cls) : include_criteria(cls)
-    end
-
-    def exclude_criteria cls
-      @exclude_criteria ||= {}
-      @exclude_criteria[cls] ||= begin
-        id_locks = inherited_from_relation_ids_locks_for_subject_type(cls).select{ |l| l.closed?(options) }
-        id_locks = id_locks.reject{ |lock| role_has_open_id_lock?(cls, lock.subject_id) }
-        id_locks = id_locks.reject{ |lock| owner_has_open_id_lock?(cls, lock.subject_id) }
-        id_locks += owner_id_locks_for_subject_type(cls).select{ |l| l.closed?(options) }
-
-        excluded_ids = id_locks.map(&:subject_id).flatten
-
-        conditions = { :_id.nin => excluded_ids }
-        conditions = conditions.merge(_type: cls.to_s) if hereditary?
-
-        base_criteria.or(conditions)
-      end
-    end
-
-    def include_criteria cls
-      @include_criteria ||= {}
-      @include_criteria[cls] ||= begin
-        id_locks = inherited_from_relation_ids_locks_for_subject_type(cls).select{ |l| l.open?(options) }
-        id_locks += owner_id_locks_for_subject_type(cls).select{ |l| l.open?(options) }
-
-        included_ids = id_locks.map(&:subject_id).flatten
-
-        conditions = { :_id.in => included_ids }
-        conditions = conditions.merge(_type: cls.to_s) if hereditary?
-
-        base_criteria.or(conditions)
-      end
-    end
-
   end
 end

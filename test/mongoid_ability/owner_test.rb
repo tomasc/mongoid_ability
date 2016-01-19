@@ -41,6 +41,5 @@ module MongoidAbility
         owner.has_lock?(other_lock).must_equal false
       end
     end
-
   end
 end
