@@ -13,11 +13,11 @@ module MongoidAbility
       closed_ids = [] # [id]
 
       base_class_and_descendants.each do |cls|
-        closed_classes << cls if ability.cannot?(action, cls, options)
-        
+        closed_classes << cls.to_s if ability.cannot?(action, cls, options)
+
         id_locks(cls).each do |lock|
           if ability.can?(action, cls.new(_id: lock.subject_id), options)
-            open_ids << [cls, lock.subject_id]
+            open_ids << [cls.to_s, lock.subject_id]
           else
             closed_ids << lock.subject_id
           end
