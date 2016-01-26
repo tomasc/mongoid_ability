@@ -19,7 +19,10 @@ module MongoidAbility
 
         scope :for_subject_type, -> (subject_type) { where(subject_type: subject_type.to_s) }
         scope :for_subject_id, -> (subject_id) { where(subject_id: subject_id.presence) }
-        scope :for_subject, -> (subject) { where(subject_type: subject.class.model_name, subject_id: subject.id) }
+        scope :for_subject, -> (subject) {
+          return where(subject_id: nil) unless subject.present?
+          where(subject_type: subject.class.model_name, subject_id: subject.id)
+        }
 
         scope :class_locks, -> { where(subject_id: nil) }
         scope :id_locks, -> { ne(subject_id: nil) }
