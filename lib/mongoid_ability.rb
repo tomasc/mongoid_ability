@@ -11,6 +11,7 @@ require "mongoid_ability/resolve_default_locks"
 require "mongoid_ability/resolve_inherited_locks"
 require "mongoid_ability/resolve_owner_locks"
 
+require "mongoid_ability/values_for_accessible_query"
 require "mongoid_ability/accessible_query_builder"
 
 # ---------------------------------------------------------------------
