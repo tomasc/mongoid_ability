@@ -18,7 +18,12 @@ module MongoidAbility
         scope :for_action, -> (action) { where(action: action.to_sym) }
 
         scope :for_subject_type, -> (subject_type) { where(subject_type: subject_type.to_s) }
-        scope :for_subject_id, -> (subject_id) { where(subject_id: subject_id.presence) }
+
+        scope :for_subject_id, -> (subject_id) {
+          return where(subject_id: nil) unless subject_id.present?
+          where(subject_id: BSON::ObjectId.from_string(subject_id))
+        }
+
         scope :for_subject, -> (subject) {
           return where(subject_id: nil) unless subject.present?
           where(subject_type: subject.class.model_name, subject_id: subject.id)
