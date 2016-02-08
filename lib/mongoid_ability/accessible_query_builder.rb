@@ -31,7 +31,7 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     def values
-      @values ||= MongoidAbility::ValuesForAccessibleQuery.call(base_class, ability, action, options)
+      @values ||= base_class.values_for_accessible_query(ability, action, options)
     end
 
     # ---------------------------------------------------------------------
