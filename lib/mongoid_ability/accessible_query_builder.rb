@@ -8,19 +8,23 @@ module MongoidAbility
 
     def call
       return base_class.criteria unless and_conditions.present?
-      base_class.criteria.where(and_conditions)
+      base_class.criteria.where(conditions)
+    end
+
+    def conditions
+      and_conditions
     end
 
     private # =============================================================
 
-    def or_conditions
-      return unless conditions = [closed_types_condition, open_ids_condition].compact.presence
-      { :$or => conditions }
-    end
-
     def and_conditions
       return unless conditions = [or_conditions, closed_ids_condition].compact.presence
       { :$and => conditions }
+    end
+
+    def or_conditions
+      return unless conditions = [closed_types_condition, open_ids_condition].compact.presence
+      { :$or => conditions }
     end
 
     def closed_types_condition
