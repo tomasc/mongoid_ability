@@ -19,27 +19,27 @@ module MongoidAbility
 
     def and_conditions
       return unless conditions = [or_conditions, closed_ids_condition].compact.presence
-      { :$and => conditions }
+      { '$and' => conditions }
     end
 
     def or_conditions
       return unless conditions = [closed_types_condition, open_ids_condition].compact.presence
-      { :$or => conditions }
+      { '$or' => conditions }
     end
 
     def closed_types_condition
       return unless values.closed_types.present?
-      { :_type.nin => values.closed_types }
+      { _type: { '$nin' => values.closed_types } }
     end
 
     def open_ids_condition
       return unless values.open_types_and_ids.present?
-      { :_id.in => values.open_types_and_ids.map(&:id) }
+      { _id: { '$in' => values.open_types_and_ids.map(&:id) } }
     end
 
     def closed_ids_condition
       return unless values.closed_ids.present?
-      { :_id.nin => values.closed_ids }
+      { _id: { '$nin' => values.closed_ids } }
     end
 
     # ---------------------------------------------------------------------
