@@ -1,4 +1,4 @@
-require "test_helper"
+require 'test_helper'
 
 module MongoidAbility
   describe Ability do
@@ -12,7 +12,7 @@ module MongoidAbility
     describe 'default locks' do
       before do
         # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: true) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
         MySubject1.default_locks = []
         MySubject2.default_locks = []
       end
@@ -26,9 +26,9 @@ module MongoidAbility
 
     describe 'when defined for all superclasses' do
       before do
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-        MySubject1.default_locks = [ MyLock.new(subject_type: MySubject1, action: :read, outcome: true) ]
-        MySubject2.default_locks = [ MyLock.new(subject_type: MySubject2, action: :read, outcome: false) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
+        MySubject1.default_locks = [MyLock.new(subject_type: MySubject1, action: :read, outcome: true)]
+        MySubject2.default_locks = [MyLock.new(subject_type: MySubject2, action: :read, outcome: false)]
       end
 
       it 'respects the definitions' do
@@ -40,9 +40,9 @@ module MongoidAbility
 
     describe 'when defined for some superclasses' do
       before do
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
         MySubject1.default_locks = []
-        MySubject2.default_locks = [ MyLock.new(subject_type: MySubject2, action: :read, outcome: true) ]
+        MySubject2.default_locks = [MyLock.new(subject_type: MySubject2, action: :read, outcome: true)]
       end
 
       it 'propagates default locks to subclasses' do
@@ -57,10 +57,10 @@ module MongoidAbility
     describe 'user locks' do
       describe 'when defined for superclass' do
         before do
-          MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           MySubject1.default_locks = []
           MySubject2.default_locks = []
-          owner.my_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]
+          owner.my_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
         end
 
         it 'applies the superclass lock' do
@@ -74,10 +74,10 @@ module MongoidAbility
     describe 'inherited owner locks' do
       describe 'when multiple inherited owners' do
         before do
-          MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           owner.my_roles = [
-            MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]),
-            MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ])
+            MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]),
+            MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: false)])
           ]
         end
 
@@ -88,10 +88,10 @@ module MongoidAbility
 
       describe 'when defined for superclass' do
         before do
-          MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
+          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           MySubject1.default_locks = []
           MySubject2.default_locks = []
-          owner.my_roles = [ MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]) ]
+          owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'applies the superclass lock' do
@@ -105,9 +105,9 @@ module MongoidAbility
     describe 'combined locks' do
       describe 'user and role locks' do
         before do
-          MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-          owner.my_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-          owner.my_roles = [ MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]) ]
+          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
+          owner.my_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
+          owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'prefers user locks' do
@@ -117,8 +117,8 @@ module MongoidAbility
 
       describe 'roles and default locks' do
         before do
-          MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :read, outcome: false) ]
-          owner.my_roles = [ MyRole.new(my_locks: [ MyLock.new(subject_type: MySubject, action: :read, outcome: true) ]) ]
+          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
+          owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'prefers role locks' do
@@ -126,6 +126,5 @@ module MongoidAbility
         end
       end
     end
-
   end
 end
