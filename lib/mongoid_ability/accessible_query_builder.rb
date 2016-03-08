@@ -42,9 +42,5 @@ module MongoidAbility
     def base_class_superclass
       @base_class_superclass ||= (base_class.ancestors_with_default_locks.last || base_class)
     end
-
-    def default_lock(_cls, action)
-      base_class_superclass.default_locks.detect { |l| l.action.to_s == action.to_s }
-    end
   end
 end
