@@ -24,6 +24,9 @@ module MongoidAbility
         MySubject.default_locks = []
         MySubject.default_lock MyLock, :read, false
         MySubject.default_lock MyLock1, :read, false
+
+        MySubject1.default_locks = []
+        MySubject1.default_lock MyLock, :read, true
       end
 
       it 'does not allow multiple locks for same action' do
@@ -36,6 +39,11 @@ module MongoidAbility
 
       it 'replaces existing locks with new one' do
         MySubject.default_locks.detect { |l| l.action == :read }.class.must_equal MyLock1
+      end
+
+      it 'replaces superclass locks' do
+        MySubject1.default_locks.count.must_equal 1
+        MySubject1.default_locks.detect { |l| l.action == :read }.outcome.must_equal true
       end
     end
 
