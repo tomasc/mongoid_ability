@@ -17,18 +17,18 @@ module MongoidAbility
     private # =============================================================
 
     def closed_types_condition
-      { _type: { '$nin' => values.closed_types } }
+      { _type: { '$nin' => values.closed_types.uniq } }
     end
 
     def open_types_and_ids_condition
       {
-        _type: { '$in' => values.open_types_and_ids.map(&:type) },
-        _id: { '$in' => values.open_types_and_ids.map(&:id) }
+        _type: { '$in' => values.open_types_and_ids.map(&:type).uniq },
+        _id: { '$in' => values.open_types_and_ids.map(&:id).uniq }
       }
     end
 
     def closed_ids_condition
-      { _id: { '$nin' => values.closed_ids } }
+      { _id: { '$nin' => values.closed_ids.uniq } }
     end
 
     # ---------------------------------------------------------------------
