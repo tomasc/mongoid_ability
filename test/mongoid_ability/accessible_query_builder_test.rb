@@ -18,6 +18,11 @@ module MongoidAbility
       subject.must_be_kind_of Mongoid::Criteria
     end
 
+    it 'allows to pass prefix' do
+      skip 'not sure how to best test this'
+      selector = AccessibleQueryBuilder.call(base_class, ability, action, prefix: :foo).selector
+    end
+
     # ---------------------------------------------------------------------
 
     describe 'closed_types' do

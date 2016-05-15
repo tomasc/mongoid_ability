@@ -4,6 +4,10 @@ module MongoidAbility
       new(*args).call
     end
 
+    def initialize(base_class, ability, action, options = {})
+      super(base_class, ability, action, options)
+    end
+
     # =====================================================================
 
     def call
@@ -17,18 +21,18 @@ module MongoidAbility
     private # =============================================================
 
     def closed_types_condition
-      { _type: { '$nin' => values.closed_types.uniq } }
+      { type_key => { '$nin' => values.closed_types.uniq } }
     end
 
     def open_types_and_ids_condition
       {
-        _type: { '$in' => values.open_types_and_ids.map(&:type).uniq },
-        _id: { '$in' => values.open_types_and_ids.map(&:id).uniq }
+        type_key => { '$in' => values.open_types_and_ids.map(&:type).uniq },
+        id_key => { '$in' => values.open_types_and_ids.map(&:id).uniq }
       }
     end
 
     def closed_ids_condition
-      { _id: { '$nin' => values.closed_ids.uniq } }
+      { id_key => { '$nin' => values.closed_ids.uniq } }
     end
 
     # ---------------------------------------------------------------------
@@ -41,6 +45,20 @@ module MongoidAbility
 
     def base_class_superclass
       @base_class_superclass ||= (base_class.ancestors_with_default_locks.last || base_class)
+    end
+
+    # ---------------------------------------------------------------------
+
+    def prefix
+      options.fetch(:prefix, nil)
+    end
+
+    def id_key
+      [prefix, '_id'].reject(&:blank?).join.to_sym
+    end
+
+    def type_key
+      [prefix, '_type'].reject(&:blank?).join.to_sym
     end
   end
 end
