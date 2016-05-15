@@ -43,10 +43,10 @@ end
 
 This class defines a permission itself using the following fields:
 
-`:subject_type, type: String`  
-`:subject_id, type: Moped::BSON::ObjectId`  
-`:action, type: Symbol, default: :read`  
-`:outcome, type: Boolean, default: false`  
+`:subject_type, type: String`
+`:subject_id, type: Moped::BSON::ObjectId`
+`:action, type: Symbol, default: :read`
+`:outcome, type: Boolean, default: false`
 
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
@@ -80,6 +80,12 @@ end
 ```
 
 The subject classes can be subclassed. Subclasses inherit the default locks (unless they override them), the resulting outcome being correctly calculated bottom-up the superclass chain.
+
+Additionally the locks can be converted to Mongoid criteria:
+
+```ruby
+MySubject.accessible_by(ability, :read)
+```
 
 ### Owner
 
