@@ -7,16 +7,16 @@ module MongoidAbility
     attr_reader :owner
 
     def self.subject_classes
-      Object.descendants.select{ |cls| cls.included_modules.include?(MongoidAbility::Subject) }
+      Object.descendants.select { |cls| cls.included_modules.include?(MongoidAbility::Subject) }
     end
 
     def self.subject_root_classes
-      subject_classes.reject{ |cls| cls.superclass.included_modules.include?(MongoidAbility::Subject) }
+      subject_classes.reject { |cls| cls.superclass.included_modules.include?(MongoidAbility::Subject) }
     end
 
     # =====================================================================
 
-    def initialize owner
+    def initialize(owner)
       @owner = owner
 
       can do |action, subject_type, subject, options|
@@ -26,7 +26,7 @@ module MongoidAbility
 
         subject_class.self_and_ancestors_with_default_locks.each do |cls|
           outcome = ResolveInheritedLocks.call(owner, action, cls, subject, options)
-          break if outcome != nil
+          break unless outcome.nil?
         end
 
         outcome
@@ -40,11 +40,13 @@ module MongoidAbility
     # .select(&current_ability.can_update)
     # .select(&current_ability.can_destroy)
     # etc.
-    def method_missing name, *args
+    # 
+    # TODO: allow to pass options .select(&current_ability.can_read(my_option: false))
+    #
+    def method_missing(name, *args)
       return super unless name.to_s =~ /\A(can|cannot)_/
       return unless action = name.to_s.gsub(/\A(can|cannot)_/, '').to_sym
-      name =~ /can_/ ? lambda { |doc| can? action, doc } : lambda { |doc| cannot? action, doc }
+      name =~ /can_/ ? ->(doc) { can? action, doc } : ->(doc) { cannot? action, doc }
     end
-
   end
 end
