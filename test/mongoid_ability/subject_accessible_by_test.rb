@@ -135,5 +135,14 @@ module MongoidAbility
         MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
       end
     end
+
+    # =====================================================================
+
+    describe 'prefix' do
+      it 'allows to pass prefix' do
+        skip 'not sure how to best test this'
+        MySubject.accessible_by(ability, :update, prefix: :subject).must_equal 'foo'
+      end
+    end
   end
 end
