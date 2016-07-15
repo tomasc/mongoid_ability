@@ -43,14 +43,14 @@ module MongoidAbility
 
     def owner_id_locks_for_subject_type(cls)
       @owner_id_locks_for_subject_type ||= {}
-      @owner_id_locks_for_subject_type[cls] ||= owner.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
+      @owner_id_locks_for_subject_type[cls] ||= owner.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s).cache
     end
 
     def inherited_from_relation_ids_locks_for_subject_type(cls)
       return [] unless inherited_from_relation
       @inherited_from_relation_ids_locks_for_subject_type ||= {}
       @inherited_from_relation_ids_locks_for_subject_type[cls] ||= inherited_from_relation.collect do |o|
-        o.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s)
+        o.locks_relation.id_locks.for_action(action).for_subject_type(cls.to_s).cache
       end.flatten
     end
 
