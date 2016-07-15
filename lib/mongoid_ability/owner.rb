@@ -40,8 +40,9 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
-    def has_lock? lock
-      locks_relation.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id.presence).exists?
+    def has_lock?(lock)
+      @has_lock ||= {}
+      @has_lock[lock] ||= locks_relation.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id.presence).cache.exists?
     end
 
     private # =============================================================
