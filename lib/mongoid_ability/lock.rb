@@ -9,7 +9,7 @@ module MongoidAbility
         field :outcome, type: Boolean, default: false
         field :options, type: Hash, default: {}
 
-        belongs_to :subject, polymorphic: true, touch: true
+        belongs_to :subject, polymorphic: true, touch: true, optional: true
 
         # TODO: validate that action is defined on subject or its superclasses
         validates :action, presence: true, uniqueness: { scope: [:subject_type, :subject_id, :outcome] }
