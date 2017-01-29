@@ -23,7 +23,7 @@ module MongoidAbility
 
         it 'returns it' do
           ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal false
-          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject).calculated_outcome.must_equal false
+          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).calculated_outcome.must_equal false
         end
 
         describe 'when defined on user' do
@@ -31,7 +31,7 @@ module MongoidAbility
 
           it 'returns it' do
             ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal true
-            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject).calculated_outcome.must_equal true
+            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).calculated_outcome.must_equal true
           end
         end
       end

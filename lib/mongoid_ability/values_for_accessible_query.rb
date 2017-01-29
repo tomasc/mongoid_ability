@@ -4,6 +4,10 @@ module MongoidAbility
       new(*args).call
     end
 
+    def initialize(base_class, ability, action, options = {})
+      super(base_class, ability, action, options)
+    end
+
     # =====================================================================
 
     def call

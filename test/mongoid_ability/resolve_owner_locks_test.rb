@@ -6,7 +6,7 @@ module MongoidAbility
     let(:my_subject) { MySubject.new }
 
     subject { ResolveOwnerLocks.call(owner, :read, MySubject, nil) }
-    let(:resolver_for_subject_id) { ResolveOwnerLocks.call(owner, :read, MySubject, my_subject) }
+    let(:resolver_for_subject_id) { ResolveOwnerLocks.call(owner, :read, MySubject, my_subject.id) }
 
     describe '#outcome' do
       before do
