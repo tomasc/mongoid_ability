@@ -2,7 +2,6 @@ require 'test_helper'
 
 module MongoidAbility
   describe ResolveLocks do
-
     let(:owner) { MyOwner.new }
 
     describe 'errors' do
@@ -20,6 +19,5 @@ module MongoidAbility
         end
       end
     end
-
   end
 end

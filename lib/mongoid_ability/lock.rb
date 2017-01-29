@@ -15,16 +15,17 @@ module MongoidAbility
         validates :action, presence: true, uniqueness: { scope: [:subject_type, :subject_id, :outcome] }
         validates :outcome, presence: true
 
-        scope :for_action, -> (action) { where(action: action.to_sym) }
+        scope :for_action, ->(action) { where(action: action.to_sym) }
 
-        scope :for_subject_type, -> (subject_type) { where(subject_type: subject_type.to_s) }
+        scope :for_subject_type, ->(subject_type) { where(subject_type: subject_type.to_s) }
+        scope :for_subject_types, ->(subject_types) { criteria.in(subject_type: subject_types) }
 
-        scope :for_subject_id, -> (subject_id) {
+        scope :for_subject_id, ->(subject_id) {
           return where(subject_id: nil) unless subject_id.present?
           where(subject_id: BSON::ObjectId.from_string(subject_id))
         }
 
-        scope :for_subject, -> (subject) {
+        scope :for_subject, ->(subject) {
           return where(subject_id: nil) unless subject.present?
           where(subject_type: subject.class.model_name, subject_id: subject.id)
         }
@@ -33,8 +34,6 @@ module MongoidAbility
         scope :id_locks, -> { ne(subject_id: nil) }
       end
     end
-
-    # =====================================================================
 
     concerning :LockType do
       def class_lock?

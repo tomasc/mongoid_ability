@@ -14,39 +14,35 @@ module MongoidAbility
       subject_classes.reject { |cls| cls.superclass.included_modules.include?(MongoidAbility::Subject) }
     end
 
-    # =====================================================================
-
     def initialize(owner)
       @owner = owner
 
-      can do |action, subject_type, subject, options|
+      can do |action, subject_type, subject, options = {}|
         subject_class = subject_type.to_s.constantize
-        outcome = nil
-        options ||= {}
+        lock = nil
 
         subject_class.self_and_ancestors_with_default_locks.each do |cls|
-          outcome = ResolveInheritedLocks.call(owner, action, cls, subject, options)
-          break unless outcome.nil?
+          lock = ResolveInheritedLocks.call(owner, action, cls, subject, options)
+          break unless lock.nil?
         end
 
-        outcome
+        lock.calculated_outcome(options) if lock
       end
     end
-
-    # ---------------------------------------------------------------------
 
     # lambda for easy permission checking:
     # .select(&current_ability.can_read)
     # .select(&current_ability.can_update)
     # .select(&current_ability.can_destroy)
     # etc.
-    # 
-    # TODO: allow to pass options .select(&current_ability.can_read(my_option: false))
-    #
     def method_missing(name, *args)
       return super unless name.to_s =~ /\A(can|cannot)_/
-      return unless action = name.to_s.gsub(/\A(can|cannot)_/, '').to_sym
-      name =~ /can_/ ? ->(doc) { can? action, doc } : ->(doc) { cannot? action, doc }
+      return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
+
+      case name
+      when /can_/ then can?(action, *args)
+      else cannot?(action, *args)
+      end
     end
   end
 end

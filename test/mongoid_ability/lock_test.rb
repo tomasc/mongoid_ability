@@ -51,7 +51,7 @@ module MongoidAbility
 
       it 'converts empty String to nil' do
         id = ''
-        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_equal nil
+        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_be_nil
       end
     end
 

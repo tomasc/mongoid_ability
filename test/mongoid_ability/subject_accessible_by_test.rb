@@ -16,7 +16,7 @@ module MongoidAbility
     describe 'default open locks' do
       before do
         # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: true) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
         MySubject1.default_locks = []
         MySubject2.default_locks = []
 
@@ -43,7 +43,7 @@ module MongoidAbility
     describe 'default closed locks' do
       before do
         # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: false) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
         MySubject1.default_locks = []
         MySubject2.default_locks = []
 
@@ -70,9 +70,9 @@ module MongoidAbility
     describe 'default combined locks' do
       before do
         # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: false) ]
-        MySubject1.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: true) ]
-        MySubject2.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: false) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
+        MySubject1.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
+        MySubject2.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
 
         my_subject
         my_subject1
@@ -97,10 +97,10 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     describe 'closed id locks' do
-      let(:role_1) { MyRole.new(my_locks: [ MyLock.new(subject: my_subject, action: :update, outcome: false) ]) }
+      let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject, action: :update, outcome: false)]) }
 
       before do
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: true) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
         MySubject1.default_locks = []
         MySubject2.default_locks = []
 
@@ -117,10 +117,10 @@ module MongoidAbility
     end
 
     describe 'open id locks' do
-      let(:role_1) { MyRole.new(my_locks: [ MyLock.new(subject: my_subject1, action: :update, outcome: true) ]) }
+      let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject1, action: :update, outcome: true)]) }
 
       before do
-        MySubject.default_locks = [ MyLock.new(subject_type: MySubject, action: :update, outcome: false) ]
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
         MySubject1.default_locks = []
         MySubject2.default_locks = []
 
@@ -139,9 +139,21 @@ module MongoidAbility
     # =====================================================================
 
     describe 'prefix' do
+      let(:prefix) { :subject }
+
+      before do
+        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
+        MySubject1.default_locks = []
+        MySubject2.default_locks = []
+
+        my_subject
+        my_subject1
+        my_subject2
+      end
+
       it 'allows to pass prefix' do
-        skip 'not sure how to best test this'
-        MySubject.accessible_by(ability, :update, prefix: :subject).must_equal 'foo'
+        selector = MySubject.accessible_by(ability, :update, prefix: prefix).selector
+        selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => [] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
       end
     end
   end
