@@ -1,5 +1,5 @@
 module MongoidAbility
-  class ResolveDefaultLocks < ResolveLocks
+  class ResolveDefaultLocks < Resolver
     def call
       closed_lock = default_locks.detect { |l| l.closed?(options) }
       return closed_lock if closed_lock

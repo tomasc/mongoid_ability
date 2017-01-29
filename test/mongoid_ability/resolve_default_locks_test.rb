@@ -17,11 +17,11 @@ module MongoidAbility
         ]
       end
 
-      it { ResolveDefaultLocks.call(nil, :read, MySubject, nil, options).calculated_outcome(options).must_be :==, true }
-      it { ResolveDefaultLocks.call(nil, :update, MySubject, nil, options).calculated_outcome(options).must_be :==, false }
+      it { ResolveDefaultLocks.call(nil, :read, MySubject, nil, options).must_equal MySubject.default_locks.first }
+      it { ResolveDefaultLocks.call(nil, :update, MySubject, nil, options).must_equal MySubject.default_locks.last }
 
-      it { ResolveDefaultLocks.call(nil, :read, MySubject1, nil, options).calculated_outcome(options).must_be :==, false }
-      it { ResolveDefaultLocks.call(nil, :update, MySubject1, nil, options).calculated_outcome(options).must_be :==, true }
+      it { ResolveDefaultLocks.call(nil, :read, MySubject1, nil, options).must_equal MySubject1.default_locks.first }
+      it { ResolveDefaultLocks.call(nil, :update, MySubject1, nil, options).must_equal MySubject1.default_locks.last }
     end
   end
 end

@@ -1,7 +1,7 @@
 # OPTIMIZE: this seems quite expensive
 
 module MongoidAbility
-  class ResolveOwnerLocks < ResolveLocks
+  class ResolveOwnerLocks < Resolver
     def call
       return unless owner.respond_to?(:locks_relation)
 

@@ -19,19 +19,23 @@ module MongoidAbility
         let(:owner) { MyOwner.new(my_roles: [inherited_owner_1, inherited_owner_2]) }
         let(:my_subject) { MySubject.new }
 
-        before { inherited_owner_1.my_locks = [MyLock.new(action: :my_read, subject_type: MySubject, outcome: false)] }
+        let(:lock) { MyLock.new(action: :my_read, subject_type: MySubject, outcome: false) }
+
+        before { inherited_owner_1.my_locks = [lock] }
 
         it 'returns it' do
-          ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal false
-          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).calculated_outcome.must_equal false
+          ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
+          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
         end
 
         describe 'when defined on user' do
-          before { owner.my_locks = [MyLock.new(action: :my_read, subject_type: MySubject, outcome: true)] }
+          let(:lock) { MyLock.new(action: :my_read, subject_type: MySubject, outcome: false) }
+
+          before { owner.my_locks = [lock] }
 
           it 'returns it' do
-            ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal true
-            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).calculated_outcome.must_equal true
+            ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
+            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
           end
         end
       end

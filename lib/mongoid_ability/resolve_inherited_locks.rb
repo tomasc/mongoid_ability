@@ -1,5 +1,5 @@
 module MongoidAbility
-  class ResolveInheritedLocks < ResolveLocks
+  class ResolveInheritedLocks < Resolver
     def call
       owner_lock = resolved_owner_lock
       return owner_lock if owner_lock
