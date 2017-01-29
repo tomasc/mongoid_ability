@@ -6,6 +6,7 @@ require "mongoid_ability/lock"
 require "mongoid_ability/owner"
 require "mongoid_ability/subject"
 
+require "mongoid_ability/resolver"
 require "mongoid_ability/resolve_locks"
 require "mongoid_ability/resolve_default_locks"
 require "mongoid_ability/resolve_inherited_locks"
