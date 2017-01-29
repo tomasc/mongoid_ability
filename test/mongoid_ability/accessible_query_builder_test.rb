@@ -21,6 +21,7 @@ module MongoidAbility
     describe 'prefix' do
       let(:my_subject) { MySubject.create! }
       let(:my_subject_1) { MySubject1.create! }
+      let(:my_subject_2) { MySubject2.create! }
       let(:prefix) { :foo }
 
       before do
