@@ -1,30 +1,35 @@
 module MongoidAbility
   class ResolveInheritedLocks < ResolveLocks
     def call
-      uo = user_outcome
-      return uo unless uo.nil?
+      owner_lock = resolved_owner_lock
+      return owner_lock if owner_lock
 
       if owner.respond_to?(owner.class.inherit_from_relation_name) && !owner.inherit_from_relation.nil?
-        io = owner.inherit_from_relation.collect { |inherited_owner| inherited_owner_outcome(inherited_owner) }.compact
-        return io.any? { |o| o == true } unless io.empty?
+        resolved_inherited_owner_locks = owner.inherit_from_relation.map { |inherited_owner| resolved_inherited_owner_lock(inherited_owner) }.compact
+
+        open_lock = resolved_inherited_owner_locks.detect { |l| l.open?(options) }
+        return open_lock if open_lock
+
+        closed_lock = resolved_inherited_owner_locks.detect { |l| l.closed?(options) }
+        return closed_lock if closed_lock
       end
 
-      default_outcome
+      resolved_default_lock
     end
 
-    private # =============================================================
+    private
 
-    def user_outcome
-      @user_outcome ||= ResolveOwnerLocks.call(owner, action, subject_class, subject, options)
+    def resolved_owner_lock
+      @resolved_owner_lock ||= ResolveOwnerLocks.call(owner, action, subject_class, subject, options)
     end
 
-    def inherited_owner_outcome(inherited_owner)
-      @inherited_owner_outcome ||= {}
-      @inherited_owner_outcome[inherited_owner] ||= ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject, options)
+    def resolved_inherited_owner_lock(inherited_owner)
+      @resolved_inherited_owner_lock ||= {}
+      @resolved_inherited_owner_lock[inherited_owner] ||= ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject, options)
     end
 
-    def default_outcome
-      @default_outcome ||= ResolveDefaultLocks.call(nil, action, subject_class, nil, options)
+    def resolved_default_lock
+      @resolved_default_lock ||= ResolveDefaultLocks.call(nil, action, subject_class, nil, options)
     end
   end
 end

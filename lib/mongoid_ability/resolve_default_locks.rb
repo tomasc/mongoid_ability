@@ -1,11 +1,14 @@
 module MongoidAbility
   class ResolveDefaultLocks < ResolveLocks
     def call
-      return false if default_locks.any? { |l| l.closed?(options) }
-      return true if default_locks.any? { |l| l.open?(options) }
+      closed_lock = default_locks.detect { |l| l.closed?(options) }
+      return closed_lock if closed_lock
+
+      open_lock = default_locks.detect { |l| l.open?(options) }
+      return open_lock if open_lock
     end
 
-    private # =============================================================
+    private
 
     def default_locks
       subject_class.default_locks.select { |l| l.action.to_s == action.to_s }

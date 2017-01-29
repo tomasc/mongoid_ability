@@ -1,9 +1,10 @@
-require "test_helper"
+require 'test_helper'
 
 module MongoidAbility
   describe ResolveDefaultLocks do
-
     describe '.call' do
+      let(:options) { {} }
+
       before do
         MySubject.default_locks = [
           MyLock.new(subject_type: MySubject, action: :read, outcome: true),
@@ -16,12 +17,11 @@ module MongoidAbility
         ]
       end
 
-      it { ResolveDefaultLocks.call(nil, :read, MySubject, nil, {}).must_equal true }
-      it { ResolveDefaultLocks.call(nil, :update, MySubject, nil, {}).must_equal false }
+      it { ResolveDefaultLocks.call(nil, :read, MySubject, nil, options).calculated_outcome(options).must_be :==, true }
+      it { ResolveDefaultLocks.call(nil, :update, MySubject, nil, options).calculated_outcome(options).must_be :==, false }
 
-      it { ResolveDefaultLocks.call(nil, :read, MySubject1, nil, {}).must_equal false }
-      it { ResolveDefaultLocks.call(nil, :update, MySubject1, nil, {}).must_equal true }
+      it { ResolveDefaultLocks.call(nil, :read, MySubject1, nil, options).calculated_outcome(options).must_be :==, false }
+      it { ResolveDefaultLocks.call(nil, :update, MySubject1, nil, options).calculated_outcome(options).must_be :==, true }
     end
-
   end
 end
