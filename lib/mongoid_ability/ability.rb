@@ -19,10 +19,11 @@ module MongoidAbility
 
       can do |action, subject_type, subject, options = {}|
         subject_class = subject_type.to_s.constantize
+        subject_id = subject ? subject.id : nil
         lock = nil
 
         subject_class.self_and_ancestors_with_default_locks.each do |cls|
-          lock = ResolveInheritedLocks.call(owner, action, cls, subject, options)
+          lock = ResolveInheritedLocks.call(owner, action, cls.to_s, subject_id, options)
           break unless lock.nil?
         end
 
