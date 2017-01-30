@@ -8,14 +8,20 @@ module MongoidAbility
     let(:action) { :read }
     let(:options) { Hash.new }
 
-    before do
-      MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
-    end
+    let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
+    let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :false, outcome: true)] }
+    let(:my_subject_2_default_locks) { [] }
 
     subject { AccessibleQueryBuilder.call(base_class, ability, action, options) }
 
     it 'returns Mongoid::Criteria' do
-      subject.must_be_kind_of Mongoid::Criteria
+      MySubject.stub :default_locks, my_subject_default_locks do
+        MySubject1.stub :default_locks, my_subject_1_default_locks do
+          MySubject2.stub :default_locks, my_subject_2_default_locks do
+            subject.must_be_kind_of Mongoid::Criteria
+          end
+        end
+      end
     end
 
     describe 'prefix' do
@@ -30,8 +36,14 @@ module MongoidAbility
       end
 
       it 'allows to pass prefix' do
-        selector = AccessibleQueryBuilder.call(base_class, ability, action, prefix: prefix).selector
-        selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => ['MongoidAbility::MySubject', 'MongoidAbility::MySubject1', 'MongoidAbility::MySubject2'] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              selector = AccessibleQueryBuilder.call(base_class, ability, action, prefix: prefix).selector
+              selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => ['MongoidAbility::MySubject', 'MongoidAbility::MySubject1', 'MongoidAbility::MySubject2'] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
+            end
+          end
+        end
       end
     end
 
@@ -47,9 +59,15 @@ module MongoidAbility
       end
 
       it 'does not return subject with that id' do
-        MySubject.accessible_by(ability, :read).wont_include my_subject
-        MySubject.accessible_by(ability, :read).wont_include my_subject_1
-        MySubject1.accessible_by(ability, :read).wont_include my_subject_1
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :read).wont_include my_subject
+              MySubject.accessible_by(ability, :read).wont_include my_subject_1
+              MySubject1.accessible_by(ability, :read).wont_include my_subject_1
+            end
+          end
+        end
       end
     end
 
@@ -63,8 +81,14 @@ module MongoidAbility
       end
 
       it 'does not return subject with that id' do
-        MySubject.accessible_by(ability, :read).wont_include my_subject_a
-        MySubject.accessible_by(ability, :read).must_include my_subject_b
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :read).wont_include my_subject_a
+              MySubject.accessible_by(ability, :read).must_include my_subject_b
+            end
+          end
+        end
       end
     end
 
@@ -81,8 +105,14 @@ module MongoidAbility
       end
 
       it 'does not return subject with that id' do
-        MySubject.accessible_by(ability, :read).must_include my_subject
-        MySubject.accessible_by(ability, :read).must_include my_subject_1
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :read).must_include my_subject
+              MySubject.accessible_by(ability, :read).must_include my_subject_1
+            end
+          end
+        end
       end
     end
   end

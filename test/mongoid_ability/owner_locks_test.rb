@@ -10,31 +10,27 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
-    # ---------------------------------------------------------------------
-
-    before do
-      MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
-    end
-
-    # ---------------------------------------------------------------------
+    let(:default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
 
     describe 'when lock for subject' do
       before { owner.my_locks = [subject_lock] }
 
       it 'applies it' do
-        ability.can?(:read, subject.class).must_equal true
-        ability.can?(:read, subject).must_equal false
+        MySubject.stub :default_locks, default_locks do
+          ability.can?(:read, subject.class).must_equal true
+          ability.can?(:read, subject).must_equal false
+        end
       end
     end
-
-    # ---------------------------------------------------------------------
 
     describe 'when lock for subject type' do
       before { owner.my_locks = [subject_type_lock] }
 
       it 'applies it' do
-        ability.can?(:read, subject.class).must_equal false
-        ability.can?(:read, subject).must_equal false
+        MySubject.stub :default_locks, default_locks do
+          ability.can?(:read, subject.class).must_equal false
+          ability.can?(:read, subject).must_equal false
+        end
       end
     end
   end

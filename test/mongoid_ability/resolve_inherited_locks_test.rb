@@ -6,11 +6,13 @@ module MongoidAbility
       let(:owner) { MyOwner.new }
       let(:my_subject) { MySubject.new }
 
-      before { MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :my_read, outcome: true)] }
+      let(:default_locks) { [MyLock.new(subject_type: MySubject, action: :my_read, outcome: true)] }
 
       it 'returns it' do
-        ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal true
-        ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject).calculated_outcome.must_equal true
+        MySubject.stub :default_locks, default_locks do
+          ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).calculated_outcome.must_equal true
+          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject).calculated_outcome.must_equal true
+        end
       end
 
       describe 'when defined on one of the inherited owners' do
@@ -24,8 +26,10 @@ module MongoidAbility
         before { inherited_owner_1.my_locks = [lock] }
 
         it 'returns it' do
-          ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
-          ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
+          MySubject.stub :default_locks, default_locks do
+            ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
+            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
+          end
         end
 
         describe 'when defined on user' do
@@ -34,8 +38,10 @@ module MongoidAbility
           before { owner.my_locks = [lock] }
 
           it 'returns it' do
-            ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
-            ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
+            MySubject.stub :default_locks, default_locks do
+              ResolveInheritedLocks.call(owner, :my_read, MySubject, nil).must_equal lock
+              ResolveInheritedLocks.call(owner, :my_read, MySubject, my_subject.id).must_equal lock
+            end
           end
         end
       end

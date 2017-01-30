@@ -5,13 +5,13 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
-    before do
-      MySubject.default_locks = [MyLock1.new(action: :read, outcome: false)]
-    end
+    let(:default_locks) { [MyLock1.new(action: :read, outcome: false)] }
 
     it 'allows to pass options to a can? block' do
-      ability.can?(:read, MySubject, {}).must_equal false
-      ability.can?(:read, MySubject, override: true).must_equal true
+      MySubject.stub :default_locks, default_locks do
+        ability.can?(:read, MySubject, {}).must_equal false
+        ability.can?(:read, MySubject, override: true).must_equal true
+      end
     end
   end
 end

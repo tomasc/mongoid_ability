@@ -5,50 +5,63 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
+    let(:my_subject_default_locks) { [] }
+    let(:my_subject_1_default_locks) { [] }
+    let(:my_subject_2_default_locks) { [] }
+
     it 'exposes owner' do
       ability.owner.must_equal owner
     end
 
     describe 'default locks' do
-      before do
-        # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-      end
+      # NOTE: we might need to use the .default_lock macro in case we propagate down directly
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
 
       it 'propagates from superclass to all subclasses' do
-        ability.can?(:update, MySubject).must_equal true
-        ability.can?(:update, MySubject1).must_equal true
-        ability.can?(:update, MySubject2).must_equal true
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              ability.can?(:update, MySubject).must_equal true
+              ability.can?(:update, MySubject1).must_equal true
+              ability.can?(:update, MySubject2).must_equal true
+            end
+          end
+        end
       end
     end
 
     describe 'when defined for all superclasses' do
-      before do
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
-        MySubject1.default_locks = [MyLock.new(subject_type: MySubject1, action: :read, outcome: true)]
-        MySubject2.default_locks = [MyLock.new(subject_type: MySubject2, action: :read, outcome: false)]
-      end
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+      let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :read, outcome: true)] }
+      let(:my_subject_2_default_locks) { [MyLock.new(subject_type: MySubject2, action: :read, outcome: false)] }
 
       it 'respects the definitions' do
-        ability.can?(:read, MySubject).must_equal false
-        ability.can?(:read, MySubject1).must_equal true
-        ability.can?(:read, MySubject2).must_equal false
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              ability.can?(:read, MySubject).must_equal false
+              ability.can?(:read, MySubject1).must_equal true
+              ability.can?(:read, MySubject2).must_equal false
+            end
+          end
+        end
       end
     end
 
     describe 'when defined for some superclasses' do
-      before do
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = [MyLock.new(subject_type: MySubject2, action: :read, outcome: true)]
-      end
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+      let(:my_subject_2_default_locks) { [MyLock.new(subject_type: MySubject2, action: :read, outcome: true)] }
 
       it 'propagates default locks to subclasses' do
-        ability.can?(:read, MySubject).must_equal false
-        ability.can?(:read, MySubject1).must_equal false
-        ability.can?(:read, MySubject2).must_equal true
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              ability.can?(:read, MySubject).must_equal false
+              ability.can?(:read, MySubject1).must_equal false
+              ability.can?(:read, MySubject2).must_equal true
+            end
+          end
+        end
       end
     end
 
@@ -56,15 +69,20 @@ module MongoidAbility
 
     describe 'user locks' do
       describe 'when defined for superclass' do
+        let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+
         before do
-          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
-          MySubject1.default_locks = []
-          MySubject2.default_locks = []
           owner.my_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
         end
 
         it 'applies the superclass lock' do
-          ability.can?(:read, MySubject2).must_equal true
+          MySubject.stub :default_locks, my_subject_default_locks do
+            MySubject1.stub :default_locks, my_subject_1_default_locks do
+              MySubject2.stub :default_locks, my_subject_2_default_locks do
+                ability.can?(:read, MySubject2).must_equal true
+              end
+            end
+          end
         end
       end
     end
@@ -73,8 +91,9 @@ module MongoidAbility
 
     describe 'inherited owner locks' do
       describe 'when multiple inherited owners' do
+        let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+
         before do
-          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           owner.my_roles = [
             MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]),
             MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: false)])
@@ -82,20 +101,31 @@ module MongoidAbility
         end
 
         it 'prefers positive outcome' do
-          ability.can?(:read, MySubject).must_equal true
+          MySubject.stub :default_locks, my_subject_default_locks do
+            MySubject1.stub :default_locks, my_subject_1_default_locks do
+              MySubject2.stub :default_locks, my_subject_2_default_locks do
+                ability.can?(:read, MySubject).must_equal true
+              end
+            end
+          end
         end
       end
 
       describe 'when defined for superclass' do
+        let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+
         before do
-          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
-          MySubject1.default_locks = []
-          MySubject2.default_locks = []
           owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'applies the superclass lock' do
-          ability.can?(:read, MySubject2).must_equal true
+          MySubject.stub :default_locks, my_subject_default_locks do
+            MySubject1.stub :default_locks, my_subject_1_default_locks do
+              MySubject2.stub :default_locks, my_subject_2_default_locks do
+                ability.can?(:read, MySubject2).must_equal true
+              end
+            end
+          end
         end
       end
     end
@@ -104,25 +134,39 @@ module MongoidAbility
 
     describe 'combined locks' do
       describe 'user and role locks' do
+        let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+
         before do
-          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           owner.my_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'prefers user locks' do
-          ability.can?(:read, MySubject).must_equal false
+          MySubject.stub :default_locks, my_subject_default_locks do
+            MySubject1.stub :default_locks, my_subject_1_default_locks do
+              MySubject2.stub :default_locks, my_subject_2_default_locks do
+                ability.can?(:read, MySubject).must_equal false
+              end
+            end
+          end
         end
       end
 
       describe 'roles and default locks' do
+        let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+
         before do
-          MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]
           owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
         end
 
         it 'prefers role locks' do
-          ability.can?(:read, MySubject).must_equal true
+          MySubject.stub :default_locks, my_subject_default_locks do
+            MySubject1.stub :default_locks, my_subject_1_default_locks do
+              MySubject2.stub :default_locks, my_subject_2_default_locks do
+                ability.can?(:read, MySubject).must_equal true
+              end
+            end
+          end
         end
       end
     end

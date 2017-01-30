@@ -6,11 +6,9 @@ module MongoidAbility
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
 
-    # ---------------------------------------------------------------------
-
-    before do
-      MySubject.default_locks = [MyLock.new(action: :read, outcome: true), MyLock.new(action: :update, outcome: false)]
-    end
+    let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
+    let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :false, outcome: true)] }
+    let(:my_subject_2_default_locks) { [] }
 
     # ---------------------------------------------------------------------
 
@@ -68,17 +66,35 @@ module MongoidAbility
       end
 
       it 'does not affect calculated_outcome' do
-        @ability.can?(:read, my_subject).must_equal true
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              @ability.can?(:read, my_subject).must_equal true
+            end
+          end
+        end
       end
 
       it 'returns calculated_outcome without this lock' do
-        subject_lock.inherited_outcome.must_equal false
-        subject_type_lock.inherited_outcome.must_equal true
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              subject_lock.inherited_outcome.must_equal false
+              subject_type_lock.inherited_outcome.must_equal true
+            end
+          end
+        end
       end
 
       it 'returns calculated_outcome for default locks' do
-        lock = MySubject.default_locks.detect { |l| l.action == :read }
-        lock.inherited_outcome.must_equal true
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              lock = MySubject.default_locks.detect { |l| l.action == :read }
+              lock.inherited_outcome.must_equal true
+            end
+          end
+        end
       end
     end
   end

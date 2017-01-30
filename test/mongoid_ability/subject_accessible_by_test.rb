@@ -11,149 +11,136 @@ module MongoidAbility
     let(:owner) { MyOwner.new(my_roles: [role_1, role_2]) }
     let(:ability) { Ability.new(owner) }
 
-    # =====================================================================
+    let(:my_subject_default_locks) { [] }
+    let(:my_subject_1_default_locks) { [] }
+    let(:my_subject_2_default_locks) { [] }
+
+    before { my_subject; my_subject1; my_subject2 }
 
     describe 'default open locks' do
-      before do
-        # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      # NOTE: we might need to use the .default_lock macro in case we propagate down directly
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
 
       it 'propagates from superclass to all subclasses' do
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject2
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject2
 
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject1.accessible_by(ability, :update).to_a.must_include my_subject2
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject1.accessible_by(ability, :update).to_a.must_include my_subject2
 
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
-        MySubject2.accessible_by(ability, :update).to_a.must_include my_subject2
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
+              MySubject2.accessible_by(ability, :update).to_a.must_include my_subject2
+            end
+          end
+        end
       end
     end
 
     describe 'default closed locks' do
-      before do
-        # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      # NOTE: we might need to use the .default_lock macro in case we propagate down directly
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: false)] }
 
       it 'propagates from superclass to all subclasses' do
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject1
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject1
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2
 
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject1
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject1
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2
 
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+            end
+          end
+        end
       end
     end
 
     describe 'default combined locks' do
-      before do
-        # NOTE: we might need to use the .default_lock macro in case we propagate down directly
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
-        MySubject1.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
-        MySubject2.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      # NOTE: we might need to use the .default_lock macro in case we propagate down directly
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: false)] }
+      let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
+      let(:my_subject_2_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: false)] }
 
       it 'propagates from superclass to all subclasses' do
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2
 
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2
 
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+            end
+          end
+        end
       end
     end
 
-    # ---------------------------------------------------------------------
-
     describe 'closed id locks' do
       let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject, action: :update, outcome: false)]) }
-
-      before do
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
 
       it 'applies id locks' do
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject.accessible_by(ability, :update).to_a.must_include my_subject2
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject.accessible_by(ability, :update).to_a.must_include my_subject2
+            end
+          end
+        end
       end
     end
 
     describe 'open id locks' do
       let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject1, action: :update, outcome: true)]) }
-
-      before do
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: false)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: false)] }
 
       it 'applies id locks' do
-        MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
-        MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
+              MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
+              MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
+            end
+          end
+        end
       end
     end
 
-    # =====================================================================
-
     describe 'prefix' do
       let(:prefix) { :subject }
-
-      before do
-        MySubject.default_locks = [MyLock.new(subject_type: MySubject, action: :update, outcome: true)]
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-
-        my_subject
-        my_subject1
-        my_subject2
-      end
+      let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
 
       it 'allows to pass prefix' do
-        selector = MySubject.accessible_by(ability, :update, prefix: prefix).selector
-        selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => [] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
+        MySubject.stub :default_locks, my_subject_default_locks do
+          MySubject1.stub :default_locks, my_subject_1_default_locks do
+            MySubject2.stub :default_locks, my_subject_2_default_locks do
+              selector = MySubject.accessible_by(ability, :update, prefix: prefix).selector
+              selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => [] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
+            end
+          end
+        end
       end
     end
   end

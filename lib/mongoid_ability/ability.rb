@@ -34,9 +34,16 @@ module MongoidAbility
       return super unless name.to_s =~ /\A(can|cannot)_/
       return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
 
-      case name
-      when /can_/ then can?(action, *args)
-      else cannot?(action, *args)
+      if args.empty? || args.first.is_a?(Hash)
+        case name
+        when /can_/ then -> (doc) { can?(action, doc, *args) }
+        else -> (doc) { cannot?(action, doc, *args) }
+        end
+      else
+        case name
+        when /can_/ then can?(action, *args)
+        else cannot?(action, *args)
+        end
       end
     end
   end
