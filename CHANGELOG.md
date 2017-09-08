@@ -1,3 +1,7 @@
+# 1.0.0
+
+* conforms to '[MONGOID-4418](https://jira.mongodb.org/browse/MONGOID-4418) Don't allow PersistenceContext method as field names' by renaming the `Lock` field `:options` to `:opts` (but aliasing it `as: :options`). As a result the `Mongoid::Ability` API stays unchanged, however in some cases it might be necessary to migrate the values from the `:options` fields to the new `:opts`.
+
 # 0.4.3
 
 * stub `default_locks` in tests to avoid brittle tests
