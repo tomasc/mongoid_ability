@@ -7,7 +7,7 @@ module MongoidAbility
       base.class_eval do
         field :action, type: Symbol, default: :read
         field :outcome, type: Boolean, default: false
-        field :options, type: Hash, default: {}
+        field :opts, as: :options, type: Hash, default: {}
 
         belongs_to :subject, polymorphic: true, touch: true, optional: true
 
