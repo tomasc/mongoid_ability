@@ -25,7 +25,7 @@ module MongoidAbility
 
     def resolved_inherited_owner_lock(inherited_owner)
       @resolved_inherited_owner_lock ||= {}
-      @resolved_inherited_owner_lock[inherited_owner] ||= ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject_id, options)
+      @resolved_inherited_owner_lock[inherited_owner.id.to_s] ||= ResolveOwnerLocks.call(inherited_owner, action, subject_class, subject_id, options)
     end
 
     def resolved_default_lock
