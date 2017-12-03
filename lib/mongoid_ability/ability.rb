@@ -16,11 +16,20 @@ module MongoidAbility
 
     def initialize(owner)
       @owner = owner
+      @cached_outcomes ||= {}
 
       can do |action, subject_type, subject, options = {}|
         subject_id = subject ? subject.id : nil
-        if lock = ResolveLocks.call(owner, action, subject_type, subject_id, options)
-          lock.calculated_outcome(options)
+        cache_key = cache_key_for(action, subject_type, subject_id, options)
+
+        unless @cached_outcomes.has_key?(cache_key)
+          @cached_outcomes[cache_key] = begin
+            if lock = ResolveLocks.call(owner, action, subject_type, subject_id, options)
+              lock.calculated_outcome(options)
+            end
+          end
+        else
+          @cached_outcomes[cache_key]
         end
       end
     end
@@ -45,6 +54,45 @@ module MongoidAbility
         else cannot?(action, *args)
         end
       end
+    end
+
+    private
+
+    def cache_key_for(action, subject_type, subject_id, options = {})
+      res = [action.to_s]
+
+      if subject_id.nil?
+        res << subject_type
+      elsif subject_ids_from_locks.include?(subject_id)
+        res << subject_id.to_s
+      else
+        res << subject_type
+      end
+
+      unless options.empty?
+        res << Array(flatten_nested_hash.call(options)).flatten.compact.map(&:to_s)
+      end
+
+      res.join('/')
+    end
+
+    def subject_ids_from_locks
+      @owner_locks ||= begin
+        from_owner = owner.locks_relation.id_locks.pluck(:subject_id)
+        from_rel = []
+
+        if owner.respond_to?(owner.class.inherit_from_relation_name) && !owner.inherit_from_relation.nil?
+          from_rel = owner.inherit_from_relation.flat_map do |rel|
+            rel.locks_relation.id_locks.pluck(:subject_id)
+          end.compact
+        end
+
+        from_owner + from_rel
+      end
+    end
+
+    def flatten_nested_hash
+      -> (h) { h.is_a?(Hash) ? h.flat_map { |k, v| [k, *flatten_nested_hash.call(v)] } : h }
     end
   end
 end
