@@ -4,7 +4,17 @@ module MongoidAbility
   class Ability
     include CanCan::Ability
 
-    attr_reader :owner
+    attr_accessor :owner
+
+    def marshal_dump
+      @rules
+    end
+
+    def marshal_load(array)
+      Array(array).each do |rule|
+        add_rule(rule)
+      end
+    end
 
     def self.subject_classes
       Object.descendants.select { |cls| cls.included_modules.include?(MongoidAbility::Subject) }
@@ -16,22 +26,28 @@ module MongoidAbility
 
     def initialize(owner)
       @owner = owner
-      @cached_outcomes ||= {}
 
-      can do |action, subject_type, subject, options = {}|
-        subject_id = subject ? subject.id : nil
-        cache_key = cache_key_for(action, subject_type, subject_id, options)
+      # locks on owner
+      # locks on owner roles
+      #   • sorted by class going up
+      # locks on classes up
 
-        unless @cached_outcomes.has_key?(cache_key)
-          @cached_outcomes[cache_key] = begin
-            if lock = ResolveLocks.call(owner, action, subject_type, subject_id, options)
-              lock.calculated_outcome(options)
-            end
-          end
-        else
-          @cached_outcomes[cache_key]
+      owner.locks.each { |lock| process_lock(lock) }
+
+      owner.inherit_from_relation.each do |inherited|
+        inherited.locks.each { |lock| process_lock(lock) }
+      end
+
+      self.class.subject_root_classes.each do |cls|
+        ([cls] + cls.descendants).reverse.each do |subcls|
+          subcls.default_locks.each { |lock| process_lock(lock) }
         end
       end
+    end
+
+    def process_lock(lock)
+      ability = lock.outcome ? :can : :cannot
+      self.send(ability, lock.action, lock.subject_class)
     end
 
     # lambda for easy permission checking:
@@ -54,45 +70,6 @@ module MongoidAbility
         else cannot?(action, *args)
         end
       end
-    end
-
-    private
-
-    def cache_key_for(action, subject_type, subject_id, options = {})
-      res = [action.to_s]
-
-      if subject_id.nil?
-        res << subject_type
-      elsif subject_ids_from_locks.include?(subject_id)
-        res << subject_id.to_s
-      else
-        res << subject_type
-      end
-
-      unless options.empty?
-        res << Array(flatten_nested_hash.call(options)).flatten.compact.map(&:to_s)
-      end
-
-      res.join('/')
-    end
-
-    def subject_ids_from_locks
-      @owner_locks ||= begin
-        from_owner = owner.locks_relation.id_locks.pluck(:subject_id)
-        from_rel = []
-
-        if owner.respond_to?(owner.class.inherit_from_relation_name) && !owner.inherit_from_relation.nil?
-          from_rel = owner.inherit_from_relation.flat_map do |rel|
-            rel.locks_relation.id_locks.pluck(:subject_id)
-          end.compact
-        end
-
-        from_owner + from_rel
-      end
-    end
-
-    def flatten_nested_hash
-      -> (h) { h.is_a?(Hash) ? h.flat_map { |k, v| [k, *flatten_nested_hash.call(v)] } : h }
     end
   end
 end
