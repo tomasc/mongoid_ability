@@ -22,20 +22,43 @@ module MongoidAbility
     end
 
     describe 'inherited locks' do
-      let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
-      let(:my_role) { MyRole.new(my_locks: [read_lock]) }
-      let(:owner) { MyOwner.new(my_roles: [my_role]) }
+      describe 'subject_type' do
+        let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        let(:my_role) { MyRole.new(my_locks: [read_lock]) }
+        let(:owner) { MyOwner.new(my_roles: [my_role]) }
 
-      it { ability.can?(:read, MySubject).must_equal true }
-      it { ability.cannot?(:read, MySubject).must_equal false }
+        it { ability.can?(:read, MySubject).must_equal true }
+        it { ability.cannot?(:read, MySubject).must_equal false }
+      end
+
+      describe 'subject_id' do
+        let(:my_subject) { MySubject.new }
+        let(:read_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+        let(:my_role) { MyRole.new(my_locks: [read_lock]) }
+        let(:owner) { MyOwner.new(my_roles: [my_role]) }
+
+        it { ability.can?(:read, my_subject).must_equal true }
+        it { ability.cannot?(:read, my_subject).must_equal false }
+      end
     end
 
     describe 'owner locks' do
-      let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
-      let(:owner) { MyOwner.new(my_locks: [read_lock]) }
+      describe 'subject_type' do
+        let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        let(:owner) { MyOwner.new(my_locks: [read_lock]) }
 
-      it { ability.can?(:read, MySubject).must_equal true }
-      it { ability.cannot?(:read, MySubject).must_equal false }
+        it { ability.can?(:read, MySubject).must_equal true }
+        it { ability.cannot?(:read, MySubject).must_equal false }
+      end
+
+      describe 'subject_id' do
+        let(:my_subject) { MySubject.new }
+        let(:read_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+        let(:owner) { MyOwner.new(my_locks: [read_lock]) }
+
+        it { ability.can?(:read, my_subject).must_equal true }
+        it { ability.cannot?(:read, my_subject).must_equal false }
+      end
     end
   end
 end

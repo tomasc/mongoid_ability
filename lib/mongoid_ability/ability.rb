@@ -52,8 +52,10 @@ module MongoidAbility
 
     def apply_lock_rule(lock)
       ability_type = lock.outcome ? :can : :cannot
-      cls = [lock.subject_class] + lock.subject_class.descendants
-      self.send ability_type, lock.action, cls, id: lock.id
+      cls = lock.class_lock? ? ([lock.subject_class] + lock.subject_class.descendants) : lock.subject_class
+      action = lock.action
+      
+      self.send ability_type, action, cls, id: lock.subject_id
     end
 
     # # lambda for easy permission checking:
