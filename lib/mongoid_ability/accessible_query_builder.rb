@@ -11,7 +11,7 @@ module MongoidAbility
     # =====================================================================
 
     def call
-      base_class.criteria.where(conditions)
+      base_class.criteria#.where(conditions)
     end
 
     def conditions

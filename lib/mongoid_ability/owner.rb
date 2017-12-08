@@ -19,14 +19,17 @@ module MongoidAbility
     end
 
     def locks_relation
+      return unless respond_to?(self.class.locks_relation_name)
       send(self.class.locks_relation_name)
     end
 
     def locks_relation=(val)
+      return unless respond_to?("#{self.class.locks_relation_name}=")
       send "#{self.class.locks_relation_name}=", val
     end
 
     def inherit_from_relation
+      return unless respond_to?(self.class.inherit_from_relation_name)
       send(self.class.inherit_from_relation_name)
     end
 

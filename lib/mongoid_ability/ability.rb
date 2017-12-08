@@ -25,51 +25,57 @@ module MongoidAbility
     end
 
     def initialize(owner)
-      @owner = owner
-
-      # locks on owner
-      # locks on owner roles
-      #   • sorted by class going up
-      # locks on classes up
-
-      owner.locks.each { |lock| process_lock(lock) }
-
-      owner.inherit_from_relation.each do |inherited|
-        inherited.locks.each { |lock| process_lock(lock) }
-      end
-
       self.class.subject_root_classes.each do |cls|
-        ([cls] + cls.descendants).reverse.each do |subcls|
-          subcls.default_locks.each { |lock| process_lock(lock) }
+        ([cls] + cls.descendants).each do |subcls|
+          subcls.default_locks.each do |lock|
+            apply_lock_rule(lock)
+          end
         end
+      end
+
+      if owner.inherit_from_relation
+        owner.inherit_from_relation.each do |inherited|
+          next unless inherited.locks_relation
+          inherited.locks_relation.each do |lock|
+            apply_lock_rule(lock)
+          end
+        end
+      end
+
+      return unless owner.locks_relation
+      owner.locks_relation.each do |lock|
+        apply_lock_rule(lock)
       end
     end
 
-    def process_lock(lock)
-      ability = lock.outcome ? :can : :cannot
-      self.send(ability, lock.action, lock.subject_class)
+    private
+
+    def apply_lock_rule(lock)
+      ability_type = lock.outcome ? :can : :cannot
+      cls = [lock.subject_class] + lock.subject_class.descendants
+      self.send ability_type, lock.action, cls, id: lock.id
     end
 
-    # lambda for easy permission checking:
-    # .select(&current_ability.can_read)
-    # .select(&current_ability.can_update)
-    # .select(&current_ability.can_destroy)
-    # etc.
-    def method_missing(name, *args)
-      return super unless name.to_s =~ /\A(can|cannot)_/
-      return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
-
-      if args.empty? || args.first.is_a?(Hash)
-        case name
-        when /can_/ then -> (doc) { can?(action, doc, *args) }
-        else -> (doc) { cannot?(action, doc, *args) }
-        end
-      else
-        case name
-        when /can_/ then can?(action, *args)
-        else cannot?(action, *args)
-        end
-      end
-    end
+    # # lambda for easy permission checking:
+    # # .select(&current_ability.can_read)
+    # # .select(&current_ability.can_update)
+    # # .select(&current_ability.can_destroy)
+    # # etc.
+    # def method_missing(name, *args)
+    #   return super unless name.to_s =~ /\A(can|cannot)_/
+    #   return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
+    #
+    #   if args.empty? || args.first.is_a?(Hash)
+    #     case name
+    #     when /can_/ then -> (doc) { can?(action, doc, *args) }
+    #     else -> (doc) { cannot?(action, doc, *args) }
+    #     end
+    #   else
+    #     case name
+    #     when /can_/ then can?(action, *args)
+    #     else cannot?(action, *args)
+    #     end
+    #   end
+    # end
   end
 end
