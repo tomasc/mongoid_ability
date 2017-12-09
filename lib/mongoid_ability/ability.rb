@@ -25,6 +25,8 @@ module MongoidAbility
     end
 
     def initialize(owner)
+      @owner = owner
+
       self.class.subject_root_classes.each do |cls|
         ([cls] + cls.descendants).each do |subcls|
           subcls.default_locks.each do |lock|
@@ -52,10 +54,13 @@ module MongoidAbility
 
     def apply_lock_rule(lock)
       ability_type = lock.outcome ? :can : :cannot
-      cls = lock.class_lock? ? ([lock.subject_class] + lock.subject_class.descendants) : lock.subject_class
+      # cls = lock.class_lock? ? ([lock.subject_class] + lock.subject_class.descendants) : lock.subject_class
+      cls = lock.subject_class
+      conditions = lock.class_lock? ? {} : { id: lock.subject_id }
       action = lock.action
-      
-      self.send ability_type, action, cls, id: lock.subject_id
+
+      # p "#{ability_type}, #{action}, #{cls}"
+      self.send ability_type, action, cls, conditions
     end
 
     # # lambda for easy permission checking:
