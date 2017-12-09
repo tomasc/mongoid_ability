@@ -34,19 +34,36 @@ module MongoidAbility
     end
 
     def ability
-      @ability ||= MongoidAbility::Ability.new(self)
+      @ability ||= begin
+        MongoidAbility::Ability.new(self)
+      end
     end
 
     def has_lock?(lock)
       @has_lock ||= {}
-      @has_lock[lock.id.to_s] ||= locks_relation.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id.presence).cache.exists?
+
+      return @has_lock[lock.id.to_s] if @has_lock.has_key?(lock.id.to_s)
+
+      @has_lock[lock.id.to_s] ||= begin
+        locks_relation.where(
+          subject_type: lock.subject_type,
+          subject_id: lock.subject_id.presence,
+          action: lock.action,
+          options: lock.options
+        ).exists?
+      end
     end
 
     private
 
     def cleanup_locks
       locks_relation.select(&:open?).each do |lock|
-        lock.destroy if locks_relation.where(action: lock.action, subject_type: lock.subject_type, subject_id: lock.subject_id).any?(&:closed?)
+        lock.destroy if locks_relation.where(
+          subject_type: lock.subject_type,
+          subject_id: lock.subject_id.presence,
+          action: lock.action,
+          options: lock.options
+        ).any?(&:closed?)
       end
     end
   end

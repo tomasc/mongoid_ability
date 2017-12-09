@@ -55,8 +55,8 @@ module MongoidAbility
       end
     end
 
+    # calculates outcome as if this lock is not present
     concerning :InheritedOutcome do
-      # calculates outcome as if this lock is not present
       def inherited_outcome
         return outcome unless owner.present?
         cloned_owner = owner.clone
@@ -75,7 +75,7 @@ module MongoidAbility
 
     concerning :Group do
       def group_key
-        [action, subject_type, subject_id, options]
+        [subject_type, subject_id, action, options]
       end
     end
 

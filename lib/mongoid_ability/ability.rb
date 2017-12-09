@@ -17,11 +17,15 @@ module MongoidAbility
     end
 
     def self.subject_classes
-      Object.descendants.select { |cls| cls.included_modules.include?(MongoidAbility::Subject) }
+      Object.descendants.select do |cls|
+        cls.included_modules.include?(MongoidAbility::Subject)
+      end
     end
 
     def self.subject_root_classes
-      subject_classes.reject { |cls| cls.superclass.included_modules.include?(MongoidAbility::Subject) }
+      subject_classes.reject do |cls|
+        cls.superclass.included_modules.include?(MongoidAbility::Subject)
+      end
     end
 
     def initialize(owner)

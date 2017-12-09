@@ -13,9 +13,7 @@ module MongoidAbility
         subject.run_callbacks(:save)
       end
 
-      it 'prefers closed locks' do
-        subject.my_locks.sort.must_equal [closed_lock].sort
-      end
+      it { subject.my_locks.sort.must_equal [closed_lock].sort }
 
       describe 'locks relation' do
         it { subject.class.locks_relation_name.must_equal :my_locks }
@@ -29,17 +27,9 @@ module MongoidAbility
       let(:other_lock) { MyLock.new(action: :update, subject: MySubject.new) }
       let(:owner) { MyOwner.new(my_locks: [subject_type_lock, subject_lock]) }
 
-      it 'returns true when lock for same action & subject_type' do
-        owner.has_lock?(subject_type_lock).must_equal true
-      end
-
-      it 'returns true when lock for same action & subject' do
-        owner.has_lock?(subject_lock).must_equal true
-      end
-
-      it 'returns false for non existing lock' do
-        owner.has_lock?(other_lock).must_equal false
-      end
+      it { owner.has_lock?(subject_type_lock).must_equal true }
+      it { owner.has_lock?(subject_lock).must_equal true }
+      it { owner.has_lock?(other_lock).must_equal false }
     end
   end
 end
