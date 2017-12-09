@@ -53,6 +53,28 @@ module MongoidAbility
 
     private
 
+    # lambda for easy permission checking:
+    # .select(&current_ability.can_read)
+    # .select(&current_ability.can_update)
+    # .select(&current_ability.can_destroy)
+    # etc.
+    def method_missing(name, *args)
+      return super unless name.to_s =~ /\A(can|cannot)_/
+      return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
+
+      if args.empty? || args.first.is_a?(Hash)
+        case name
+        when /can_/ then -> (doc) { can?(action, doc, *args) }
+        else -> (doc) { cannot?(action, doc, *args) }
+        end
+      else
+        case name
+        when /can_/ then can?(action, *args)
+        else cannot?(action, *args)
+        end
+      end
+    end
+
     def apply_lock_rule(lock)
       ability_type = lock.outcome ? :can : :cannot
       cls = lock.subject_class
@@ -62,27 +84,5 @@ module MongoidAbility
       # p "#{ability_type}, #{action}, #{cls}"
       self.send ability_type, action, cls, conditions
     end
-
-    # # lambda for easy permission checking:
-    # # .select(&current_ability.can_read)
-    # # .select(&current_ability.can_update)
-    # # .select(&current_ability.can_destroy)
-    # # etc.
-    # def method_missing(name, *args)
-    #   return super unless name.to_s =~ /\A(can|cannot)_/
-    #   return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
-    #
-    #   if args.empty? || args.first.is_a?(Hash)
-    #     case name
-    #     when /can_/ then -> (doc) { can?(action, doc, *args) }
-    #     else -> (doc) { cannot?(action, doc, *args) }
-    #     end
-    #   else
-    #     case name
-    #     when /can_/ then can?(action, *args)
-    #     else cannot?(action, *args)
-    #     end
-    #   end
-    # end
   end
 end
