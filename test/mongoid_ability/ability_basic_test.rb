@@ -5,17 +5,16 @@ module MongoidAbility
     let(:owner) { MyRole.new }
     let(:ability) { Ability.new(owner) }
 
-    describe 'default' do
-      before(:all) { MySubject.default_locks = [] }
-      after(:all) { MySubject.default_locks = [] }
+    before(:all) { MySubject.default_locks = [] }
+    after(:all) { MySubject.default_locks = [] }
 
+    describe 'default' do
       it { ability.can?(:read, MySubject).must_equal false }
       it { ability.cannot?(:read, MySubject).must_equal true }
     end
 
     describe 'class locks' do
       before(:all) { MySubject.default_lock MyLock, :read, true }
-      after(:all) { MySubject.default_locks = [] }
 
       it { ability.can?(:read, MySubject).must_equal true }
       it { ability.cannot?(:read, MySubject).must_equal false }
