@@ -80,5 +80,17 @@ module MongoidAbility
         subject_type.constantize
       end
     end
+
+    concerning :Group do
+      def group_key
+        [action, subject_type, subject_id, options]
+      end
+    end
+
+    # concerning :Sort do
+    #   def <=> (other)
+    #     [action, subject_type, subject_id] <=> [action, subject_type, subject_id]
+    #   end
+    # end
   end
 end

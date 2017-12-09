@@ -6,9 +6,9 @@ module MongoidAbility
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
 
-    let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
-    let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :false, outcome: true)] }
-    let(:my_subject_2_default_locks) { [] }
+    # let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
+    # let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :false, outcome: true)] }
+    # let(:my_subject_2_default_locks) { [] }
 
     # ---------------------------------------------------------------------
 
@@ -52,6 +52,17 @@ module MongoidAbility
         MyLock.for_subject_id(id.to_s).selector['subject_id'].must_be_nil
       end
     end
+
+    # ---------------------------------------------------------------------
+
+    # describe 'sort' do
+    #   let(:owner) do
+    #     MyOwner.new(my_locks: [
+    #       MyLock.new(subject_type: MySubject, action: :read, outcome: true),
+    #       MyLock.new(subject_type: MySubject, action: :read, outcome: false)
+    #     ])
+    #   end
+    # end
 
     # ---------------------------------------------------------------------
 

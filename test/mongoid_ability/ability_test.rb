@@ -5,6 +5,12 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
+    after(:all) do
+      MySubject.default_locks = []
+      MySubject1.default_locks = []
+      MySubject2.default_locks = []
+    end
+
     it 'exposes owner' do
       ability.owner.must_equal owner
     end
@@ -27,12 +33,6 @@ module MongoidAbility
         MySubject2.default_lock MyLock, :read, false
       end
 
-      after(:all) do
-        MySubject.default_locks = []
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-      end
-
       it { ability.can?(:read, MySubject).must_equal false }
       it { ability.can?(:read, MySubject1).must_equal true }
       it { ability.can?(:read, MySubject2).must_equal false }
@@ -45,12 +45,6 @@ module MongoidAbility
         MySubject2.default_lock MyLock, :read, true
       end
 
-      after(:all) do
-        MySubject.default_locks = []
-        MySubject1.default_locks = []
-        MySubject2.default_locks = []
-      end
-
       it 'propagates default locks to subclasses' do
         ability.can?(:read, MySubject).must_equal false
         ability.can?(:read, MySubject1).must_equal false
@@ -60,68 +54,54 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
-    # describe 'user locks' do
-    #   describe 'when defined for superclass' do
-    #     let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
-    #
-    #     before do
-    #       owner.my_locks = [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]
-    #     end
-    #
-    #     it 'applies the superclass lock' do
-    #       MySubject.stub :default_locks, my_subject_default_locks do
-    #         MySubject1.stub :default_locks, my_subject_1_default_locks do
-    #           MySubject2.stub :default_locks, my_subject_2_default_locks do
-    #             ability.can?(:read, MySubject2).must_equal true
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-    # end
+    describe 'user locks' do
+      describe 'when defined for superclass' do
+        let(:owner) { MyOwner.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]) }
+
+        before(:all) do
+          MySubject.default_lock MyLock, :read, false
+        end
+
+        it { ability.can?(:read, MySubject2).must_equal true }
+      end
+    end
 
     # ---------------------------------------------------------------------
 
-    # describe 'inherited owner locks' do
-    #   describe 'when multiple inherited owners' do
-    #     let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
-    #
-    #     before do
-    #       owner.my_roles = [
-    #         MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]),
-    #         MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: false)])
-    #       ]
-    #     end
-    #
-    #     it 'prefers positive outcome' do
-    #       MySubject.stub :default_locks, my_subject_default_locks do
-    #         MySubject1.stub :default_locks, my_subject_1_default_locks do
-    #           MySubject2.stub :default_locks, my_subject_2_default_locks do
-    #             ability.can?(:read, MySubject).must_equal true
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-    #
-    #   describe 'when defined for superclass' do
-    #     let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
-    #
-    #     before do
-    #       owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
-    #     end
-    #
-    #     it 'applies the superclass lock' do
-    #       MySubject.stub :default_locks, my_subject_default_locks do
-    #         MySubject1.stub :default_locks, my_subject_1_default_locks do
-    #           MySubject2.stub :default_locks, my_subject_2_default_locks do
-    #             ability.can?(:read, MySubject2).must_equal true
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-    # end
+    describe 'inherited owner locks' do
+      describe 'when multiple inherited owners' do
+        let(:owner) do
+          MyOwner.new(my_roles: [
+            MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)]),
+            MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: false)]),
+          ])
+        end
+
+        before(:all) do
+          MySubject.default_lock MyLock, :read, false
+        end
+
+        it { ability.can?(:read, MySubject).must_equal true }
+      end
+
+      # describe 'when defined for superclass' do
+      #   let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: false)] }
+      #
+      #   before do
+      #     owner.my_roles = [MyRole.new(my_locks: [MyLock.new(subject_type: MySubject, action: :read, outcome: true)])]
+      #   end
+      #
+      #   it 'applies the superclass lock' do
+      #     MySubject.stub :default_locks, my_subject_default_locks do
+      #       MySubject1.stub :default_locks, my_subject_1_default_locks do
+      #         MySubject2.stub :default_locks, my_subject_2_default_locks do
+      #           ability.can?(:read, MySubject2).must_equal true
+      #         end
+      #       end
+      #     end
+      #   end
+      # end
+    end
 
     # ---------------------------------------------------------------------
 

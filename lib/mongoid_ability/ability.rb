@@ -29,24 +29,25 @@ module MongoidAbility
 
       self.class.subject_root_classes.each do |cls|
         ([cls] + cls.descendants).each do |subcls|
-          subcls.default_locks.each do |lock|
-            apply_lock_rule(lock)
+          grouped_locks = subcls.default_locks.group_by(&:group_key)
+          grouped_locks.each do |_, locks|
+            apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
           end
         end
       end
 
       if owner.inherit_from_relation
-        owner.inherit_from_relation.each do |inherited|
-          next unless inherited.locks_relation
-          inherited.locks_relation.each do |lock|
-            apply_lock_rule(lock)
-          end
+        combined_locks = owner.inherit_from_relation.flat_map(&:locks_relation)
+        grouped_locks = combined_locks.group_by(&:group_key)
+        grouped_locks.each do |_, locks|
+          apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
         end
       end
 
       return unless owner.locks_relation
-      owner.locks_relation.each do |lock|
-        apply_lock_rule(lock)
+      grouped_locks = owner.locks_relation.group_by(&:group_key)
+      grouped_locks.each do |_, locks|
+        apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
       end
     end
 
@@ -54,7 +55,6 @@ module MongoidAbility
 
     def apply_lock_rule(lock)
       ability_type = lock.outcome ? :can : :cannot
-      # cls = lock.class_lock? ? ([lock.subject_class] + lock.subject_class.descendants) : lock.subject_class
       cls = lock.subject_class
       conditions = lock.class_lock? ? {} : { id: lock.subject_id }
       action = lock.action
