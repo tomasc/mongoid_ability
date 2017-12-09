@@ -87,10 +87,11 @@ module MongoidAbility
       end
     end
 
-    # concerning :Sort do
-    #   def <=> (other)
-    #     [action, subject_type, subject_id] <=> [action, subject_type, subject_id]
-    #   end
-    # end
+    concerning :Sort do
+      def <=> (other)
+        [subject_type, subject_id, action, (outcome ? -1 : 1)] <=>
+          [other.subject_type, other.subject_id, other.action, (other.outcome ? -1 : 1)]
+      end
+    end
   end
 end

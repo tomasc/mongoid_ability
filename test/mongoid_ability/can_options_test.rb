@@ -1,17 +1,29 @@
-# require 'test_helper'
-#
-# module MongoidAbility
-#   describe 'can options test' do
-#     let(:owner) { MyOwner.new }
-#     let(:ability) { Ability.new(owner) }
-#
-#     let(:default_locks) { [MyLock1.new(action: :read, outcome: false)] }
-#
-#     it 'allows to pass options to a can? block' do
-#       MySubject.stub :default_locks, default_locks do
-#         ability.can?(:read, MySubject, {}).must_equal false
-#         ability.can?(:read, MySubject, override: true).must_equal true
-#       end
-#     end
-#   end
-# end
+require 'test_helper'
+
+module MongoidAbility
+  describe 'can options test' do
+    let(:owner) { MyOwner.new }
+    let(:ability) { Ability.new(owner) }
+    let(:subject1) { MySubject.new }
+    let(:subject2) { MySubject.new(override: true) }
+
+    after(:all) { MySubject.default_locks = [] }
+
+    describe 'positive' do
+      before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
+
+      it { ability.can?(:read, subject1).must_equal false }
+      it { ability.can?(:read, subject2).must_equal true }
+    end
+
+    describe 'negative' do
+      before(:all) do
+        MySubject.default_lock MyLock, :read, true
+        MySubject.default_lock MyLock, :read, false, override: true
+      end
+
+      it { ability.can?(:read, subject1).must_equal true }
+      it { ability.can?(:read, subject2).must_equal false }
+    end
+  end
+end

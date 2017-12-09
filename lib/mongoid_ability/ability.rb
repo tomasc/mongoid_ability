@@ -30,8 +30,11 @@ module MongoidAbility
       self.class.subject_root_classes.each do |cls|
         ([cls] + cls.descendants).each do |subcls|
           grouped_locks = subcls.default_locks.group_by(&:group_key)
-          grouped_locks.each do |_, locks|
-            apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
+          selected_locks = grouped_locks.flat_map do |_, locks|
+            locks.detect(&:open?) || locks.first # prefer positive outcome
+          end
+          selected_locks.sort.each do |lock|
+            apply_lock_rule(lock)
           end
         end
       end
@@ -39,19 +42,23 @@ module MongoidAbility
       if owner.inherit_from_relation
         combined_locks = owner.inherit_from_relation.flat_map(&:locks_relation)
         grouped_locks = combined_locks.group_by(&:group_key)
-        grouped_locks.each do |_, locks|
-          apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
+        selected_locks = grouped_locks.flat_map do |_, locks|
+          locks.detect(&:open?) || locks.first # prefer positive outcome
+        end
+        selected_locks.sort.each do |lock|
+          apply_lock_rule(lock)
         end
       end
 
       return unless owner.locks_relation
       grouped_locks = owner.locks_relation.group_by(&:group_key)
-      grouped_locks.each do |_, locks|
-        apply_lock_rule(locks.detect(&:open?) || locks.first) # prefer positive outcome
+      selected_locks = grouped_locks.flat_map do |_, locks|
+        locks.detect(&:open?) || locks.first # prefer positive outcome
+      end
+      selected_locks.sort.each do |lock|
+        apply_lock_rule(lock)
       end
     end
-
-    private
 
     # lambda for easy permission checking:
     # .select(&current_ability.can_read)
@@ -75,14 +82,17 @@ module MongoidAbility
       end
     end
 
+    private
+
     def apply_lock_rule(lock)
       ability_type = lock.outcome ? :can : :cannot
       cls = lock.subject_class
-      conditions = lock.class_lock? ? {} : { id: lock.subject_id }
+      options = lock.options
+      options = options.merge(id: lock.subject_id) if lock.id_lock?
       action = lock.action
 
-      # p "#{ability_type}, #{action}, #{cls}"
-      self.send ability_type, action, cls, conditions
+      # p "#{ability_type}, #{action}, #{cls}, #{options}"
+      self.send ability_type, action, cls, options
     end
   end
 end

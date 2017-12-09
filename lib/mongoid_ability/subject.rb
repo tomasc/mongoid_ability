@@ -19,7 +19,7 @@ module MongoidAbility
         lock = lock_cls.new(subject_type: to_s, action: action, outcome: outcome, options: options)
 
         # remove any existing locks
-        if existing_lock = default_locks.detect { |l| l.action == lock.action }
+        if existing_lock = default_locks.detect { |l| l.action == lock.action && l.options == lock.options }
           default_locks.delete(existing_lock)
         end
 

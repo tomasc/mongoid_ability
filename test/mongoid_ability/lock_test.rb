@@ -55,14 +55,20 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
-    # describe 'sort' do
-    #   let(:owner) do
-    #     MyOwner.new(my_locks: [
-    #       MyLock.new(subject_type: MySubject, action: :read, outcome: true),
-    #       MyLock.new(subject_type: MySubject, action: :read, outcome: false)
-    #     ])
-    #   end
-    # end
+    describe 'sort' do
+      let(:lock0) { MyLock.new(subject_type: MySubject, action: :update, outcome: false) }
+      let(:lock1) { MyLock.new(subject_type: MySubject, action: :update, outcome: true) }
+      let(:lock2) { MyLock.new(subject_type: MySubject, action: :read, outcome: false, options: { override: true }) }
+      let(:lock3) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+      let(:lock4) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+
+      let(:owner) { MyOwner.new(my_locks: [lock1, lock2, lock3, lock4]) }
+
+      let(:sorted_locks) { owner.my_locks.sort }
+
+      it { sorted_locks[0].must_equal lock4 }
+      it { sorted_locks[3].must_equal lock1 }
+    end
 
     # ---------------------------------------------------------------------
 
