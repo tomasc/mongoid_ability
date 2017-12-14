@@ -86,6 +86,12 @@ module MongoidAbility
       end
     end
 
+    def model_adapter(model_class, action)
+      adapter_class = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model_class)
+      # adjust relevant_rules_for_query to return all rules starting from the last descendant
+      adapter_class.new(model_class, relevant_rules_for_query(action, (model_class.descendants.last || model_class)))
+    end
+
     private
 
     def apply_lock_rule(lock)
