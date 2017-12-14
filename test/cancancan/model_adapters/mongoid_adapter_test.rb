@@ -25,91 +25,87 @@ module CanCan
           MySubject2.default_locks = []
         end
 
-        describe 'default open locks' do
-          before { MySubject.default_lock MyLock, :update, true }
+        describe 'subject type locks' do
+          describe 'default open locks' do
+            before { MySubject.default_lock MyLock, :update, true }
 
-          it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject }
-          it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject1 }
-          it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject2 }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject2 }
 
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
-          it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject2 }
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject2 }
 
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
-          it { MySubject2.accessible_by(ability, :update).to_a.must_include my_subject2 }
-        end
-
-        describe 'default closed locks' do
-          before { MySubject.default_lock MyLock, :update, false }
-
-          it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject1 }
-          it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2 }
-
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject1 }
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2 }
-
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
-        end
-
-        describe 'default combined locks' do
-          before(:all) do
-            MySubject.default_lock MyLock, :update, false
-            MySubject1.default_lock MyLock, :update, true
-            MySubject2.default_lock MyLock, :update, false
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
+            it { MySubject2.accessible_by(ability, :update).to_a.must_include my_subject2 }
           end
 
-          it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject1 }
-          it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+          describe 'default closed locks' do
+            before { MySubject.default_lock MyLock, :update, false }
 
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
-          it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject1 }
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2 }
 
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
-          it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject1 }
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+          end
+
+          describe 'default combined locks' do
+            before(:all) do
+              MySubject.default_lock MyLock, :update, false
+              MySubject1.default_lock MyLock, :update, true
+              MySubject2.default_lock MyLock, :update, false
+            end
+
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject1.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+          end
         end
 
-        # describe 'closed id locks' do
-        #   let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject, action: :update, outcome: false)]) }
-        #   let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
-        #
-        #   it 'applies id locks' do
-        #     MySubject.stub :default_locks, my_subject_default_locks do
-        #       MySubject1.stub :default_locks, my_subject_1_default_locks do
-        #         MySubject2.stub :default_locks, my_subject_2_default_locks do
-        #           MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        #           MySubject.accessible_by(ability, :update).to_a.must_include my_subject1
-        #           MySubject.accessible_by(ability, :update).to_a.must_include my_subject2
-        #         end
-        #       end
-        #     end
-        #   end
-        # end
+        describe 'conditions locks' do
+          describe 'closed id locks' do
+            let(:lock) { MyLock.new(subject: my_subject, action: :update, outcome: false) }
+            let(:role_1) { MyRole.new(my_locks: [lock]) }
 
-        # describe 'open id locks' do
-        #   let(:role_1) { MyRole.new(my_locks: [MyLock.new(subject: my_subject1, action: :update, outcome: true)]) }
-        #   let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: false)] }
-        #
-        #   it 'applies id locks' do
-        #     MySubject.stub :default_locks, my_subject_default_locks do
-        #       MySubject1.stub :default_locks, my_subject_1_default_locks do
-        #         MySubject2.stub :default_locks, my_subject_2_default_locks do
-        #           MySubject.accessible_by(ability, :update).to_a.wont_include my_subject
-        #           MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1
-        #           MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2
-        #         end
-        #       end
-        #     end
-        #   end
-        # end
+            before(:all) do
+              MySubject.default_lock MyLock, :update, true
+            end
+
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject.accessible_by(ability, :update).to_a.must_include my_subject2 }
+          end
+
+          describe 'open id locks' do
+            let(:lock) { MyLock.new(subject: my_subject1, action: :update, outcome: true) }
+            let(:role_1) { MyRole.new(my_locks: [lock]) }
+
+            before(:all) do
+              MySubject.default_lock MyLock, :update, false
+            end
+
+            it { MySubject.accessible_by(ability, :update).to_a.wont_include my_subject }
+            it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
+            it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+          end
+        end
 
         # describe 'prefix' do
         #   let(:prefix) { :subject }

@@ -45,11 +45,26 @@ module CanCan
         end
       end
 
+      def open_conditions
+        condition_rules.select(&:base_behavior).inject([]) do |res, rule|
+          res << rule.conditions
+          res
+        end
+      end
+
+      def closed_conditions
+        condition_rules.reject(&:base_behavior).inject([]) do |res, rule|
+          res << @model_class.criteria.excludes(rule.conditions).selector
+          res
+        end
+      end
+
       def database_records
-        @model_class.criteria
-          .and([
-            { :_type.in => subject_types }
-          ])
+        @model_class.where({
+          '$and' => [
+            { '$or' => [{ :_type.in => subject_types }].concat(open_conditions) }
+          ].concat(closed_conditions)
+        })
       end
 
       private
@@ -66,29 +81,23 @@ module CanCan
         end
       end
 
-      # def condition_rules_for(subject_type)
-      #   condition_rules.select do |rule|
-      #     rule.subjects.include?(subject_type)
-      #   end
-      # end
-      #
-      # def condition_rules
-      #   @condition_rules ||= begin
-      #     @rules.select{ |rule| rule.conditions.present? }
-      #   end
-      # end
+      def condition_rules
+        @condition_rules ||= begin
+          @rules.select{ |rule| rule.conditions.present? }
+        end
+      end
 
       def prefix
         # options.fetch(:prefix, nil)
       end
 
-      def id_key
-        @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
-      end
-
-      def type_key
-        @type_key ||= [prefix, '_type'].reject(&:blank?).join.to_sym
-      end
+      # def id_key
+      #   @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
+      # end
+      #
+      # def type_key
+      #   @type_key ||= [prefix, '_type'].reject(&:blank?).join.to_sym
+      # end
     end
   end
 end
