@@ -2,6 +2,10 @@ module MongoidAbility
   module Subject
     def self.included(base)
       base.extend ClassMethods
+      base.class_eval do
+        # always set the _type field as it is used by :accessible_by queries
+        field :_type, type: String, default: model_name
+      end
     end
 
     module ClassMethods
