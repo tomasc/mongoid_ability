@@ -87,9 +87,9 @@ module CanCan
         end
       end
 
-      def prefix
-        # options.fetch(:prefix, nil)
-      end
+      # def prefix
+      #   options.fetch(:prefix, nil)
+      # end
 
       # def id_key
       #   @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
