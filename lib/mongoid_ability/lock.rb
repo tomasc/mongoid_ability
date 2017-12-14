@@ -81,8 +81,8 @@ module MongoidAbility
 
     concerning :Sort do
       def <=> (other)
-        [subject_type, subject_id, action, (outcome ? -1 : 1)] <=>
-          [other.subject_type, other.subject_id, other.action, (other.outcome ? -1 : 1)]
+        [subject_type, subject_id.to_s, action, (outcome ? -1 : 1)] <=>
+          [other.subject_type, other.subject_id.to_s, other.action, (other.outcome ? -1 : 1)]
       end
     end
   end
