@@ -145,21 +145,30 @@ module CanCan
           end
         end
 
-        # describe 'prefix' do
-        #   let(:prefix) { :subject }
-        #   let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :update, outcome: true)] }
-        #
-        #   it 'allows to pass prefix' do
-        #     MySubject.stub :default_locks, my_subject_default_locks do
-        #       MySubject1.stub :default_locks, my_subject_1_default_locks do
-        #         MySubject2.stub :default_locks, my_subject_2_default_locks do
-        #           selector = MySubject.accessible_by(ability, :update, prefix: prefix).selector
-        #           selector.must_equal('$and' => [{ '$or' => [{ "#{prefix}_type" => { '$nin' => [] } }, { "#{prefix}_type" => { '$in' => [] }, "#{prefix}_id" => { '$in' => [] } }] }, { "#{prefix}_id" => { '$nin' => [] } }])
-        #         end
-        #       end
-        #     end
-        #   end
-        # end
+        describe 'prefix' do
+          let(:lock_1) { MyLock.new(subject: my_subject1, action: :update, outcome: true) }
+          let(:lock_2) { MyLock.new(subject: my_subject2, action: :update, outcome: false) }
+          let(:role_1) { MyRole.new(my_locks: [lock_1, lock_2]) }
+
+          let(:prefix) { :subject }
+          let(:selector) { MySubject.accessible_by(ability, :update, prefix: prefix).selector }
+
+          before(:all) do
+            MySubject.default_lock MyLock, :update, true
+          end
+
+          it 'allows to pass prefix' do
+            selector.must_equal(
+              '$and' => [
+                { '$or' => [
+                  { 'subject_type' => { '$in' => [MySubject, MySubject1, MySubject2] } },
+                  { 'subject_id' => my_subject1.id }
+                ] },
+                { 'subject_id' => { '$ne' => my_subject2.id } }
+              ]
+            )
+          end
+        end
       end
     end
   end

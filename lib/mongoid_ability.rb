@@ -2,6 +2,7 @@ require 'cancancan'
 require 'mongoid'
 
 require 'cancancan/model_adapters/mongoid_adapter'
+require 'cancancan/model_additions'
 
 require 'mongoid_ability/version'
 

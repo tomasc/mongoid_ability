@@ -27,6 +27,12 @@ module CanCan
         raise NotImplemented, 'This model adapter does not support matching on a specific condition.'
       end
 
+      def initialize(model_class, rules, options = {})
+        @model_class = model_class
+        @rules = rules
+        @options = options
+      end
+
       def subject_types
         @subject_types ||= begin
           root_cls = @model_class.root_class
@@ -49,35 +55,39 @@ module CanCan
 
       def open_conditions
         @open_conditions ||= begin
-          condition_rules.select(&:base_behavior).inject([]) do |res, rule|
-            res << rule.conditions
-            res
+          condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
+            res << apply_prefix_to_conditions(rule.conditions)
           end
         end
       end
 
       def closed_conditions
         @closed_conditions ||= begin
-          condition_rules.reject(&:base_behavior).inject([]) do |res, rule|
-            res << @model_class.criteria.excludes(rule.conditions).selector
-            res
+          condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
+            res << @model_class.criteria.excludes(apply_prefix_to_conditions(rule.conditions)).selector
           end
         end
       end
 
       def subject_type_conditions
         return unless subject_types.present?
-        { :_type.in => subject_types }
+        { :"#{type_key}".in => subject_types }
+      end
+
+      def has_any_conditions?
+        subject_type_conditions.present? ||
+          open_conditions.present? ||
+          closed_conditions.present?
       end
 
       def database_records
-        return @model_class.none unless (subject_type_conditions.present? || open_conditions.present? || closed_conditions.present?)
+        return @model_class.none unless has_any_conditions?
 
-        @model_class.where({
+        @model_class.where(
           '$and' => [
-            { '$or' => [subject_type_conditions].concat(open_conditions).compact }
-          ].concat(closed_conditions)
-        })
+            { '$or' => ([subject_type_conditions] + open_conditions).compact }
+          ] + closed_conditions
+        )
       end
 
       private
@@ -90,27 +100,38 @@ module CanCan
 
       def subject_type_rules
         @subject_type_rules ||= begin
-          @rules.reject{ |rule| rule.conditions.present? }
+          @rules.reject { |rule| rule.conditions.present? }
         end
       end
 
       def condition_rules
         @condition_rules ||= begin
-          @rules.select{ |rule| rule.conditions.present? }
+          @rules.select { |rule| rule.conditions.present? }
         end
       end
 
-      # def prefix
-      #   options.fetch(:prefix, nil)
-      # end
+      def prefix
+        @options.fetch(:prefix, nil)
+      end
 
-      # def id_key
-      #   @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
-      # end
-      #
-      # def type_key
-      #   @type_key ||= [prefix, '_type'].reject(&:blank?).join.to_sym
-      # end
+      def apply_prefix_to_conditions(conditions = {})
+        return conditions unless prefix.present?
+        conditions.inject({}) do |h, (k, v)|
+          if %i(id _id).include?(k.to_sym)
+            h.merge(id_key => v)
+          else
+            h.merge(k => v)
+          end
+        end
+      end
+
+      def id_key
+        @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
+      end
+
+      def type_key
+        @type_key ||= [prefix, '_type'].reject(&:blank?).join.to_sym
+      end
     end
   end
 end
