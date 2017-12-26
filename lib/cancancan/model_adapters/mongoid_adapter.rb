@@ -65,12 +65,17 @@ module CanCan
         end
       end
 
+      def subject_type_conditions
+        return unless subject_types.present?
+        { :_type.in => subject_types }
+      end
+
       def database_records
-        return @model_class.none unless (subject_types.present? || open_conditions.present? || closed_conditions.present?)
+        return @model_class.none unless (subject_type_conditions.present? || open_conditions.present? || closed_conditions.present?)
 
         @model_class.where({
           '$and' => [
-            { '$or' => [{ :_type.in => subject_types }].concat(open_conditions) }
+            { '$or' => [subject_type_conditions].concat(open_conditions).compact }
           ].concat(closed_conditions)
         })
       end
