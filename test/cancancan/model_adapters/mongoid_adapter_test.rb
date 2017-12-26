@@ -56,6 +56,8 @@ module CanCan
             it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject }
             it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject1 }
             it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
+
+            it { MySubject.accessible_by(ability, :update).selector.must_equal({}) }
           end
 
           describe 'default combined locks' do

@@ -28,38 +28,46 @@ module CanCan
       end
 
       def subject_types
-        root_cls = @model_class.root_class
+        @subject_types ||= begin
+          root_cls = @model_class.root_class
 
-        (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
-          subject_type_rules_for(cls).each do |rule|
-            if rule.base_behavior
-              # if closed rule exists, remove cls & descendants from result
-              res += (Array(cls) + cls.descendants)
-            else
-              # if open rules exists, add cls & descendants from resul
-              res -= (Array(cls) + cls.descendants)
+          (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
+            subject_type_rules_for(cls).each do |rule|
+              if rule.base_behavior
+                # if closed rule exists, remove cls & descendants from result
+                res += (Array(cls) + cls.descendants)
+              else
+                # if open rules exists, add cls & descendants from resul
+                res -= (Array(cls) + cls.descendants)
+              end
             end
-          end
 
-          res
+            res
+          end
         end
       end
 
       def open_conditions
-        condition_rules.select(&:base_behavior).inject([]) do |res, rule|
-          res << rule.conditions
-          res
+        @open_conditions ||= begin
+          condition_rules.select(&:base_behavior).inject([]) do |res, rule|
+            res << rule.conditions
+            res
+          end
         end
       end
 
       def closed_conditions
-        condition_rules.reject(&:base_behavior).inject([]) do |res, rule|
-          res << @model_class.criteria.excludes(rule.conditions).selector
-          res
+        @closed_conditions ||= begin
+          condition_rules.reject(&:base_behavior).inject([]) do |res, rule|
+            res << @model_class.criteria.excludes(rule.conditions).selector
+            res
+          end
         end
       end
 
       def database_records
+        return @model_class.none unless (subject_types.present? || open_conditions.present? || closed_conditions.present?)
+
         @model_class.where({
           '$and' => [
             { '$or' => [{ :_type.in => subject_types }].concat(open_conditions) }
