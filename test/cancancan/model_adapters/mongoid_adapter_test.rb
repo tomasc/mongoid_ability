@@ -79,6 +79,17 @@ module CanCan
           end
         end
 
+        describe 'closed types & open ids' do
+          let(:lock_1) { MyLock.new(subject_type: MySubject, action: :update, outcome: false) }
+          let(:lock_2) { MyLock.new(subject: my_subject, action: :update, outcome: true) }
+          let(:lock_3) { MyLock.new(subject: my_subject1, action: :update, outcome: true) }
+
+          let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3]) }
+
+          it { MySubject.accessible_by(ability, :update).must_include my_subject }
+          it { MySubject.accessible_by(ability, :update).must_include my_subject1 }
+        end
+
         describe 'conditions locks' do
           describe 'closed id locks' do
             let(:lock) { MyLock.new(subject: my_subject, action: :update, outcome: false) }
