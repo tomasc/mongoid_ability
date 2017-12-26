@@ -116,6 +116,31 @@ module CanCan
             it { MySubject1.accessible_by(ability, :update).to_a.must_include my_subject1 }
             it { MySubject2.accessible_by(ability, :update).to_a.wont_include my_subject2 }
           end
+
+          describe 'override lock' do
+            describe 'positive' do
+              let(:my_subject) { MySubject.new }
+              let(:my_subject1) { MySubject.new(override: true) }
+
+              before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
+
+              it { MySubject.accessible_by(ability, :read).to_a.wont_include(my_subject) }
+              it { MySubject.accessible_by(ability, :read).to_a.must_include(my_subject1) }
+            end
+
+            describe 'negative' do
+              let(:my_subject) { MySubject.new }
+              let(:my_subject1) { MySubject.new(override: true) }
+
+              before(:all) do
+                MySubject.default_lock MyLock, :read, true
+                MySubject.default_lock MyLock, :read, false, override: true
+              end
+
+              it { MySubject.accessible_by(ability, :read).to_a.must_include(my_subject) }
+              it { MySubject.accessible_by(ability, :read).to_a.wont_include(my_subject1) }
+            end
+          end
         end
 
         # describe 'prefix' do
