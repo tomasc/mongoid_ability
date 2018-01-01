@@ -32,7 +32,8 @@ module MongoidAbility
       @owner = owner
 
       self.class.subject_root_classes.each do |cls|
-        ([cls] + cls.descendants).each do |subcls|
+        cls_list = [cls] + cls.descendants
+        cls_list.each do |subcls|
           grouped_locks = subcls.default_locks.group_by(&:group_key)
           selected_locks = grouped_locks.flat_map do |_, locks|
             locks.detect(&:open?) || locks.first # prefer positive outcome
@@ -43,7 +44,7 @@ module MongoidAbility
         end
       end
 
-      if owner.inherit_from_relation
+      if owner.respond_to?(owner.class.inherit_from_relation_name)
         combined_locks = owner.inherit_from_relation.flat_map(&:locks_relation)
         grouped_locks = combined_locks.group_by(&:group_key)
         selected_locks = grouped_locks.flat_map do |_, locks|
@@ -54,7 +55,8 @@ module MongoidAbility
         end
       end
 
-      return unless owner.locks_relation
+      return unless owner.respond_to?(owner.class.locks_relation_name)
+      return unless owner.locks_relation.present?
       grouped_locks = owner.locks_relation.group_by(&:group_key)
       selected_locks = grouped_locks.flat_map do |_, locks|
         locks.detect(&:open?) || locks.first # prefer positive outcome
@@ -88,12 +90,13 @@ module MongoidAbility
 
     def model_adapter(model_class, action, options = {})
       adapter_class = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model_class)
-      # adjust relevant_rules_for_query to return all rules starting from the last descendant
-      adapter_class.new(
-        model_class, 
-        relevant_rules_for_query(action, (model_class.descendants.last || model_class)),
-        options
-      )
+      # include all rules that apply for descendants as well
+      # so the adapter can exclude include subclasses from critieria
+      rules = ([model_class] + model_class.descendants).inject([]) do |res, cls|
+        res += relevant_rules_for_query(action, cls)
+        res.uniq
+      end
+      adapter_class.new(model_class, rules, options)
     end
 
     private
@@ -105,7 +108,6 @@ module MongoidAbility
       options = options.merge(id: lock.subject_id) if lock.id_lock?
       action = lock.action
 
-      # p "#{ability_type}, #{action}, #{cls}, #{options}"
       self.send ability_type, action, cls, options
     end
   end

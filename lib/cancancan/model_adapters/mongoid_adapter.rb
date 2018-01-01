@@ -43,12 +43,12 @@ module CanCan
                 # if closed rule exists, remove cls & descendants from result
                 res += (Array(cls) + cls.descendants)
               else
-                # if open rules exists, add cls & descendants from resul
+                # if open rules exists, add cls & descendants from result
                 res -= (Array(cls) + cls.descendants)
               end
             end
 
-            res
+            res.uniq
           end
         end
       end

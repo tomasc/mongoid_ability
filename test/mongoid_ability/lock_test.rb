@@ -9,8 +9,8 @@ module MongoidAbility
 
     after(:all) do
       MySubject.default_locks = []
-      MySubject1.default_locks = []
-      MySubject2.default_locks = []
+      MySubject1.default_locks = []; MySubject11.default_locks = []
+      MySubject2.default_locks = []; MySubject21.default_locks = []
     end
 
     # ---------------------------------------------------------------------
