@@ -5,9 +5,6 @@ module MongoidAbility
     let(:owner) { MyRole.new }
     let(:ability) { Ability.new(owner) }
 
-    before(:all) { MySubject.reset_default_locks! }
-    after(:all) { MySubject.reset_default_locks! }
-
     describe 'default' do
       it { ability.can?(:read, MySubject).must_equal false }
       it { ability.cannot?(:read, MySubject).must_equal true }

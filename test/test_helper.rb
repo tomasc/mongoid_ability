@@ -26,7 +26,10 @@ DatabaseCleaner.strategy = :truncation
 
 class MiniTest::Spec
   before(:each) { DatabaseCleaner.start }
-  after(:each) { DatabaseCleaner.clean }
+  after(:each) {
+    [MySubject, MySubject1, MySubject2, MySubject11, MySubject21].each(&:reset_default_locks!)
+    DatabaseCleaner.clean
+  }
 end
 
 class Object

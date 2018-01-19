@@ -23,11 +23,7 @@ module CanCan
           my_subject21.save!
         end
 
-        after(:all) do
-          MySubject.reset_default_locks!
-          MySubject1.reset_default_locks!; MySubject11.reset_default_locks!
-          MySubject2.reset_default_locks!; MySubject21.reset_default_locks!
-        end
+        after(:all) { [MySubject, MySubject1, MySubject2, MySubject11, MySubject21].each(&:reset_default_locks!) }
 
         describe 'subject type locks' do
           describe 'default open locks' do

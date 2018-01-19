@@ -7,12 +7,6 @@ module MongoidAbility
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
 
-    after(:all) do
-      MySubject.reset_default_locks!
-      MySubject1.reset_default_locks!; MySubject11.reset_default_locks!
-      MySubject2.reset_default_locks!; MySubject21.reset_default_locks!
-    end
-
     # ---------------------------------------------------------------------
 
     it { subject.must_respond_to :action }

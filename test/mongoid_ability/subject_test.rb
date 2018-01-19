@@ -2,12 +2,6 @@ require 'test_helper'
 
 module MongoidAbility
   describe Subject do
-    after(:all) do
-      MySubject.reset_default_locks!
-      MySubject1.reset_default_locks!; MySubject11.reset_default_locks!
-      MySubject2.reset_default_locks!; MySubject21.reset_default_locks!
-    end
-
     describe '.default_lock' do
       before(:all) do
         MySubject.default_lock MyLock, :read, true

@@ -5,19 +5,13 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
-    after(:all) do
-      MySubject.reset_default_locks!
-      MySubject1.reset_default_locks!; MySubject11.reset_default_locks!
-      MySubject2.reset_default_locks!; MySubject21.reset_default_locks!
-    end
-
     it 'exposes owner' do
       ability.owner.must_equal owner
     end
 
     describe 'default locks' do
       before(:all) { MySubject.default_lock MyLock, :update, true }
-      after(:all) { MySubject.reset_default_locks! }
+      after(:all) { [MySubject, MySubject1, MySubject2, MySubject11, MySubject21].each(&:reset_default_locks!) }
 
       it 'propagates from superclass to all subclasses' do
         ability.can?(:update, MySubject).must_equal true
