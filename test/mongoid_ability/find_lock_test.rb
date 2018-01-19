@@ -19,6 +19,17 @@ module MongoidAbility
       let(:owner) { MyOwner.new(my_roles: [role]) }
 
       it { FindLock.call(owner, :read, MySubject).must_equal lock }
+
+      describe 'conflicting locks' do
+        let(:lock_1) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        let(:lock_2) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+
+        let(:role_1) { MyRole.new(my_locks: [lock_1]) }
+        let(:role_2) { MyRole.new(my_locks: [lock_2]) }
+        let(:owner) { MyOwner.new(my_roles: [role_1, role_2]) }
+
+        it { FindLock.call(owner, :read, MySubject).must_equal lock_1 }
+      end
     end
 
     describe 'owned lock' do
