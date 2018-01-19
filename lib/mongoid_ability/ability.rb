@@ -52,11 +52,11 @@ module MongoidAbility
             locks.detect(&:open?) || locks.first
           end
 
-          grouped_locks = locks.group_by(&:group_key)
-          selected_locks = grouped_locks.flat_map do |_, locks|
+          selected_locks = locks.group_by(&:group_key).flat_map do |_, locks|
             # prefer last one, i.e. the one closest to owner
             locks.last
           end
+
           selected_locks.sort.each do |lock|
             apply_lock_rule(lock)
           end
