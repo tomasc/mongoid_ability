@@ -108,14 +108,53 @@ module MongoidAbility
       end
 
       describe 'roles and default locks' do
-        let(:role_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        describe 'negative positive' do
+          before(:all) { MySubject.default_lock MyLock, :read, false }
 
-        let(:role) { MyRole.new(my_locks: [role_lock]) }
-        let(:owner) { MyOwner.new(my_roles: [role]) }
+          let(:lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+          let(:role) { MyRole.new(my_locks: [lock]) }
+          let(:owner) { MyOwner.new(my_roles: [role]) }
 
-        before(:all) { MySubject.default_lock MyLock, :read, false }
+          it { ability.can?(:read, MySubject).must_equal true }
 
-        it { ability.can?(:read, MySubject).must_equal true }
+          describe 'subclass' do
+            let(:lock) { MyLock.new(subject_type: MySubject1, action: :read, outcome: true) }
+
+            it { ability.can?(:read, MySubject).must_equal false }
+            it { ability.can?(:read, MySubject1).must_equal true }
+          end
+        end
+
+        describe 'positive negative' do
+          before(:all) { MySubject.default_lock MyLock, :read, true }
+
+          let(:lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+          let(:role) { MyRole.new(my_locks: [lock]) }
+          let(:owner) { MyOwner.new(my_roles: [role]) }
+
+          it { ability.can?(:read, MySubject).must_equal false }
+
+          describe 'subclass' do
+            let(:lock) { MyLock.new(subject_type: MySubject1, action: :read, outcome: false) }
+
+            it { ability.can?(:read, MySubject).must_equal true }
+            it { ability.can?(:read, MySubject1).must_equal false }
+          end
+        end
+
+        describe 'positive negative positive' do
+          before(:all) do
+            MySubject.default_lock MyLock, :read, true
+            MySubject1.default_lock MyLock, :read, false
+          end
+
+          let(:lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+          let(:role) { MyRole.new(my_locks: [lock]) }
+          let(:owner) { MyOwner.new(my_roles: [role]) }
+
+          it { ability.can?(:read, MySubject).must_equal true }
+          it { ability.can?(:read, MySubject1).must_equal false }
+        end
       end
     end
   end

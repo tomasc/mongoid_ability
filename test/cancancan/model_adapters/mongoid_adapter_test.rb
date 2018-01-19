@@ -86,10 +86,9 @@ module CanCan
               MySubject.default_lock MyLock, :read, true
             end
 
-            let(:lock_1) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
-            let(:lock_2) { MyLock.new(subject_type: MySubject1, action: :read, outcome: false) }
-
-            let(:owner) { MyOwner.new(my_roles: [role_1, role_2], my_locks: [lock_1, lock_2]) }
+            let(:lock) { MyLock.new(subject_type: MySubject1, action: :read, outcome: false) }
+            let(:role) { MyRole.new(my_locks: [lock]) }
+            let(:owner) { MyOwner.new(my_roles: [role]) }
 
             it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject }
             it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject1 }

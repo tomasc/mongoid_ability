@@ -34,38 +34,32 @@ module CanCan
       end
 
       def subject_types
-        @subject_types ||= begin
-          root_cls = @model_class.root_class
+        root_cls = @model_class.root_class
 
-          (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
-            subject_type_rules_for(cls).each do |rule|
-              if rule.base_behavior
-                # if closed rule exists, remove cls & descendants from result
-                res += (Array(cls) + cls.descendants)
-              else
-                # if open rules exists, add cls & descendants from result
-                res -= (Array(cls) + cls.descendants)
-              end
+        (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
+          subject_type_rules_for(cls).each do |rule|
+            if rule.base_behavior
+              # if closed rule exists, remove cls & descendants from result
+              res += (Array(cls) + cls.descendants)
+            else
+              # if open rules exists, add cls & descendants from result
+              res -= (Array(cls) + cls.descendants)
             end
-
-            res.uniq
           end
+
+          res.uniq
         end
       end
 
       def open_conditions
-        @open_conditions ||= begin
-          condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
-            res << apply_prefix_to_conditions(rule.conditions)
-          end
+        condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
+          res << apply_prefix_to_conditions(rule.conditions)
         end
       end
 
       def closed_conditions
-        @closed_conditions ||= begin
-          condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
-            res << @model_class.criteria.excludes(apply_prefix_to_conditions(rule.conditions)).selector
-          end
+        condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
+          res << @model_class.criteria.excludes(apply_prefix_to_conditions(rule.conditions)).selector
         end
       end
 
@@ -99,15 +93,11 @@ module CanCan
       end
 
       def subject_type_rules
-        @subject_type_rules ||= begin
-          @rules.reject { |rule| rule.conditions.present? }
-        end
+        @rules.reject { |rule| rule.conditions.present? }
       end
 
       def condition_rules
-        @condition_rules ||= begin
-          @rules.select { |rule| rule.conditions.present? }
-        end
+        @rules.select { |rule| rule.conditions.present? }
       end
 
       def prefix

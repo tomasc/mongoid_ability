@@ -31,38 +31,36 @@ module MongoidAbility
     def initialize(owner)
       @owner = owner
 
+      inherited_locks = owner.respond_to?(owner.class.inherit_from_relation_name) ? owner.inherit_from_relation.flat_map(&:locks_relation) : []
+      owner_locks = owner.respond_to?(owner.class.locks_relation_name) ? owner.locks_relation : []
+
       self.class.subject_root_classes.each do |cls|
         cls_list = [cls] + cls.descendants
         cls_list.each do |subcls|
-          grouped_locks = subcls.default_locks.group_by(&:group_key)
+          # if 2 of the same, prefer open
+          locks = subcls.default_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+            locks.detect(&:open?) || locks.first
+          end
+
+          # if 2 of the same, prefer open
+          locks += inherited_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+            locks.detect(&:open?) || locks.first
+          end
+
+          # if 2 of the same, prefer open
+          locks += owner_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+            locks.detect(&:open?) || locks.first
+          end
+
+          grouped_locks = locks.group_by(&:group_key)
           selected_locks = grouped_locks.flat_map do |_, locks|
-            locks.detect(&:open?) || locks.first # prefer positive outcome
+            # prefer last one, i.e. the one closest to owner
+            locks.last
           end
           selected_locks.sort.each do |lock|
             apply_lock_rule(lock)
           end
         end
-      end
-
-      if owner.respond_to?(owner.class.inherit_from_relation_name)
-        combined_locks = owner.inherit_from_relation.flat_map(&:locks_relation)
-        grouped_locks = combined_locks.group_by(&:group_key)
-        selected_locks = grouped_locks.flat_map do |_, locks|
-          locks.detect(&:open?) || locks.first # prefer positive outcome
-        end
-        selected_locks.sort.each do |lock|
-          apply_lock_rule(lock)
-        end
-      end
-
-      return unless owner.respond_to?(owner.class.locks_relation_name)
-      return unless owner.locks_relation.present?
-      grouped_locks = owner.locks_relation.group_by(&:group_key)
-      selected_locks = grouped_locks.flat_map do |_, locks|
-        locks.detect(&:open?) || locks.first # prefer positive outcome
-      end
-      selected_locks.sort.each do |lock|
-        apply_lock_rule(lock)
       end
     end
 
@@ -77,8 +75,8 @@ module MongoidAbility
 
       if args.empty? || args.first.is_a?(Hash)
         case name
-        when /can_/ then -> (doc) { can?(action, doc, *args) }
-        else -> (doc) { cannot?(action, doc, *args) }
+        when /can_/ then ->(doc) { can?(action, doc, *args) }
+        else ->(doc) { cannot?(action, doc, *args) }
         end
       else
         case name
@@ -108,7 +106,7 @@ module MongoidAbility
       options = options.merge(id: lock.subject_id) if lock.id_lock?
       action = lock.action
 
-      self.send ability_type, action, cls, options
+      send(ability_type, action, cls, options)
     end
   end
 end

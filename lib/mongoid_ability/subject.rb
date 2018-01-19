@@ -56,16 +56,6 @@ module MongoidAbility
       def has_default_lock_for_action?(action)
         default_lock_for_action(action).present?
       end
-
-      # ---------------------------------------------------------------------
-
-      # def accessible_by(ability, action = :read, options = {})
-      #   AccessibleQueryBuilder.call(self, ability, action, options)
-      # end
-      #
-      # def values_for_accessible_query(ability, action = :read, options = {})
-      #   ValuesForAccessibleQuery.call(self, ability, action, options)
-      # end
     end
   end
 end

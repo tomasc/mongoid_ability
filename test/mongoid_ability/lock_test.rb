@@ -76,9 +76,11 @@ module MongoidAbility
     # ---------------------------------------------------------------------
 
     describe '#inherited_outcome' do
+      before(:all) { MySubject.default_lock MyLock, :read, true }
+
       let(:owner) { MyOwner.new(my_locks: [
         MyLock.new(subject_type: MySubject, action: :read, outcome: false),
-        MyLock.new(subject: subject, action: :read, outcome: true)
+        MyLock.new(subject: my_subject, action: :read, outcome: true)
       ]) }
 
       let(:ability) { Ability.new(owner) }
@@ -87,11 +89,7 @@ module MongoidAbility
       let(:subject_lock) { owner.my_locks.detect(&:id_lock?) }
       let(:default_lock) { MySubject.default_locks.detect { |l| l.action == :read } }
 
-      before(:all) do
-        MySubject.default_lock MyLock, :read, true
-      end
-
-      it { ability.can?(:read, subject).must_equal true }
+      it { ability.can?(:read, my_subject).must_equal true }
 
       it { subject_lock.inherited_outcome.must_equal false }
       it { subject_type_lock.inherited_outcome.must_equal true }
