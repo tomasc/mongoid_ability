@@ -13,6 +13,8 @@ module MongoidAbility
     def call
       lock = nil
       subject_class.self_and_ancestors_with_default_locks.each do |cls|
+        break if lock = FindOwnedLock.call(owner, action, cls, subject_id, options)
+        break if lock = FindInheritedLock.call(owner, action, cls, subject_id, options)
         break if lock = FindDefaultLock.call(owner, action, cls, subject_id, options)
       end
       lock
@@ -28,13 +30,30 @@ module MongoidAbility
 
     class FindDefaultLock < FindLock
       def call
+        locks = subject_class.default_locks.for_action(action)
         locks.detect(&:closed?) || locks.detect(&:open?)
       end
+    end
 
-      private
+    class FindInheritedLock < FindLock
+      def call
+        return unless owner.respond_to?(owner.class.inherit_from_relation_name)
+        locks = owner.inherit_from_relation.flat_map{ |inherited_owner| FindOwnedLock.call(inherited_owner, action, subject_type, subject_id, options) }
+        locks.detect(&:closed?) || locks.detect(&:open?)
+      end
+    end
 
-      def locks
-        subject_class.default_locks.for_action(action)
+    class FindOwnedLock < FindLock
+      def call
+        return unless owner.respond_to?(:locks_relation)
+        locks = owner.locks_relation.for_action(action).for_subject_type(subject_type)
+
+        if subject_id.present?
+          lock = locks.id_locks.detect(&:closed?) || locks.id_locks.detect(&:open?)
+          return lock unless lock.nil?
+        end
+
+        locks.class_locks.detect(&:closed?) || locks.class_locks.detect(&:open?)
       end
     end
   end
