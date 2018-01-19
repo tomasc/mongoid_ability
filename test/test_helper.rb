@@ -25,11 +25,18 @@ DatabaseCleaner.orm = :mongoid
 DatabaseCleaner.strategy = :truncation
 
 class MiniTest::Spec
-  before(:each) { DatabaseCleaner.start }
-  after(:each) {
-    [MySubject, MySubject1, MySubject2, MySubject11, MySubject21].each(&:reset_default_locks!)
+  before(:each) do
+    DatabaseCleaner.start
+  end
+
+  after(:each) do
+    [ MySubject, 
+      MySubject1, MySubject2,
+      MySubject11, MySubject21
+    ].each(&:reset_default_locks!)
+
     DatabaseCleaner.clean
-  }
+  end
 end
 
 class Object
