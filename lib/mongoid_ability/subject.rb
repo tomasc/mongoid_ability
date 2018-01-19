@@ -10,7 +10,11 @@ module MongoidAbility
 
     module ClassMethods
       def default_locks
-        @default_locks ||= []
+        @default_locks ||= LocksDecorator.new([])
+      end
+
+      def reset_default_locks!
+        @default_locks = LocksDecorator.new([])
       end
 
       def default_locks=(locks)
@@ -26,10 +30,8 @@ module MongoidAbility
         end
 
         # add new lock
-        default_locks.push lock
+        default_locks.push(lock)
       end
-
-      # ---------------------------------------------------------------------
 
       def self_and_ancestors_with_default_locks
         ancestors.select { |a| a.is_a?(Class) && a.respond_to?(:default_locks) }
@@ -47,14 +49,8 @@ module MongoidAbility
         self_and_ancestors_with_default_locks.last
       end
 
-      # ---------------------------------------------------------------------
-
-      def default_lock_for_action(action)
-        default_locks.detect { |lock| lock.action == action.to_sym }
-      end
-
       def has_default_lock_for_action?(action)
-        default_lock_for_action(action).present?
+        default_locks.for_action(action).present?
       end
     end
   end

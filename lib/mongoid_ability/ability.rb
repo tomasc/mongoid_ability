@@ -32,23 +32,25 @@ module MongoidAbility
       @owner = owner
 
       inherited_locks = owner.respond_to?(owner.class.inherit_from_relation_name) ? owner.inherit_from_relation.flat_map(&:locks_relation) : []
+      inherited_locks = LocksDecorator.new(inherited_locks)
+
       owner_locks = owner.respond_to?(owner.class.locks_relation_name) ? owner.locks_relation : []
 
       self.class.subject_root_classes.each do |cls|
         cls_list = [cls] + cls.descendants
         cls_list.each do |subcls|
           # if 2 of the same, prefer open
-          locks = subcls.default_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+          locks = subcls.default_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 
           # if 2 of the same, prefer open
-          locks += inherited_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+          locks += inherited_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 
           # if 2 of the same, prefer open
-          locks += owner_locks.select{ |lock| lock.subject_type == subcls.to_s }.group_by(&:group_key).flat_map do |_, locks|
+          locks += owner_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 

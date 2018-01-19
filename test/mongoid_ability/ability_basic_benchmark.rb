@@ -8,7 +8,7 @@ module MongoidAbility
     let(:ability) { Ability.new(owner) }
 
     before(:all) { MySubject.default_lock MyLock, :read, true }
-    after(:all) { MySubject.default_locks = [] }
+    after(:all) { MySubject.reset_default_locks! }
 
     bench_performance_constant 'can?' do |n|
       n.times do

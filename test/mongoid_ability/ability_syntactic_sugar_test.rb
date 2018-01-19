@@ -8,7 +8,7 @@ module MongoidAbility
     let(:options) { { x: 1 } }
 
     before(:all) { MySubject.default_lock MyLock, :read, true }
-    after(:all) { MySubject.default_locks = [] }
+    after(:all) { MySubject.reset_default_locks! }
 
     describe 'owner can?' do
       it { [MySubject].select(&ability.can_read(options)).must_equal [] }

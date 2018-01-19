@@ -7,7 +7,7 @@ module MongoidAbility
     let(:subject1) { MySubject.new }
     let(:subject2) { MySubject.new(override: true) }
 
-    after(:all) { MySubject.default_locks = [] }
+    after(:all) { MySubject.reset_default_locks! }
 
     describe 'positive' do
       before(:all) { MySubject.default_lock MyLock, :read, true, override: true }

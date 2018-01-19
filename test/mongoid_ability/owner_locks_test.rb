@@ -7,7 +7,7 @@ module MongoidAbility
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
 
-    after(:all) { MySubject.default_locks = [] }
+    after(:all) { MySubject.reset_default_locks! }
 
     describe 'when lock for subject' do
       let(:subject_lock) { MyLock.new(action: :read, subject: subject, outcome: false) }

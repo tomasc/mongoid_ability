@@ -3,9 +3,9 @@ require 'test_helper'
 module MongoidAbility
   describe Subject do
     after(:all) do
-      MySubject.default_locks = []
-      MySubject1.default_locks = []; MySubject11.default_locks = []
-      MySubject2.default_locks = []; MySubject21.default_locks = []
+      MySubject.reset_default_locks!
+      MySubject1.reset_default_locks!; MySubject11.reset_default_locks!
+      MySubject2.reset_default_locks!; MySubject21.reset_default_locks!
     end
 
     describe '.default_lock' do

@@ -34,15 +34,13 @@ module MongoidAbility
     end
 
     def ability
-      @ability ||= begin
-        MongoidAbility::Ability.new(self)
-      end
+      @ability ||= MongoidAbility::Ability.new(self)
     end
 
     def has_lock?(lock)
       @has_lock ||= {}
 
-      return @has_lock[lock.id.to_s] if @has_lock.has_key?(lock.id.to_s)
+      return @has_lock[lock.id.to_s] if @has_lock.key?(lock.id.to_s)
 
       @has_lock[lock.id.to_s] ||= begin
         locks_relation.where(

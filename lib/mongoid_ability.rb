@@ -12,6 +12,9 @@ require 'mongoid_ability/lock'
 require 'mongoid_ability/owner'
 require 'mongoid_ability/subject'
 
+require 'mongoid_ability/locks_decorator'
+require 'mongoid_ability/find_lock'
+
 # ---------------------------------------------------------------------
 
 if defined?(Rails)
