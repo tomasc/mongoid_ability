@@ -43,37 +43,43 @@ module CanCan
       end
 
       def subject_types
-        root_cls = @model_class.root_class
-        (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
-          subject_type_rules_for(cls).each do |rule|
-            cls_list = (Array(cls) + cls.descendants)
-            rule.base_behavior ? res += cls_list : res -= cls_list
+        @subject_types ||= begin
+          root_cls = @model_class.root_class
+          (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
+            subject_type_rules_for(cls).each do |rule|
+              cls_list = (Array(cls) + cls.descendants)
+              rule.base_behavior ? res += cls_list : res -= cls_list
+            end
+            res.uniq
           end
-          res.uniq
         end
       end
 
       def open_conditions
-        condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
-          rule.conditions.each do |key, value|
-            key = id_key if %i[id _id].include?(key.to_sym)
-            res <<  case value
-                    when Array then { key => { '$in' => value } }
-                    else { key => value }
-                    end
+        @open_conditions ||= begin
+          condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
+            rule.conditions.each do |key, value|
+              key = id_key if %i[id _id].include?(key.to_sym)
+              res <<  case value
+                      when Array then { key => { '$in' => value } }
+                      else { key => value }
+                      end
+            end
           end
         end
       end
 
       def closed_conditions
-        condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
-          rule.conditions.each do |key, value|
-            key = id_key if %i[id _id].include?(key.to_sym)
-            res <<  case value
-                    when Regexp then { key => { '$not' => value } }
-                    when Array then { key => { '$nin' => value } }
-                    else { key => { '$ne' => value } }
-                    end
+        @closed_conditions ||= begin
+          condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
+            rule.conditions.each do |key, value|
+              key = id_key if %i[id _id].include?(key.to_sym)
+              res <<  case value
+                      when Regexp then { key => { '$not' => value } }
+                      when Array then { key => { '$nin' => value } }
+                      else { key => { '$ne' => value } }
+                      end
+            end
           end
         end
       end
@@ -92,11 +98,13 @@ module CanCan
       def database_records
         return @model_class.none unless has_any_conditions?
 
-        @model_class.where(
-          '$and' => [
-            { '$or' => ([subject_type_conditions] + open_conditions).compact }
-          ] + closed_conditions
-        )
+        or_conditions = { '$or' => ([subject_type_conditions, *open_conditions]).compact }
+        or_conditions = nil if or_conditions['$or'].empty?
+        
+        and_conditions = { '$and' => [or_conditions, *closed_conditions].compact }
+        and_conditions = nil if and_conditions['$and'].empty?
+
+        @model_class.where(and_conditions)
       end
 
       private
