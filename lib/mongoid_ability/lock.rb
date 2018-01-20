@@ -74,7 +74,7 @@ module MongoidAbility
     end
 
     concerning :Group do
-      def group_key
+      def group_key_for_calc
         [subject_type, subject_id, action, options]
       end
     end

@@ -40,21 +40,21 @@ module MongoidAbility
         cls_list = [cls] + cls.descendants
         cls_list.each do |subcls|
           # if 2 of the same, prefer open
-          locks = subcls.default_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
+          locks = subcls.default_locks.for_subject_type(subcls).group_by(&:group_key_for_calc).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 
           # if 2 of the same, prefer open
-          locks += inherited_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
+          locks += inherited_locks.for_subject_type(subcls).group_by(&:group_key_for_calc).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 
           # if 2 of the same, prefer open
-          locks += owner_locks.for_subject_type(subcls).group_by(&:group_key).flat_map do |_, locks|
+          locks += owner_locks.for_subject_type(subcls).group_by(&:group_key_for_calc).flat_map do |_, locks|
             locks.detect(&:open?) || locks.first
           end
 
-          selected_locks = locks.group_by(&:group_key).flat_map do |_, locks|
+          selected_locks = locks.group_by(&:group_key_for_calc).flat_map do |_, locks|
             # prefer last one, i.e. the one closest to owner
             locks.last
           end
