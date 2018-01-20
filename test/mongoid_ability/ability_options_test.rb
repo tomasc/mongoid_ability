@@ -1,7 +1,7 @@
 require 'test_helper'
 
 module MongoidAbility
-  describe 'can options test' do
+  describe 'options test' do
     let(:owner) { MyOwner.new }
     let(:ability) { Ability.new(owner) }
     let(:subject1) { MySubject.new }
