@@ -2,6 +2,7 @@ class MySubject
   include Mongoid::Document
   include MongoidAbility::Subject
 
+  field :str_val, type: String
   field :override, type: Boolean, default: false
 end
 

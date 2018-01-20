@@ -107,8 +107,7 @@ module MongoidAbility
       options = lock.options
       options = options.merge(id: lock.subject_id) if lock.id_lock?
       action = lock.action
-
-      send(ability_type, action, cls, options)
+      send ability_type, action, cls, options
     end
   end
 end

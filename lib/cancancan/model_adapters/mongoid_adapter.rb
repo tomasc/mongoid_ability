@@ -19,12 +19,21 @@ module CanCan
       # Used to determine if this model adapter will override the matching behavior for a specific condition.
       # If this returns true then matches_condition? will be called. See Rule#matches_conditions_hash
       def self.override_condition_matching?(_subject, _name, _value)
-        false
+        true
       end
 
       # Override if override_condition_matching? returns true
-      def self.matches_condition?(_subject, _name, _value)
-        raise NotImplemented, 'This model adapter does not support matching on a specific condition.'
+      def self.matches_condition?(subject, name, value)
+        attribute = subject.send(name)
+
+        case value
+        when Hash then hash_condition_match?(attribute, value)
+        when Range then value.cover?(attribute)
+        when Regexp then value.match(attribute)
+        when Array then value.include?(attribute)
+        when Enumerable then value.include?(attribute)
+        else attribute == value
+        end
       end
 
       def initialize(model_class, rules, options = {})
@@ -39,10 +48,8 @@ module CanCan
         (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
           subject_type_rules_for(cls).each do |rule|
             if rule.base_behavior
-              # if closed rule exists, remove cls & descendants from result
               res += (Array(cls) + cls.descendants)
             else
-              # if open rules exists, add cls & descendants from result
               res -= (Array(cls) + cls.descendants)
             end
           end
@@ -53,13 +60,26 @@ module CanCan
 
       def open_conditions
         condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
-          res << apply_prefix_to_conditions(rule.conditions)
+          rule.conditions.each do |key, value|
+            key = id_key if %i[id _id].include?(key.to_sym)
+            res <<  case value
+                    when Array then { key => { '$in' => value } }
+                    else { key => value }
+                    end
+          end
         end
       end
 
       def closed_conditions
         condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
-          res << @model_class.criteria.excludes(apply_prefix_to_conditions(rule.conditions)).selector
+          rule.conditions.each do |key, value|
+            key = id_key if %i[id _id].include?(key.to_sym)
+            res <<  case value
+                    when Regexp then { key => { '$not' => value } }
+                    when Array then { key => { '$nin' => value } }
+                    else { key => { '$ne' => value } }
+                    end
+          end
         end
       end
 
@@ -102,17 +122,6 @@ module CanCan
 
       def prefix
         @options.fetch(:prefix, nil)
-      end
-
-      def apply_prefix_to_conditions(conditions = {})
-        return conditions unless prefix.present?
-        conditions.inject({}) do |h, (k, v)|
-          if %i(id _id).include?(k.to_sym)
-            h.merge(id_key => v)
-          else
-            h.merge(k => v)
-          end
-        end
       end
 
       def id_key

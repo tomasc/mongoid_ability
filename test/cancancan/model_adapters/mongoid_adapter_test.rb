@@ -23,8 +23,6 @@ module CanCan
           my_subject21.save!
         end
 
-        after(:all) { [MySubject, MySubject1, MySubject2, MySubject11, MySubject21].each(&:reset_default_locks!) }
-
         describe 'subject type locks' do
           describe 'default open locks' do
             before { MySubject.default_lock MyLock, :read, true }
