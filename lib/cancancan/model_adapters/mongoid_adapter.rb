@@ -44,16 +44,11 @@ module CanCan
 
       def subject_types
         root_cls = @model_class.root_class
-
         (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
           subject_type_rules_for(cls).each do |rule|
-            if rule.base_behavior
-              res += (Array(cls) + cls.descendants)
-            else
-              res -= (Array(cls) + cls.descendants)
-            end
+            cls_list = (Array(cls) + cls.descendants)
+            rule.base_behavior ? res += cls_list : res -= cls_list
           end
-
           res.uniq
         end
       end
