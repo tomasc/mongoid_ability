@@ -57,13 +57,13 @@ module MongoidAbility
 
     # calculates outcome as if this lock is not present
     concerning :InheritedOutcome do
-      def inherited_outcome
+      def inherited_outcome(options = {})
         return outcome unless owner.present?
         cloned_owner = owner.clone
         cloned_owner.locks_relation = cloned_owner.locks_relation - [self]
         cloned_ability = MongoidAbility::Ability.new(cloned_owner)
 
-        cloned_ability.can?(action, (subject.present? ? subject : subject_class))
+        cloned_ability.can?(action, (subject.present? ? subject : subject_class), options)
       end
     end
 
@@ -80,9 +80,13 @@ module MongoidAbility
     end
 
     concerning :Sort do
-      def <=> (other)
-        [subject_type, subject_id.to_s, action, (outcome ? -1 : 1)] <=>
-          [other.subject_type, other.subject_id.to_s, other.action, (other.outcome ? -1 : 1)]
+      class_methods do
+        def sort
+          -> (a, b) {
+            [a.subject_type, a.subject_id.to_s, a.action, (a.outcome ? -1 : 1)] <=>
+              [b.subject_type, b.subject_id.to_s, b.action, (b.outcome ? -1 : 1)]
+          }
+        end
       end
     end
   end

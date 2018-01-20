@@ -13,7 +13,7 @@ module MongoidAbility
         subject.run_callbacks(:save)
       end
 
-      it { subject.my_locks.sort.must_equal [closed_lock].sort }
+      it { subject.my_locks.sort(&Lock.sort).must_equal [closed_lock].sort(&Lock.sort) }
 
       describe 'locks relation' do
         it { subject.class.locks_relation_name.must_equal :my_locks }

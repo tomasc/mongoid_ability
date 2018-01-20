@@ -61,7 +61,7 @@ module MongoidAbility
 
       let(:owner) { MyOwner.new(my_locks: [lock1, lock2, lock3, lock4]) }
 
-      let(:sorted_locks) { owner.my_locks.sort }
+      let(:sorted_locks) { owner.my_locks.sort(&Lock.sort) }
 
       it { sorted_locks[0].must_equal lock4 }
       it { sorted_locks[3].must_equal lock1 }

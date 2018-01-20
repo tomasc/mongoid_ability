@@ -59,7 +59,7 @@ module MongoidAbility
             locks.last
           end
 
-          selected_locks.sort.each do |lock|
+          selected_locks.sort(&Lock.sort).each do |lock|
             apply_lock_rule(lock)
           end
         end
