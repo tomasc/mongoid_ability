@@ -45,13 +45,25 @@ module CanCan
       def subject_types
         @subject_types ||= begin
           root_cls = @model_class.root_class
-          (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
+          [root_cls, *root_cls.descendants].compact
+        end
+      end
+
+      def open_subject_types
+        @open_subject_types ||= begin
+          subject_types.inject([]) do |res, cls|
             subject_type_rules_for(cls).each do |rule|
               cls_list = [cls, *cls.descendants].compact
               rule.base_behavior ? res += cls_list : res -= cls_list
             end
             res.uniq
           end
+        end
+      end
+
+      def closed_subject_types
+        @closed_subject_types ||= begin
+          subject_types - open_subject_types
         end
       end
 
@@ -85,8 +97,8 @@ module CanCan
       end
 
       def subject_type_conditions
-        return unless subject_types.present?
-        { :"#{type_key}".in => subject_types.map(&:to_s) }
+        return unless open_subject_types.present?
+        { :"#{type_key}".nin => closed_subject_types.map(&:to_s) }
       end
 
       def has_any_conditions?

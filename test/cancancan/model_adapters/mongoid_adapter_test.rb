@@ -193,7 +193,7 @@ module CanCan
             selector.must_equal(
               '$and' => [
                 { '$or' => [
-                  { 'subject_type' => { '$in' => [MySubject, MySubject1, MySubject11, MySubject2, MySubject21].map(&:to_s) } },
+                  { 'subject_type' => { '$nin' => [] } },
                   { 'subject_id' => my_subject1.id }
                 ] },
                 { 'subject_id' => { '$ne' => my_subject2.id } }
