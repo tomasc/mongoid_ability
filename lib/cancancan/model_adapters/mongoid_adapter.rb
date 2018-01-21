@@ -47,7 +47,7 @@ module CanCan
           root_cls = @model_class.root_class
           (Array(root_cls) + root_cls.descendants).inject([]) do |res, cls|
             subject_type_rules_for(cls).each do |rule|
-              cls_list = (Array(cls) + cls.descendants)
+              cls_list = [cls, *cls.descendants].compact
               rule.base_behavior ? res += cls_list : res -= cls_list
             end
             res.uniq
@@ -86,7 +86,7 @@ module CanCan
 
       def subject_type_conditions
         return unless subject_types.present?
-        { :"#{type_key}".in => subject_types }
+        { :"#{type_key}".in => subject_types.map(&:to_s) }
       end
 
       def has_any_conditions?
@@ -100,7 +100,7 @@ module CanCan
 
         or_conditions = { '$or' => ([subject_type_conditions, *open_conditions]).compact }
         or_conditions = nil if or_conditions['$or'].empty?
-        
+
         and_conditions = { '$and' => [or_conditions, *closed_conditions].compact }
         and_conditions = nil if and_conditions['$and'].empty?
 
