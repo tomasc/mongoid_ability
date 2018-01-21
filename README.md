@@ -50,24 +50,11 @@ This class defines a permission itself using the following fields:
 
 These fields define what subject (respectively subject type, when referring to a class) the lock applies to, which action it is defined for (for example `:read`), and whether the outcome is positive or negative.
 
-For more specific behavior, it is possible to override the `#calculated_outcome` method (should, for example, the permission depend on some additional factors). The `#calculated_outcome` method receives options that are passed when checking the permissions using for example `can? :read, MyClass, { option_1: 1 }`
-
-```ruby
-def calculated_outcome options={}
-    # custom behaviour
-    # return true/false
-end
-```
-
-If you wish to check the state of a lock directly, please use the convenience methods `#open?` and `#closed?`. These take into account the `#calculated_outcome`. Using the `:outcome` field directly is discouraged as it just returns the boolean attribute.
-
-The lock class can be further subclassed in order to customise its behavior, for example per action.
-
 ### Subject
 
 All subjects (classes which permissions you want to control) will include the `MongoidAbility::Subject` module.
 
-Each action and its default outcome, needs to be defined using the `.default_lock` macro.
+Each action and its default outcome needs to be defined using the `.default_lock` macro.
 
 ```ruby
 class MySubject
@@ -130,6 +117,54 @@ current_user.can?(:read, resource, options)
 other_user.can?(:read, ResourceClass, options)
 ```
 
+Ability can be easily obtained as:
+
+```ruby
+current_user.ability
+```
+
+### Caching
+
+The ability object is fully cache-able, which means it is possible to save some precious time on every request (instead of always converting the Lock documents to CanCan rules):
+
+```ruby
+class ActionController::Base
+  def current_ability
+    @current_ability ||= Rails.cache.fetch([current_user.cache_key, 'ability'].join('/')) do
+      MongoidAbility::Ability.new(current_user)
+    end
+  end
+end
+```
+
+And on the owner:
+
+```ruby
+def ability
+  @ability ||= Rails.cache.fetch([cache_key, 'ability'].join('/')) do
+    MongoidAbility::Ability.new(self)
+  end
+end
+```
+
+Of course this assumes the user's `cache_key` updates when any of its locks (or locks stored on its roles) change.
+
+### Decoration
+
+To be able to check permissions on decorated objects (for example via the Draper gem) subclass the Ability class as follows:
+
+```ruby
+class MyAbility < MongoidAbility::Ability
+  def can?(action, subject, *extra_args)
+    while subject.is_a?(Draper::Decorator)
+      subject = subject.model
+    end
+
+    super(action, subject, *extra_args)
+  end
+end
+```
+
 ### CanCanCan
 
 The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanCommunity/cancancan) will be automatically overriden by the `Ability` class provided by this gem.
@@ -139,15 +174,6 @@ The default `:current_ability` defined by [CanCanCan](https://github.com/CanCanC
 1. Setup subject classes and their default locks.
 2. Define permissions using lock objects embedded (or associated to) either in user or role.
 3. Use standard [CanCanCan](https://github.com/CanCanCommunity/cancancan) helpers (`.authorize!`, `#can?`, `#cannot?`) to authorize the current user.
-
-## How it works?
-
-The ability class in this gem looks up and calculates the outcome in the following order:
-
-1. User locks, defined for `:subject_id`, then `:subject_type` (then its superclasses), then defined in the subject class itself (via the `.default_lock` macro) and its superclasses.
-2. Role locks have the same look up chain as the user locks. The role permissions are optimistic, meaning that in case a user has multiple roles, and the roles have locks with conflicting outcomes, the ability favors the positive one.
-
-See the test suite for more details.
 
 ## Contributing
 
