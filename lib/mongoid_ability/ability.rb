@@ -66,28 +66,6 @@ module MongoidAbility
       end
     end
 
-    # lambda for easy permission checking:
-    # .select(&current_ability.can_read)
-    # .select(&current_ability.can_update)
-    # .select(&current_ability.can_destroy)
-    # etc.
-    def method_missing(name, *args)
-      return super unless name.to_s =~ /\A(can|cannot)_/
-      return unless action = name.to_s.scan(/\A(can|cannot)_(\w+)/).flatten.last.to_sym
-
-      if args.empty? || args.first.is_a?(Hash)
-        case name
-        when /can_/ then ->(doc) { can?(action, doc, *args) }
-        else ->(doc) { cannot?(action, doc, *args) }
-        end
-      else
-        case name
-        when /can_/ then can?(action, *args)
-        else cannot?(action, *args)
-        end
-      end
-    end
-
     def model_adapter(model_class, action, options = {})
       adapter_class = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model_class)
       # include all rules that apply for descendants as well
