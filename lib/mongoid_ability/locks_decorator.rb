@@ -35,11 +35,11 @@ module MongoidAbility
     end
 
     def class_locks
-      select(&:class_lock?)
+      compact.select(&:class_lock?)
     end
 
     def id_locks
-      select(&:id_lock?)
+      compact.select(&:id_lock?)
     end
   end
 end

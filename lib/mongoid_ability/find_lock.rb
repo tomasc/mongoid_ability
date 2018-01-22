@@ -38,8 +38,18 @@ module MongoidAbility
     class FindInheritedLock < FindLock
       def call
         return unless owner.respond_to?(owner.class.inherit_from_relation_name)
-        locks = owner.inherit_from_relation.flat_map{ |inherited_owner| FindOwnedLock.call(inherited_owner, action, subject_type, subject_id, options) }
-        locks.compact.detect(&:open?) || locks.compact.detect(&:closed?)
+        locks = LocksDecorator.new(
+          owner.inherit_from_relation
+                .flat_map { |inherited_owner| FindOwnedLock.call(inherited_owner, action, subject_type, subject_id, options) }
+        )
+
+        if subject_id.present?
+          lock = locks.for_subject_id(subject_id).detect(&:closed?) ||
+                 locks.for_subject_id(subject_id).detect(&:open?)
+          return lock unless lock.nil?
+        end
+
+        locks.class_locks.detect(&:open?) || locks.class_locks.detect(&:closed?)
       end
     end
 
@@ -49,11 +59,12 @@ module MongoidAbility
         locks = owner.locks_relation.for_action(action).for_subject_type(subject_type)
 
         if subject_id.present?
-          lock = locks.id_locks.compact.detect(&:closed?) || locks.id_locks.compact.detect(&:open?)
+          lock = locks.for_subject_id(subject_id).detect(&:closed?) ||
+                 locks.for_subject_id(subject_id).detect(&:open?)
           return lock unless lock.nil?
         end
 
-        locks.class_locks.compact.detect(&:closed?) || locks.class_locks.compact.detect(&:open?)
+        locks.class_locks.detect(&:closed?) || locks.class_locks.detect(&:open?)
       end
     end
   end

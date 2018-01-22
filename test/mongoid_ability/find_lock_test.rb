@@ -30,6 +30,18 @@ module MongoidAbility
 
         it { FindLock.call(owner, :read, MySubject).must_equal lock_1 }
       end
+
+      describe 'id lock' do
+        let(:my_subject) { MySubject.new }
+        let(:other_subject) { MySubject.new }
+        let(:lock_1) { MyLock.new(subject_type: my_subject.model_name, subject_id: my_subject.id, action: :read, outcome: false) }
+        let(:lock_2) { MyLock.new(subject_type: other_subject.model_name, subject_id: other_subject.id, action: :read, outcome: false) }
+        let(:role) { MyRole.new(my_locks: [lock_1, lock_2]) }
+        let(:owner) { MyOwner.new(my_roles: [role]) }
+
+        it { FindLock.call(owner, :read, MySubject).must_equal MySubject.default_locks.for_action(:read).first }
+        it { FindLock.call(owner, :read, my_subject.class, my_subject.id).must_equal lock_1 }
+      end
     end
 
     describe 'owned lock' do
@@ -42,11 +54,13 @@ module MongoidAbility
 
       describe 'id lock' do
         let(:my_subject) { MySubject.new }
-        let(:lock) { MyLock.new(subject: my_subject, action: :read, outcome: false) }
-        let(:owner) { MyOwner.new(my_locks: [lock]) }
+        let(:other_subject) { MySubject.new }
+        let(:lock_1) { MyLock.new(subject_type: my_subject.model_name, subject_id: my_subject.id, action: :read, outcome: false) }
+        let(:lock_2) { MyLock.new(subject_type: other_subject.model_name, subject_id: other_subject.id, action: :read, outcome: false) }
+        let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2]) }
 
         it { FindLock.call(owner, :read, MySubject).must_equal MySubject.default_locks.for_action(:read).first }
-        it { FindLock.call(owner, :read, my_subject.class, my_subject.id).must_equal lock }
+        it { FindLock.call(owner, :read, my_subject.class, my_subject.id).must_equal lock_1 }
       end
     end
   end
