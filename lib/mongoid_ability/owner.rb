@@ -3,7 +3,9 @@ module MongoidAbility
     def self.included(base)
       base.extend ClassMethods
       base.class_eval do
-        delegate :can?, :cannot?, to: :ability
+        delegate  :can?, :cannot?,
+                  to: :ability
+
         before_save :cleanup_locks
       end
     end
