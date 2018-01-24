@@ -132,6 +132,8 @@ class ActionController::Base
   def current_ability
     @current_ability ||= Rails.cache.fetch([current_user.cache_key, 'ability'].join('/')) do
       MongoidAbility::Ability.new(current_user)
+    end.tap do |ability|
+      ability.owner ||= current_user
     end
   end
 end
@@ -143,11 +145,15 @@ And on the owner:
 def ability
   @ability ||= Rails.cache.fetch([cache_key, 'ability'].join('/')) do
     MongoidAbility::Ability.new(self)
+  end.tap do |ability|
+    ability.owner ||= self
   end
 end
 ```
 
 Of course this assumes the user's `cache_key` updates when any of its locks (or locks stored on its roles) change.
+
+Note the owner has to be assigned after fetching the ability from cache.
 
 ### Decoration
 
