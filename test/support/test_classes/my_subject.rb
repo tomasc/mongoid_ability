@@ -1,12 +1,19 @@
-module MongoidAbility
-  class MySubject
-    include Mongoid::Document
-    include MongoidAbility::Subject
-  end
+class MySubject
+  include Mongoid::Document
+  include MongoidAbility::Subject
 
-  class MySubject1 < MySubject
-  end
+  field :str_val, type: String
+  field :override, type: Boolean, default: false
+end
 
-  class MySubject2 < MySubject1
-  end
+class MySubject1 < MySubject
+end
+
+class MySubject11 < MySubject
+end
+
+class MySubject2 < MySubject1
+end
+
+class MySubject21 < MySubject11
 end

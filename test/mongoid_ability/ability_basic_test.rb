@@ -2,27 +2,58 @@ require 'test_helper'
 
 module MongoidAbility
   describe 'basic ability test' do
-    let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
-    let(:owner) { MyRole.new(my_locks: [read_lock]) }
+    let(:owner) { MyRole.new }
     let(:ability) { Ability.new(owner) }
 
-    let(:default_locks) { [MyLock.new(action: :read, outcome: true)] }
+    describe 'default' do
+      it { ability.can?(:read, MySubject).must_equal false }
+      it { ability.cannot?(:read, MySubject).must_equal true }
+    end
 
-    it 'owner can?' do
-      MySubject.stub :default_locks, default_locks do
-        ability.can?(:read, MySubject).must_equal false
+    describe 'class locks' do
+      before(:all) { MySubject.default_lock MyLock, :read, true }
+
+      it { ability.can?(:read, MySubject).must_equal true }
+      it { ability.cannot?(:read, MySubject).must_equal false }
+    end
+
+    describe 'inherited locks' do
+      describe 'subject_type' do
+        let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        let(:my_role) { MyRole.new(my_locks: [read_lock]) }
+        let(:owner) { MyOwner.new(my_roles: [my_role]) }
+
+        it { ability.can?(:read, MySubject).must_equal true }
+        it { ability.cannot?(:read, MySubject).must_equal false }
+      end
+
+      describe 'subject_id' do
+        let(:my_subject) { MySubject.new }
+        let(:read_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+        let(:my_role) { MyRole.new(my_locks: [read_lock]) }
+        let(:owner) { MyOwner.new(my_roles: [my_role]) }
+
+        it { ability.can?(:read, my_subject).must_equal true }
+        it { ability.cannot?(:read, my_subject).must_equal false }
       end
     end
 
-    it 'owner cannot?' do
-      MySubject.stub :default_locks, default_locks do
-        ability.cannot?(:read, MySubject).must_equal true
-      end
-    end
+    describe 'owner locks' do
+      describe 'subject_type' do
+        let(:read_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+        let(:owner) { MyOwner.new(my_locks: [read_lock]) }
 
-    it 'is accessible by' do
-      MySubject.stub :default_locks, default_locks do
-        MySubject.accessible_by(ability, :read).must_be_kind_of Mongoid::Criteria
+        it { ability.can?(:read, MySubject).must_equal true }
+        it { ability.cannot?(:read, MySubject).must_equal false }
+      end
+
+      describe 'subject_id' do
+        let(:my_subject) { MySubject.new }
+        let(:read_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
+        let(:owner) { MyOwner.new(my_locks: [read_lock]) }
+
+        it { ability.can?(:read, my_subject).must_equal true }
+        it { ability.cannot?(:read, my_subject).must_equal false }
       end
     end
   end

@@ -46,38 +46,47 @@ module MongoidAbility
     end
 
     concerning :Outcome do
-      # NOTE: override for more complicated results
-      def calculated_outcome(_options = {})
+      def open?
         outcome
       end
 
-      def open?(options = {})
-        calculated_outcome(options) == true
-      end
-
-      def closed?(options = {})
-        !open?(options)
+      def closed?
+        !open?
       end
     end
 
+    # calculates outcome as if this lock is not present
     concerning :InheritedOutcome do
-      # calculates outcome as if this lock is not present
-      def inherited_outcome(options = default_options)
-        return calculated_outcome(options) unless owner.present?
+      def inherited_outcome(options = {})
+        return outcome unless owner.present?
         cloned_owner = owner.clone
         cloned_owner.locks_relation = cloned_owner.locks_relation - [self]
-        MongoidAbility::Ability.new(cloned_owner).can? action, (subject.present? ? subject : subject_class), options
-      end
+        cloned_ability = MongoidAbility::Ability.new(cloned_owner)
 
-      # used when calculating inherited outcome
-      def default_options
-        {}
+        cloned_ability.can?(action, (subject.present? ? subject : subject_class), options)
       end
     end
 
     concerning :Subject do
       def subject_class
         subject_type.constantize
+      end
+    end
+
+    concerning :Group do
+      def group_key_for_calc
+        [subject_type, subject_id, action, options]
+      end
+    end
+
+    concerning :Sort do
+      class_methods do
+        def sort
+          -> (a, b) {
+            [a.subject_type, a.subject_id.to_s, a.action, (a.outcome ? -1 : 1)] <=>
+              [b.subject_type, b.subject_id.to_s, b.action, (b.outcome ? -1 : 1)]
+          }
+        end
       end
     end
   end

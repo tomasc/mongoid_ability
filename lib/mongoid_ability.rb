@@ -1,19 +1,19 @@
-require "mongoid_ability/version"
+require 'cancancan'
+require 'mongoid'
 
-require "mongoid_ability/ability"
+require 'cancancan/model_adapters/mongoid_adapter'
+require 'cancancan/model_additions'
 
-require "mongoid_ability/lock"
-require "mongoid_ability/owner"
-require "mongoid_ability/subject"
+require 'mongoid_ability/version'
 
-require "mongoid_ability/resolver"
-require "mongoid_ability/resolve_locks"
-require "mongoid_ability/resolve_default_locks"
-require "mongoid_ability/resolve_inherited_locks"
-require "mongoid_ability/resolve_owner_locks"
+require 'mongoid_ability/ability'
 
-require "mongoid_ability/values_for_accessible_query"
-require "mongoid_ability/accessible_query_builder"
+require 'mongoid_ability/lock'
+require 'mongoid_ability/owner'
+require 'mongoid_ability/subject'
+
+require 'mongoid_ability/locks_decorator'
+require 'mongoid_ability/find_lock'
 
 # ---------------------------------------------------------------------
 

@@ -3,12 +3,9 @@ require 'test_helper'
 module MongoidAbility
   describe Lock do
     subject { MyLock.new }
+
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
-
-    let(:my_subject_default_locks) { [MyLock.new(subject_type: MySubject, action: :read, outcome: true)] }
-    let(:my_subject_1_default_locks) { [MyLock.new(subject_type: MySubject1, action: :false, outcome: true)] }
-    let(:my_subject_2_default_locks) { [] }
 
     # ---------------------------------------------------------------------
 
@@ -55,47 +52,42 @@ module MongoidAbility
 
     # ---------------------------------------------------------------------
 
+    describe 'sort' do
+      let(:lock0) { MyLock.new(subject_type: MySubject, action: :update, outcome: false) }
+      let(:lock1) { MyLock.new(subject_type: MySubject, action: :update, outcome: true) }
+      let(:lock2) { MyLock.new(subject_type: MySubject, action: :read, outcome: false, options: { override: true }) }
+      let(:lock3) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
+      let(:lock4) { MyLock.new(subject_type: MySubject, action: :read, outcome: true) }
+
+      let(:owner) { MyOwner.new(my_locks: [lock1, lock2, lock3, lock4]) }
+
+      let(:sorted_locks) { owner.my_locks.sort(&Lock.sort) }
+
+      it { sorted_locks[0].must_equal lock4 }
+      it { sorted_locks[3].must_equal lock1 }
+    end
+
+    # ---------------------------------------------------------------------
+
     describe '#inherited_outcome' do
-      let(:my_subject) { MySubject.new }
-      let(:subject_type_lock) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
-      let(:subject_lock) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
-      let(:owner) { MyOwner.new(my_locks: [subject_type_lock, subject_lock]) }
+      before(:all) { MySubject.default_lock MyLock, :read, true }
 
-      before do
-        @ability = Ability.new(owner) # initialize owner
-      end
+      let(:owner) { MyOwner.new(my_locks: [
+        MyLock.new(subject_type: MySubject, action: :read, outcome: false),
+        MyLock.new(subject: my_subject, action: :read, outcome: true)
+      ]) }
 
-      it 'does not affect calculated_outcome' do
-        MySubject.stub :default_locks, my_subject_default_locks do
-          MySubject1.stub :default_locks, my_subject_1_default_locks do
-            MySubject2.stub :default_locks, my_subject_2_default_locks do
-              @ability.can?(:read, my_subject).must_equal true
-            end
-          end
-        end
-      end
+      let(:ability) { Ability.new(owner) }
 
-      it 'returns calculated_outcome without this lock' do
-        MySubject.stub :default_locks, my_subject_default_locks do
-          MySubject1.stub :default_locks, my_subject_1_default_locks do
-            MySubject2.stub :default_locks, my_subject_2_default_locks do
-              subject_lock.inherited_outcome.must_equal false
-              subject_type_lock.inherited_outcome.must_equal true
-            end
-          end
-        end
-      end
+      let(:subject_type_lock) { owner.my_locks.detect(&:class_lock?) }
+      let(:subject_lock) { owner.my_locks.detect(&:id_lock?) }
+      let(:default_lock) { MySubject.default_locks.detect { |l| l.action == :read } }
 
-      it 'returns calculated_outcome for default locks' do
-        MySubject.stub :default_locks, my_subject_default_locks do
-          MySubject1.stub :default_locks, my_subject_1_default_locks do
-            MySubject2.stub :default_locks, my_subject_2_default_locks do
-              lock = MySubject.default_locks.detect { |l| l.action == :read }
-              lock.inherited_outcome.must_equal true
-            end
-          end
-        end
-      end
+      it { ability.can?(:read, my_subject).must_equal true }
+
+      it { subject_lock.inherited_outcome.must_equal false }
+      it { subject_type_lock.inherited_outcome.must_equal true }
+      it { default_lock.inherited_outcome.must_equal true }
     end
   end
 end
