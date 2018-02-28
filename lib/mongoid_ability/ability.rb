@@ -83,9 +83,15 @@ module MongoidAbility
       ability_type = lock.outcome ? :can : :cannot
       cls = lock.subject_class
       options = lock.options
-      options = options.merge(id: lock.subject_id) if lock.id_lock?
+      options = options.merge(id: convert_to_bson(lock.subject_id)) if lock.id_lock?
       action = lock.action
       send ability_type, action, cls, options
+    end
+
+    def convert_to_bson(id)
+      return id unless id.is_a?(String)
+      return id unless BSON::ObjectId.legal?(id)
+      BSON::ObjectId.from_string(id)
     end
   end
 end

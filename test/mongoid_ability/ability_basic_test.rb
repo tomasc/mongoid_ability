@@ -35,6 +35,13 @@ module MongoidAbility
 
         it { ability.can?(:read, my_subject).must_equal true }
         it { ability.cannot?(:read, my_subject).must_equal false }
+
+        describe 'when id stored as String' do
+          let(:read_lock) { MyLock.new(subject_type: my_subject.model_name.to_s, subject_id: my_subject.id.to_s, action: :read, outcome: true) }
+
+          it { ability.can?(:read, my_subject).must_equal true }
+          it { ability.cannot?(:read, my_subject).must_equal false }
+        end
       end
     end
 
