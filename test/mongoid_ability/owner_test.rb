@@ -17,7 +17,7 @@ module MongoidAbility
 
       describe 'locks relation' do
         it { subject.class.locks_relation_name.must_equal :my_locks }
-        it { subject.locks_relation.metadata[:name].must_equal :my_locks }
+        it { subject.reflect_on_association(:my_locks).name.must_equal :my_locks }
       end
     end
 

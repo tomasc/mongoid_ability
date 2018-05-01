@@ -9,7 +9,11 @@ module MongoidAbility
         field :outcome, type: Boolean, default: false
         field :opts, as: :options, type: Hash, default: {}
 
-        belongs_to :subject, polymorphic: true, touch: true, optional: true
+        belongs_to :subject, polymorphic: true, optional: true
+        # Mongoid 7 does not support `touch: true` on polymorphic associations
+        after_save -> { subject.touch if subject? }
+        after_destroy -> { subject.touch if subject? }
+        after_touch -> { subject.touch if subject? }
 
         # TODO: validate that action is defined on subject or its superclasses
         validates :action, presence: true, uniqueness: { scope: [:subject_type, :subject_id, :outcome] }
