@@ -1,3 +1,5 @@
+require 'set'
+
 module CanCan
   module ModelAdapters
     class MongoidAdapter < AbstractAdapter
@@ -51,12 +53,12 @@ module CanCan
 
       def open_subject_types
         @open_subject_types ||= begin
-          subject_types.inject([]) do |res, cls|
+          subject_types.inject(Set[]) do |res, cls|
             subject_type_rules_for(cls).each do |rule|
               cls_list = [cls, *cls.descendants].compact
               rule.base_behavior ? res += cls_list : res -= cls_list
             end
-            res.uniq
+            res.to_a
           end
         end
       end
