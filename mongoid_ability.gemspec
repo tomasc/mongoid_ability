@@ -18,8 +18,8 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'cancancan', '>= 1.9'
-  spec.add_dependency 'mongoid', '>= 5'
+  spec.add_dependency 'cancancan', '~> 2.2'
+  spec.add_dependency 'mongoid', '>= 5', '< 7'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'coveralls'

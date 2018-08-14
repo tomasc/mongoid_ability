@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2.0.2
+
+* upgrade to `CanCanCan` 2.2
+* performance optimisation in `MongoidAdapter`
+
 ## 2.0.1
 
 * make sure all `subject_id` values are converted to BSON

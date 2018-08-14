@@ -6,5 +6,3 @@ git_source(:github) do |repo_name|
 end
 
 gemspec
-
-# gem 'cancancan-mongoid', github: 'tomasc/cancancan-mongoid', branch: 'master'
