@@ -67,14 +67,19 @@ module MongoidAbility
     end
 
     def model_adapter(model_class, action, options = {})
-      adapter_class = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model_class)
-      # include all rules that apply for descendants as well
-      # so the adapter can exclude include subclasses from critieria
-      rules = ([model_class] + model_class.descendants).inject([]) do |res, cls|
-        res += relevant_rules_for_query(action, cls)
-        res.uniq
+      @model_adapter ||= {}
+      @model_adapter[model_class] ||= {}
+      @model_adapter[model_class][action] ||= {}
+      @model_adapter[model_class][action][options] ||= begin
+        adapter_class = CanCan::ModelAdapters::AbstractAdapter.adapter_class(model_class)
+        # include all rules that apply for descendants as well
+        # so the adapter can exclude include subclasses from critieria
+        rules = ([model_class] + model_class.descendants).inject([]) do |res, cls|
+          res += relevant_rules_for_query(action, cls)
+          res.uniq
+        end
+        adapter_class.new(model_class, rules, options)
       end
-      adapter_class.new(model_class, rules, options)
     end
 
     private
