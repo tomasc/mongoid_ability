@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2.0.3
+
+* memoize `model_adapter` for better performance
+
 ## 2.0.2
 
 * upgrade to `CanCanCan` 2.2
