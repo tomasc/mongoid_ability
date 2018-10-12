@@ -3,6 +3,8 @@ module MongoidAbility
     def self.included(base)
       base.extend ClassMethods
       base.class_eval do
+        include Mongoid::Touchable::InstanceMethods
+
         delegate  :can?, :cannot?,
                   to: :ability
 

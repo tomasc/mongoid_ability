@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'cancancan', '~> 2.2'
-  spec.add_dependency 'mongoid', '>= 5', '< 7'
+  spec.add_dependency 'mongoid', '~> 7.0', '>= 7.0.2'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'coveralls'
