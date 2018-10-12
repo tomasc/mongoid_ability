@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.0
+
+* upgrade to Mongoid 7+
+
 ## 2.0.3
 
 * memoize `model_adapter` for better performance
