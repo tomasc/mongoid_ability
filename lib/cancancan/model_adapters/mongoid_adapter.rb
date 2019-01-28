@@ -88,11 +88,15 @@ module CanCan
           condition_rules.reject(&:base_behavior).each_with_object([]) do |rule, res|
             rule.conditions.each do |key, value|
               key = id_key if %i[id _id].include?(key.to_sym)
-              res <<  case value
-                      when Regexp then { key => { '$not' => value } }
-                      when Array then { key => { '$nin' => value } }
-                      else { key => { '$ne' => value } }
-                      end
+              case value
+              when Regexp then res << { key => { '$not' => value } }
+              else
+                if prev_value = res.detect { |item| item.dig(key, '$nin') }
+                  prev_value[key]['$nin'] += Array(value)
+                else
+                  res << { key => { '$nin' => Array(value) } }
+                end
+              end
             end
           end
         end
@@ -100,6 +104,7 @@ module CanCan
 
       def subject_type_conditions
         return unless open_subject_types.present?
+
         { :"#{type_key}".nin => closed_subject_types.map(&:to_s) }
       end
 
@@ -112,7 +117,7 @@ module CanCan
       def database_records
         return @model_class.none unless has_any_conditions?
 
-        or_conditions = { '$or' => ([subject_type_conditions, *open_conditions]).compact }
+        or_conditions = { '$or' => [subject_type_conditions, *open_conditions].compact }
         or_conditions = nil if or_conditions['$or'].empty?
 
         and_conditions = { '$and' => [or_conditions, *closed_conditions].compact }

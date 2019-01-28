@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 3.0.1
+
+* OPTMIZE: `.accessible_by` is now using `$nin` with multiple values rather than multiple of `$ne`
+
 ## 3.0.0
 
 * upgrade to Mongoid 7+

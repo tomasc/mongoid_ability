@@ -196,7 +196,7 @@ module CanCan
                   { 'subject_type' => { '$nin' => [] } },
                   { 'subject_id' => my_subject1.id }
                 ] },
-                { 'subject_id' => { '$ne' => my_subject2.id } }
+                { 'subject_id' => { '$nin' => [my_subject2.id] } }
               ]
             )
           end
