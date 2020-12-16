@@ -25,7 +25,9 @@ module CanCan
 
         describe 'subject type locks' do
           describe 'default open locks' do
-            before { MySubject.default_lock MyLock, :read, true }
+            before do
+              MySubject.default_lock MyLock, :read, true
+            end
 
             it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject }
             it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject1 }
@@ -38,6 +40,14 @@ module CanCan
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject }
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
             it { _(MySubject2.accessible_by(ability, :read).to_a).must_include my_subject2 }
+
+            it 'works for non sci classes' do
+              MyFlatSubject.default_lock MyLock, :read, true
+              flat_subject = MyFlatSubject.create!
+
+              _(MyFlatSubject.accessible_by(ability, :read).to_a)
+                .must_include flat_subject
+            end
           end
 
           describe 'default closed locks' do

@@ -8,7 +8,9 @@ module MongoidAbility
         include Mongoid::Touchable::InstanceMethods
 
         # always set the _type field as it is used by :accessible_by queries
-        field :_type, type: String, default: model_name
+        # FIXME: removing this line should in theory break non SCI object, but
+        # it doesn't ...
+        # field :_type, type: String, default: model_name
       end
     end
 
