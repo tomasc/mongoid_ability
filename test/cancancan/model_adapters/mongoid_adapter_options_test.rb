@@ -19,8 +19,8 @@ module CanCan
           describe 'positive' do
             before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
 
-            it { MySubject.accessible_by(ability).wont_include subject1 }
-            it { MySubject.accessible_by(ability).must_include subject2 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
+            it { _(MySubject.accessible_by(ability)).must_include subject2 }
           end
 
           describe 'negative' do
@@ -29,8 +29,8 @@ module CanCan
               MySubject.default_lock MyLock, :read, false, override: true
             end
 
-            it { MySubject.accessible_by(ability).must_include subject1 }
-            it { MySubject.accessible_by(ability).wont_include subject2 }
+            it { _(MySubject.accessible_by(ability)).must_include subject1 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
           end
         end
 
@@ -40,8 +40,8 @@ module CanCan
           describe 'positive' do
             before(:all) { MySubject.default_lock MyLock, :read, true, str_val: 'Jan Tschichold' }
 
-            it { MySubject.accessible_by(ability).wont_include subject1 }
-            it { MySubject.accessible_by(ability).must_include subject2 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
+            it { _(MySubject.accessible_by(ability)).must_include subject2 }
           end
 
           describe 'negative' do
@@ -50,8 +50,8 @@ module CanCan
               MySubject.default_lock MyLock, :read, false, str_val: 'Jan Tschichold'
             end
 
-            it { MySubject.accessible_by(ability).must_include subject1 }
-            it { MySubject.accessible_by(ability).wont_include subject2 }
+            it { _(MySubject.accessible_by(ability)).must_include subject1 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
           end
         end
 
@@ -61,8 +61,8 @@ module CanCan
           describe 'positive' do
             before(:all) { MySubject.default_lock MyLock, :read, true, str_val: /tschichold/i }
 
-            it { MySubject.accessible_by(ability).wont_include subject1 }
-            it { MySubject.accessible_by(ability).must_include subject2 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
+            it { _(MySubject.accessible_by(ability)).must_include subject2 }
           end
 
           describe 'negative' do
@@ -71,8 +71,8 @@ module CanCan
               MySubject.default_lock MyLock, :read, false, str_val: /tschichold/i
             end
 
-            it { MySubject.accessible_by(ability).must_include subject1 }
-            it { MySubject.accessible_by(ability).wont_include subject2 }
+            it { _(MySubject.accessible_by(ability)).must_include subject1 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
           end
         end
 
@@ -82,8 +82,8 @@ module CanCan
           describe 'positive' do
             before(:all) { MySubject.default_lock MyLock, :read, true, str_val: %w(John Paul George Ringo) }
 
-            it { MySubject.accessible_by(ability).wont_include subject1 }
-            it { MySubject.accessible_by(ability).must_include subject2 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
+            it { _(MySubject.accessible_by(ability)).must_include subject2 }
           end
 
           describe 'negative' do
@@ -92,8 +92,8 @@ module CanCan
               MySubject.default_lock MyLock, :read, false, str_val: %w(John Paul George Ringo)
             end
 
-            it { MySubject.accessible_by(ability).must_include subject1 }
-            it { MySubject.accessible_by(ability).wont_include subject2 }
+            it { _(MySubject.accessible_by(ability)).must_include subject1 }
+            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
           end
         end
       end
