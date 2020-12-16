@@ -28,8 +28,6 @@ module MongoidAbility
       subject_type.constantize
     end
 
-    # ---------------------------------------------------------------------
-
     class FindDefaultLock < FindLock
       def call
         locks = subject_class.default_locks.for_action(action)
