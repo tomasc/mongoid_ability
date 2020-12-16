@@ -27,35 +27,35 @@ module CanCan
           describe 'default open locks' do
             before { MySubject.default_lock MyLock, :read, true }
 
-            it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject }
-            it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject1 }
-            it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject2 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject }
+            it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject1 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject2 }
 
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject1.accessible_by(ability, :read).to_a.must_include my_subject1 }
-            it { MySubject1.accessible_by(ability, :read).to_a.must_include my_subject2 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).must_include my_subject1 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).must_include my_subject2 }
 
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject2.accessible_by(ability, :read).to_a.must_include my_subject2 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).must_include my_subject2 }
           end
 
           describe 'default closed locks' do
             before { MySubject.default_lock MyLock, :read, false }
 
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject.accessible_by(ability, :read).selector.must_equal({}) }
+            it { _(MySubject.accessible_by(ability, :read).selector).must_equal({}) }
           end
 
           describe 'default combined locks' do
@@ -65,14 +65,14 @@ module CanCan
               MySubject2.default_lock MyLock, :read, false
             end
 
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject }
-            it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject1 }
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject }
+            it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject1 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject1.accessible_by(ability, :read).to_a.must_include my_subject1 }
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).must_include my_subject1 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject2 }
           end
 
           describe 'combined locks' do
@@ -84,14 +84,14 @@ module CanCan
             let(:role) { MyRole.new(my_locks: [lock]) }
             let(:owner) { MyOwner.new(my_roles: [role]) }
 
-            it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject }
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject1 }
-            it { MySubject1.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject1 }
+            it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+            it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject2 }
           end
         end
 
@@ -105,9 +105,9 @@ module CanCan
                 MySubject.default_lock MyLock, :read, true
               end
 
-              it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject }
-              it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject1 }
-              it { MySubject.accessible_by(ability, :read).to_a.must_include my_subject2 }
+              it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject }
+              it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject1 }
+              it { _(MySubject.accessible_by(ability, :read).to_a).must_include my_subject2 }
             end
 
             describe 'open id locks' do
@@ -118,9 +118,9 @@ module CanCan
                 MySubject.default_lock MyLock, :read, false
               end
 
-              it { MySubject.accessible_by(ability, :read).to_a.wont_include my_subject }
-              it { MySubject1.accessible_by(ability, :read).to_a.must_include my_subject1 }
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include my_subject2 }
+              it { _(MySubject.accessible_by(ability, :read).to_a).wont_include my_subject }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).must_include my_subject1 }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject2 }
             end
 
             describe 'closed types & open ids' do
@@ -130,8 +130,8 @@ module CanCan
 
               let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3]) }
 
-              it { MySubject.accessible_by(ability, :read).must_include my_subject }
-              it { MySubject.accessible_by(ability, :read).must_include my_subject1 }
+              it { _(MySubject.accessible_by(ability, :read)).must_include my_subject }
+              it { _(MySubject.accessible_by(ability, :read)).must_include my_subject1 }
             end
           end
 
@@ -139,19 +139,21 @@ module CanCan
             describe 'positive' do
               let(:my_subject1) { MySubject1.new(override: true) }
 
-              before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
+              before(:all) do
+                MySubject.default_lock MyLock, :read, true, override: true
+              end
 
-              it { MySubject.accessible_by(ability, :read).to_a.wont_include(my_subject) }
-              it { MySubject.accessible_by(ability, :read).to_a.must_include(my_subject1) }
-              it { MySubject.accessible_by(ability, :read).to_a.wont_include(my_subject2) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).wont_include(my_subject) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).must_include(my_subject1) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).wont_include(my_subject2) }
 
-              it { MySubject1.accessible_by(ability, :read).to_a.wont_include(my_subject) }
-              it { MySubject1.accessible_by(ability, :read).to_a.must_include(my_subject1) }
-              it { MySubject1.accessible_by(ability, :read).to_a.wont_include(my_subject2) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include(my_subject) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).must_include(my_subject1) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include(my_subject2) }
 
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include(my_subject) }
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include(my_subject1) }
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include(my_subject2) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include(my_subject) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include(my_subject1) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include(my_subject2) }
             end
 
             describe 'negative' do
@@ -162,17 +164,17 @@ module CanCan
                 MySubject.default_lock MyLock, :read, false, override: true
               end
 
-              it { MySubject.accessible_by(ability, :read).to_a.must_include(my_subject) }
-              it { MySubject.accessible_by(ability, :read).to_a.wont_include(my_subject1) }
-              it { MySubject.accessible_by(ability, :read).to_a.must_include(my_subject2) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).must_include(my_subject) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).wont_include(my_subject1) }
+              it { _(MySubject.accessible_by(ability, :read).to_a).must_include(my_subject2) }
 
-              it { MySubject1.accessible_by(ability, :read).to_a.wont_include(my_subject) }
-              it { MySubject1.accessible_by(ability, :read).to_a.wont_include(my_subject1) }
-              it { MySubject1.accessible_by(ability, :read).to_a.must_include(my_subject2) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include(my_subject) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).wont_include(my_subject1) }
+              it { _(MySubject1.accessible_by(ability, :read).to_a).must_include(my_subject2) }
 
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include(my_subject) }
-              it { MySubject2.accessible_by(ability, :read).to_a.wont_include(my_subject1) }
-              it { MySubject2.accessible_by(ability, :read).to_a.must_include(my_subject2) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include(my_subject) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include(my_subject1) }
+              it { _(MySubject2.accessible_by(ability, :read).to_a).must_include(my_subject2) }
             end
           end
         end
@@ -182,15 +184,15 @@ module CanCan
           let(:lock_2) { MyLock.new(subject: my_subject2, action: :read, outcome: false) }
           let(:role_1) { MyRole.new(my_locks: [lock_1, lock_2]) }
 
-          let(:prefix) { :subject }
-          let(:selector) { MySubject.accessible_by(ability, :read, prefix: prefix).selector }
-
           before(:all) do
             MySubject.default_lock MyLock, :read, true
           end
 
           it 'allows to pass prefix' do
-            selector.must_equal(
+            prefix = :subject
+            selector = MySubject.accessible_by(ability, :read, prefix: prefix).selector
+
+            _(selector).must_equal(
               '$and' => [
                 { '$or' => [
                   { 'subject_type' => { '$nin' => [] } },
