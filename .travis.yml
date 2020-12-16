@@ -2,9 +2,9 @@ language: ruby
 script: 'bundle exec rake'
 sudo: false
 rvm:
-  - 2.5.1
-  - 2.6.4
-  - 2.7.1
+  - 2.5.8
+  - 2.6.6
+  - 2.7.2
 services:
   - mongodb
 gemfile:
