@@ -19,8 +19,15 @@ module MongoidAbility
     end
 
     describe 'load' do
-      it { _(loaded_rules.count).must_equal 2 }
-      it { _(loaded_rules.map(&:conditions)).must_include({ id: my_subject.id }) }
+      # TODO: improvement might be to add a description to this test, as the 2
+      # integer is a bit magic
+      it 'loads rules for each ?' do
+        _(loaded_rules.count).must_equal 2
+      end
+
+      it 'builds conditions for the subjects id' do
+        _(loaded_rules.map(&:conditions)).must_include({ id: my_subject.id })
+      end
     end
   end
 end
