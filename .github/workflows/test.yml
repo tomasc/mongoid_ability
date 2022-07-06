@@ -1,5 +1,8 @@
 name: My workflow
 on: [push, pull_request]
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   test:
     strategy:
