@@ -9,10 +9,10 @@ require 'mongoid_ability'
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-if ENV['CI']
-  require 'coveralls'
-  Coveralls.wear!
-end
+# if ENV['CI']
+#   require 'coveralls'
+#   Coveralls.wear!
+# end
 
 Mongoid.logger.level = Logger::INFO
 Mongo::Logger.logger.level = Logger::INFO
@@ -30,7 +30,7 @@ class MiniTest::Spec
   end
 
   after(:each) do
-    [ MySubject, 
+    [ MySubject,
       MySubject1, MySubject2,
       MySubject11, MySubject21
     ].each(&:reset_default_locks!)
