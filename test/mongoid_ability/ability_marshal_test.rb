@@ -19,9 +19,7 @@ module MongoidAbility
     end
 
     describe 'load' do
-      # TODO: improvement might be to add a description to this test, as the 2
-      # integer is a bit magic
-      it 'loads rules for each ?' do
+      it 'loads rules for each lock' do
         _(loaded_rules.count { |rule| rule.subjects == [MySubject] }).must_equal 2
       end
 
