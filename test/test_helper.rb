@@ -1,5 +1,5 @@
 require 'bundler/setup'
-require 'database_cleaner'
+require 'database_cleaner/mongoid'
 require 'minitest'
 require 'minitest/autorun'
 require 'minitest/spec'
