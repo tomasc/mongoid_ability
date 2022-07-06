@@ -21,9 +21,6 @@ Mongoid.configure do |config|
   config.connect_to('mongoid_ability_test')
 end
 
-DatabaseCleaner.orm = :mongoid
-DatabaseCleaner.strategy = :truncation
-
 class MiniTest::Spec
   before(:each) do
     DatabaseCleaner.start
