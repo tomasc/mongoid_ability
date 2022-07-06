@@ -1,100 +1,101 @@
-require 'test_helper'
+require "test_helper"
 
 module CanCan
   module ModelAdapters
     describe MongoidAdapter do
-      describe '.accessible_by' do
-        let(:owner) { MyOwner.new }
-        let(:ability) { MongoidAbility::Ability.new(owner) }
-        let(:subject1) { MySubject.new }
+      describe ".accessible_by" do
+        describe "Boolean" do
+          it "returns correct records when using positive locks" do
+            MySubject.default_lock MyLock, :read, true, override: true
+            unaccessible = MySubject.create!
+            accessible = MySubject.create!(override: true)
 
-        before do
-          subject1.save!
-          subject2.save!
-        end
-
-        describe 'Boolean' do
-          let(:subject2) { MySubject.new(override: true) }
-
-          describe 'positive' do
-            before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
-
-            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
-            it { _(MySubject.accessible_by(ability)).must_include subject2 }
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
+            _(MySubject.accessible_by(ability)).must_include accessible
           end
 
-          describe 'negative' do
-            before(:all) do
-              MySubject.default_lock MyLock, :read, true
-              MySubject.default_lock MyLock, :read, false, override: true
-            end
+          it "returns the correct records when using negative locks" do
+            MySubject.default_lock MyLock, :read, true
+            MySubject.default_lock MyLock, :read, false, override: true
+            accessible = MySubject.create!
+            unaccessible = MySubject.create!(override: true)
 
-            it { _(MySubject.accessible_by(ability)).must_include subject1 }
-            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
+            _(MySubject.accessible_by(ability)).must_include accessible
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
           end
         end
 
-        describe 'String' do
-          let(:subject2) { MySubject.new(str_val: "Jan Tschichold") }
+        describe "String" do
+          it "returns correct records when using positive locks" do
+            MySubject.default_lock MyLock, :read, true, str_val: "Jan Tschichold"
+            unaccessible = MySubject.create!
+            accessible = MySubject.create!(str_val: "Jan Tschichold")
 
-          describe 'positive' do
-            before(:all) { MySubject.default_lock MyLock, :read, true, str_val: 'Jan Tschichold' }
-
-            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
-            it { _(MySubject.accessible_by(ability)).must_include subject2 }
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
+            _(MySubject.accessible_by(ability)).must_include accessible
           end
 
-          describe 'negative' do
-            before(:all) do
-              MySubject.default_lock MyLock, :read, true
-              MySubject.default_lock MyLock, :read, false, str_val: 'Jan Tschichold'
-            end
+          it "returns the correct records when using negative locks" do
+            MySubject.default_lock MyLock, :read, true
+            MySubject.default_lock MyLock, :read, false, str_val: "Jan Tschichold"
+            accessible = MySubject.create!
+            unaccessible = MySubject.create!(str_val: "Jan Tschichold")
 
-            it { _(MySubject.accessible_by(ability)).must_include subject1 }
-            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
-          end
-        end
-
-        describe 'Regexp' do
-          let(:subject2) { MySubject.new(str_val: "Jan Tschichold") }
-
-          describe 'positive' do
-            before(:all) { MySubject.default_lock MyLock, :read, true, str_val: /tschichold/i }
-
-            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
-            it { _(MySubject.accessible_by(ability)).must_include subject2 }
-          end
-
-          describe 'negative' do
-            before(:all) do
-              MySubject.default_lock MyLock, :read, true
-              MySubject.default_lock MyLock, :read, false, str_val: /tschichold/i
-            end
-
-            it { _(MySubject.accessible_by(ability)).must_include subject1 }
-            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
+            _(MySubject.accessible_by(ability)).must_include accessible
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
           end
         end
 
-        describe 'Array' do
-          let(:subject2) { MySubject.new(str_val: "John") }
+        describe "Regexp" do
+          it "returns correct records when using positive locks" do
+            MySubject.default_lock MyLock, :read, true, str_val: /tschichold/i
+            unaccessible = MySubject.create!
+            accessible = MySubject.create!(str_val: "Jan Tschichold")
 
-          describe 'positive' do
-            before(:all) { MySubject.default_lock MyLock, :read, true, str_val: %w(John Paul George Ringo) }
-
-            it { _(MySubject.accessible_by(ability)).wont_include subject1 }
-            it { _(MySubject.accessible_by(ability)).must_include subject2 }
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
+            _(MySubject.accessible_by(ability)).must_include accessible
           end
 
-          describe 'negative' do
-            before(:all) do
-              MySubject.default_lock MyLock, :read, true
-              MySubject.default_lock MyLock, :read, false, str_val: %w(John Paul George Ringo)
-            end
+          it "returns the correct records when using negative locks" do
+            MySubject.default_lock MyLock, :read, true
+            MySubject.default_lock MyLock, :read, false, str_val: /tschichold/i
+            accessible = MySubject.create!
+            unaccessible = MySubject.create!(str_val: "Jan Tschichold")
 
-            it { _(MySubject.accessible_by(ability)).must_include subject1 }
-            it { _(MySubject.accessible_by(ability)).wont_include subject2 }
+            _(MySubject.accessible_by(ability)).must_include accessible
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
           end
+        end
+
+        describe "Array" do
+          it "returns correct records when using positive locks" do
+            MySubject.default_lock MyLock, :read, true, str_val: %w[John Paul George Ringo]
+            unaccessible = MySubject.create!
+            accessible = MySubject.create!(str_val: "John")
+
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
+            _(MySubject.accessible_by(ability)).must_include accessible
+          end
+
+          it "returns the correct records when using negative locks" do
+            MySubject.default_lock MyLock, :read, true
+            MySubject.default_lock MyLock, :read, false, str_val: %w[John Paul George Ringo]
+            accessible = MySubject.create!
+            unaccessible = MySubject.create!(str_val: "John")
+
+            _(MySubject.accessible_by(ability)).must_include accessible
+            _(MySubject.accessible_by(ability)).wont_include unaccessible
+          end
+        end
+
+        private
+
+        def owner
+          MyOwner.new
+        end
+
+        def ability
+          MongoidAbility::Ability.new(owner)
         end
       end
     end

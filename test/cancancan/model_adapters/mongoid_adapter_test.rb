@@ -203,13 +203,15 @@ module CanCan
             selector = MySubject.accessible_by(ability, :read, prefix: prefix).selector
 
             _(selector).must_equal(
-              '$and' => [
-                { '$or' => [
+              {
+                '$or' => [
                   { 'subject_type' => { '$nin' => [] } },
-                  { 'subject_id' => my_subject1.id }
-                ] },
-                { 'subject_id' => { '$nin' => [my_subject2.id] } }
-              ]
+                  { 'subject_id' => my_subject1.id },
+                ],
+                '$and' =>[
+                  { 'subject_id'=> { '$nin' => [my_subject2.id] } }
+                ]
+              }
             )
           end
         end

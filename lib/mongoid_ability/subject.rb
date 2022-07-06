@@ -1,5 +1,11 @@
 # frozen_string_literal: true
 
+# TODO: rewrite as concern, use proc for the _type or consider either using
+# discriminator_key or maybe even better add our own configurable discriminator
+# key (.ability_subject_discriminator_key), to not rely on mongoid internals?
+#
+# https://github.com/mongodb/mongoid/blob/01ee33970c5e9cefe436528c56c32e843f474e9b/lib/mongoid/traversable.rb
+
 module MongoidAbility
   module Subject
     def self.included(base)
