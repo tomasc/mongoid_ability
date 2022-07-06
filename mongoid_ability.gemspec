@@ -21,11 +21,11 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'cancancan', '~> 2.2'
   spec.add_dependency 'mongoid', '~> 7.0', '>= 7.0.2'
 
+  spec.add_development_dependency 'appraisal'
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'coveralls'
-  spec.add_development_dependency 'database_cleaner', '>= 1.5.1'
+  spec.add_development_dependency 'database_cleaner-mongoid', '~> 2.0.1'
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-minitest'
   spec.add_development_dependency 'minitest'
-  spec.add_development_dependency 'rake', '~> 10.0'
+  spec.add_development_dependency 'rake', '~> 11.0'
 end

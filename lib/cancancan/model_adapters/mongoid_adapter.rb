@@ -1,40 +1,44 @@
-require 'set'
+# frozen_string_literal: true
+
+require "set"
 
 module CanCan
   module ModelAdapters
     class MongoidAdapter < AbstractAdapter
-      def self.for_class?(model_class)
-        model_class <= Mongoid::Document
-      end
+      class << self
+        def for_class?(model_class)
+          model_class <= Mongoid::Document
+        end
 
-      # Used to determine if this model adapter will override the matching behavior for a hash of conditions.
-      # If this returns true then matches_conditions_hash? will be called. See Rule#matches_conditions_hash
-      def self.override_conditions_hash_matching?(_subject, _conditions)
-        false
-      end
+        # Used to determine if this model adapter will override the matching behavior for a hash of conditions.
+        # If this returns true then matches_conditions_hash? will be called. See Rule#matches_conditions_hash
+        def override_conditions_hash_matching?(_subject, _conditions)
+          false
+        end
 
-      # Override if override_conditions_hash_matching? returns true
-      def self.matches_conditions_hash?(_subject, _conditions)
-        raise NotImplemented, 'This model adapter does not support matching on a conditions hash.'
-      end
+        # Override if override_conditions_hash_matching? returns true
+        def matches_conditions_hash?(_subject, _conditions)
+          raise NotImplemented, "This model adapter does not support matching on a conditions hash."
+        end
 
-      # Used to determine if this model adapter will override the matching behavior for a specific condition.
-      # If this returns true then matches_condition? will be called. See Rule#matches_conditions_hash
-      def self.override_condition_matching?(_subject, _name, _value)
-        true
-      end
+        # Used to determine if this model adapter will override the matching behavior for a specific condition.
+        # If this returns true then matches_condition? will be called. See Rule#matches_conditions_hash
+        def override_condition_matching?(_subject, _name, _value)
+          true
+        end
 
-      # Override if override_condition_matching? returns true
-      def self.matches_condition?(subject, name, value)
-        attribute = subject.send(name)
+        # Override if override_condition_matching? returns true
+        def matches_condition?(subject, name, value)
+          attribute = subject.send(name)
 
-        case value
-        when Hash then hash_condition_match?(attribute, value)
-        when Range then value.cover?(attribute)
-        when Regexp then value.match(attribute)
-        when Array then value.include?(attribute)
-        when Enumerable then value.include?(attribute)
-        else attribute == value
+          case value
+          when Hash then hash_condition_match?(attribute, value)
+          when Range then value.cover?(attribute)
+          when Regexp then value.match(attribute)
+          when Array then value.include?(attribute)
+          when Enumerable then value.include?(attribute)
+          else attribute == value
+          end
         end
       end
 
@@ -75,7 +79,7 @@ module CanCan
             rule.conditions.each do |key, value|
               key = id_key if %i[id _id].include?(key.to_sym)
               res <<  case value
-                      when Array then { key => { '$in' => value } }
+                      when Array then { key => { "$in" => value } }
                       else { key => value }
                       end
             end
@@ -89,12 +93,12 @@ module CanCan
             rule.conditions.each do |key, value|
               key = id_key if %i[id _id].include?(key.to_sym)
               case value
-              when Regexp then res << { key => { '$not' => value } }
+              when Regexp then res << { key => { "$not" => value } }
               else
-                if prev_value = res.detect { |item| item.dig(key, '$nin') }
-                  prev_value[key]['$nin'] += Array(value)
+                if prev_value = res.detect { |item| item.dig(key, "$nin") }
+                  prev_value[key]["$nin"] += Array(value)
                 else
-                  res << { key => { '$nin' => Array(value) } }
+                  res << { key => { "$nin" => Array(value) } }
                 end
               end
             end
@@ -117,13 +121,13 @@ module CanCan
       def database_records
         return @model_class.none unless has_any_conditions?
 
-        or_conditions = { '$or' => [subject_type_conditions, *open_conditions].compact }
-        or_conditions = nil if or_conditions['$or'].empty?
+        or_conditions = { "$or" => [subject_type_conditions, *open_conditions].compact }
+        or_conditions = {} if or_conditions["$or"].empty?
 
-        and_conditions = { '$and' => [or_conditions, *closed_conditions].compact }
-        and_conditions = nil if and_conditions['$and'].empty?
+        and_conditions = { "$and" => [*closed_conditions].compact }
+        and_conditions = {} if and_conditions["$and"].empty?
 
-        @model_class.where(and_conditions)
+        @model_class.where(or_conditions.merge(and_conditions))
       end
 
       private
@@ -147,11 +151,11 @@ module CanCan
       end
 
       def id_key
-        @id_key ||= [prefix, '_id'].reject(&:blank?).join.to_sym
+        @id_key ||= [prefix, "_id"].reject(&:blank?).join.to_sym
       end
 
       def type_key
-        @type_key ||= [prefix, '_type'].reject(&:blank?).join.to_sym
+        @type_key ||= [prefix, "_type"].reject(&:blank?).join.to_sym
       end
     end
   end

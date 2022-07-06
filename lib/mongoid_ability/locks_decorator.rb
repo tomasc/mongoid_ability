@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MongoidAbility
   # adds scope-like methods on top of an Array containing locks
 

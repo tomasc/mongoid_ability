@@ -15,12 +15,17 @@ module MongoidAbility
     let(:loaded_rules) { ability_load.send(:rules) }
 
     describe 'dump' do
-      it { ability_dump.must_be :present? }
+      it { _(ability_dump).must_be :present? }
     end
 
     describe 'load' do
-      it { loaded_rules.count.must_equal 2 }
-      it { loaded_rules.map(&:conditions).must_include({ id: my_subject.id }) }
+      it 'loads rules for each lock' do
+        _(loaded_rules.count { |rule| rule.subjects == [MySubject] }).must_equal 2
+      end
+
+      it 'builds conditions for the subjects id' do
+        _(loaded_rules.map(&:conditions)).must_include({ id: my_subject.id })
+      end
     end
   end
 end

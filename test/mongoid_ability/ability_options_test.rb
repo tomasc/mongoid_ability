@@ -12,8 +12,8 @@ module MongoidAbility
       describe 'positive' do
         before(:all) { MySubject.default_lock MyLock, :read, true, override: true }
 
-        it { ability.can?(:read, subject1).must_equal false }
-        it { ability.can?(:read, subject2).must_equal true }
+        it { _(ability.can?(:read, subject1)).must_equal false }
+        it { _(ability.can?(:read, subject2)).must_equal true }
       end
 
       describe 'negative' do
@@ -22,8 +22,8 @@ module MongoidAbility
           MySubject.default_lock MyLock, :read, false, override: true
         end
 
-        it { ability.can?(:read, subject1).must_equal true }
-        it { ability.can?(:read, subject2).must_equal false }
+        it { _(ability.can?(:read, subject1)).must_equal true }
+        it { _(ability.can?(:read, subject2)).must_equal false }
       end
     end
 
@@ -33,8 +33,8 @@ module MongoidAbility
       describe 'positive' do
         before(:all) { MySubject.default_lock MyLock, :read, true, str_val: 'Jan Tschichold' }
 
-        it { ability.can?(:read, subject1).must_equal false }
-        it { ability.can?(:read, subject2).must_equal true }
+        it { _(ability.can?(:read, subject1)).must_equal false }
+        it { _(ability.can?(:read, subject2)).must_equal true }
       end
 
       describe 'negative' do
@@ -43,8 +43,8 @@ module MongoidAbility
           MySubject.default_lock MyLock, :read, false, str_val: 'Jan Tschichold'
         end
 
-        it { ability.can?(:read, subject1).must_equal true }
-        it { ability.can?(:read, subject2).must_equal false }
+        it { _(ability.can?(:read, subject1)).must_equal true }
+        it { _(ability.can?(:read, subject2)).must_equal false }
       end
     end
 
@@ -54,8 +54,8 @@ module MongoidAbility
       describe 'positive' do
         before(:all) { MySubject.default_lock MyLock, :read, true, str_val: /tschichold/i }
 
-        it { ability.can?(:read, subject1).must_equal false }
-        it { ability.can?(:read, subject2).must_equal true }
+        it { _(ability.can?(:read, subject1)).must_equal false }
+        it { _(ability.can?(:read, subject2)).must_equal true }
       end
 
       describe 'negative' do
@@ -64,8 +64,8 @@ module MongoidAbility
           MySubject.default_lock MyLock, :read, false, str_val: /tschichold/i
         end
 
-        it { ability.can?(:read, subject1).must_equal true }
-        it { ability.can?(:read, subject2).must_equal false }
+        it { _(ability.can?(:read, subject1)).must_equal true }
+        it { _(ability.can?(:read, subject2)).must_equal false }
       end
     end
 
@@ -75,8 +75,8 @@ module MongoidAbility
       describe 'positive' do
         before(:all) { MySubject.default_lock MyLock, :read, true, str_val: %w(John Paul George Ringo) }
 
-        it { ability.can?(:read, subject1).must_equal false }
-        it { ability.can?(:read, subject2).must_equal true }
+        it { _(ability.can?(:read, subject1)).must_equal false }
+        it { _(ability.can?(:read, subject2)).must_equal true }
       end
 
       describe 'negative' do
@@ -85,8 +85,8 @@ module MongoidAbility
           MySubject.default_lock MyLock, :read, false, str_val: %w(John Paul George Ringo)
         end
 
-        it { ability.can?(:read, subject1).must_equal true }
-        it { ability.can?(:read, subject2).must_equal false }
+        it { _(ability.can?(:read, subject1)).must_equal true }
+        it { _(ability.can?(:read, subject2)).must_equal false }
       end
     end
   end

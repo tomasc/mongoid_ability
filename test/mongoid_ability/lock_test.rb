@@ -7,50 +7,42 @@ module MongoidAbility
     let(:my_subject) { MySubject.new }
     let(:inherited_lock) { MyLock1.new }
 
-    # ---------------------------------------------------------------------
-
-    it { subject.must_respond_to :action }
-    it { subject.must_respond_to :outcome }
-    it { subject.must_respond_to :subject }
-    it { subject.must_respond_to :subject_id }
-    it { subject.must_respond_to :subject_type }
-    it { subject.must_respond_to :owner }
-
-    # ---------------------------------------------------------------------
+    it { _(subject).must_respond_to :action }
+    it { _(subject).must_respond_to :outcome }
+    it { _(subject).must_respond_to :subject }
+    it { _(subject).must_respond_to :subject_id }
+    it { _(subject).must_respond_to :subject_type }
+    it { _(subject).must_respond_to :owner }
 
     it '#open?' do
-      subject.must_respond_to :open?
-      subject.open?.must_equal false
+      _(subject).must_respond_to :open?
+      _(subject.open?).must_equal false
     end
 
     it '#closed?' do
-      subject.must_respond_to :closed?
-      subject.closed?.must_equal true
+      _(subject).must_respond_to :closed?
+      _(subject.closed?).must_equal true
     end
 
     it '#class_lock?' do
-      subject.must_respond_to :class_lock?
+      _(subject).must_respond_to :class_lock?
     end
 
     it '#id_lock?' do
-      subject.must_respond_to :id_lock?
+      _(subject).must_respond_to :id_lock?
     end
-
-    # ---------------------------------------------------------------------
 
     describe '.subject_id' do
       it 'converts legal id String to BSON' do
         id = BSON::ObjectId.new
-        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_be_kind_of BSON::ObjectId
+        _(MyLock.for_subject_id(id.to_s).selector['subject_id']).must_be_kind_of BSON::ObjectId
       end
 
       it 'converts empty String to nil' do
         id = ''
-        MyLock.for_subject_id(id.to_s).selector['subject_id'].must_be_nil
+        _(MyLock.for_subject_id(id.to_s).selector['subject_id']).must_be_nil
       end
     end
-
-    # ---------------------------------------------------------------------
 
     describe 'sort' do
       let(:lock0) { MyLock.new(subject_type: MySubject, action: :update, outcome: false) }
@@ -63,11 +55,9 @@ module MongoidAbility
 
       let(:sorted_locks) { owner.my_locks.sort(&Lock.sort) }
 
-      it { sorted_locks[0].must_equal lock4 }
-      it { sorted_locks[3].must_equal lock1 }
+      it { _(sorted_locks[0]).must_equal lock4 }
+      it { _(sorted_locks[3]).must_equal lock1 }
     end
-
-    # ---------------------------------------------------------------------
 
     describe '#inherited_outcome' do
       before(:all) { MySubject.default_lock MyLock, :read, true }
@@ -83,11 +73,11 @@ module MongoidAbility
       let(:subject_lock) { owner.my_locks.detect(&:id_lock?) }
       let(:default_lock) { MySubject.default_locks.detect { |l| l.action == :read } }
 
-      it { ability.can?(:read, my_subject).must_equal true }
+      it { _(ability.can?(:read, my_subject)).must_equal true }
 
-      it { subject_lock.inherited_outcome.must_equal false }
-      it { subject_type_lock.inherited_outcome.must_equal true }
-      it { default_lock.inherited_outcome.must_equal true }
+      it { _(subject_lock.inherited_outcome).must_equal false }
+      it { _(subject_type_lock.inherited_outcome).must_equal true }
+      it { _(default_lock.inherited_outcome).must_equal true }
     end
   end
 end

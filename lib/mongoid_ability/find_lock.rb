@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module MongoidAbility
   # finds first lock that controls specified params
 
@@ -25,8 +27,6 @@ module MongoidAbility
     def subject_class
       subject_type.constantize
     end
-
-    # ---------------------------------------------------------------------
 
     class FindDefaultLock < FindLock
       def call

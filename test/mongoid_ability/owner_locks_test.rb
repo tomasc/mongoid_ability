@@ -13,8 +13,8 @@ module MongoidAbility
 
       before(:all) { MySubject.default_lock MyLock, :read, true }
 
-      it { ability.can?(:read, subject.class).must_equal true }
-      it { ability.can?(:read, subject).must_equal false }
+      it { _(ability.can?(:read, subject.class)).must_equal true }
+      it { _(ability.can?(:read, subject)).must_equal false }
     end
 
     describe 'when lock for subject type' do
@@ -23,8 +23,8 @@ module MongoidAbility
 
       before(:all) { MySubject.default_lock MyLock, :read, true }
 
-      it { ability.can?(:read, subject.class).must_equal false }
-      it { ability.can?(:read, subject).must_equal false }
+      it { _(ability.can?(:read, subject.class)).must_equal false }
+      it { _(ability.can?(:read, subject)).must_equal false }
     end
   end
 end

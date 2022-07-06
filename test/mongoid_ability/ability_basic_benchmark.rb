@@ -11,13 +11,13 @@ module MongoidAbility
 
     bench_performance_constant 'can?' do |n|
       n.times do
-        ability.can?(:read, MySubject).must_equal false
+        _(ability.can?(:read, MySubject)).must_equal false
       end
     end
 
     bench_performance_constant 'cannot?' do |n|
       n.times do
-        ability.cannot?(:read, MySubject).must_equal true
+        _(ability.cannot?(:read, MySubject)).must_equal true
       end
     end
 

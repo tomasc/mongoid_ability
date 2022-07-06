@@ -1,0 +1,26 @@
+name: My workflow
+on: [push, pull_request]
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        gemfile: ["7_0", "7_1", "7_2", "7_3", "7_4"]
+        ruby: ["2.7", "3.0", "3.1"]
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo
+        ports: ["27017:27017"]
+    env:
+      BUNDLE_GEMFILE: ${{ github.workspace }}/gemfiles/${{ matrix.gemfile }}.gemfile
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - run: bundle exec rake
