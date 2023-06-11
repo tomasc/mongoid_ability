@@ -19,7 +19,7 @@ module MongoidAbility
     end
 
     def self.subject_classes
-      Object.subclasses.select do |cls|
+      Object.descendants.select do |cls|
         cls.included_modules.include?(MongoidAbility::Subject)
       end
     end
