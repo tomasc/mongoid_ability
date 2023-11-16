@@ -21,7 +21,7 @@ Mongoid.configure do |config|
   config.connect_to('mongoid_ability_test')
 end
 
-class MiniTest::Spec
+class Minitest::Spec
   before(:each) do
     DatabaseCleaner.start
   end
