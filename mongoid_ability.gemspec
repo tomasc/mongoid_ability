@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'appraisal'
   spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'database_cleaner-mongoid', '~> 2.0.1'
+  spec.add_development_dependency 'database_cleaner-mongoid'
   spec.add_development_dependency 'guard'
   spec.add_development_dependency 'guard-minitest'
   spec.add_development_dependency 'minitest'
