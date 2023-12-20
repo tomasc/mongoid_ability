@@ -109,14 +109,14 @@ module CanCan
       def closed_subject_type_conditions
         return if closed_subject_types.blank?
 
-        { :"#{type_key}".nin => closed_subject_types.map(&:to_s) }
+        { :"#{type_key}".nin => closed_subject_types.sort_by(&:to_s).map(&:to_s) }
       end
 
       def open_subject_type_conditions
         return if open_subject_types.blank?
         return if closed_subject_types.blank? # no need for $in if all types are open
 
-        { :"#{type_key}".in => open_subject_types.map(&:to_s) }
+        { :"#{type_key}".in => open_subject_types.sort_by(&:to_s).map(&:to_s) }
       end
 
       def has_any_conditions?

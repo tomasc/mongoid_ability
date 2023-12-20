@@ -73,7 +73,7 @@ module CanCan
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject2 }
 
-            it { _(MySubject.accessible_by(ability, :read).selector).must_equal({"$or"=>[{"_type"=>{"$nin"=>["MySubject", "MySubject11", "MySubject1", "MySubject21", "MySubject2"]}}]}) }
+            it { _(MySubject.accessible_by(ability, :read).selector).must_equal({"$or"=>[{"_type"=>{"$nin"=>["MySubject", "MySubject1", "MySubject11", "MySubject2", "MySubject21"]}}]}) }
           end
 
           describe 'default combined locks' do
