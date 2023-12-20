@@ -145,11 +145,13 @@ module CanCan
               let(:lock_1) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
               let(:lock_2) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
               let(:lock_3) { MyLock.new(subject: my_subject1, action: :read, outcome: true) }
+              let(:lock_4) { MyLock.new(subject_type: MySubject2, action: :read, outcome: true) }
 
-              let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3]) }
+              let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3, lock_4]) }
 
               it { _(MySubject.accessible_by(ability, :read)).must_include my_subject }
               it { _(MySubject.accessible_by(ability, :read)).must_include my_subject1 }
+              it { _(MySubject2.accessible_by(ability, :read)).must_include my_subject2 }
             end
           end
 
