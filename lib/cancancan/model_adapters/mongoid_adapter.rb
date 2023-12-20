@@ -132,10 +132,10 @@ module CanCan
         return @model_class.none unless any_open?
         return @model_class.all unless any_closed?
 
-        or_conditions = { "$or" => [open_subject_type_conditions, closed_subject_type_conditions, *open_conditions].compact }
+        or_conditions = { "$or" => [open_subject_type_conditions, *open_conditions].compact }
         or_conditions = {} if or_conditions["$or"].empty?
 
-        and_conditions = { "$and" => [*closed_conditions].compact }
+        and_conditions = { "$and" => [closed_subject_type_conditions, *closed_conditions].compact }
         and_conditions = {} if and_conditions["$and"].empty?
 
         @model_class.where(or_conditions.merge(and_conditions))
