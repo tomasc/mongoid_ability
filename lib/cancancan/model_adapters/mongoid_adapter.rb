@@ -108,6 +108,7 @@ module CanCan
 
       def closed_subject_type_conditions
         return if closed_subject_types.blank?
+        return if open_subject_types.blank? # no need for $nin if all types are closed
 
         { :"#{type_key}".nin => closed_subject_types.sort_by(&:to_s).map(&:to_s) }
       end
@@ -119,19 +120,17 @@ module CanCan
         { :"#{type_key}".in => open_subject_types.sort_by(&:to_s).map(&:to_s) }
       end
 
-      def has_any_conditions?
-        open_subject_type_conditions.present? ||
-          closed_subject_type_conditions.present? ||
-          open_conditions.present? ||
-          closed_conditions.present?
+      def any_open?
+        open_subject_types.present? || open_conditions.present?
       end
 
-      def has_any_closed_conditions?
-        subject_type_conditions.present? || closed_conditions.present?
+      def any_closed?
+        closed_subject_types.present? || closed_conditions.present?
       end
 
       def database_records
-        return @model_class.criteria unless has_any_conditions?
+        return @model_class.none unless any_open?
+        return @model_class.all unless any_closed?
 
         or_conditions = { "$or" => [open_subject_type_conditions, closed_subject_type_conditions, *open_conditions].compact }
         or_conditions = {} if or_conditions["$or"].empty?
