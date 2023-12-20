@@ -13,10 +13,7 @@ module MongoidAbility
       base.class_eval do
         include Mongoid::Touchable::InstanceMethods
 
-        # always set the _type field as it is used by :accessible_by queries
-        # FIXME: removing this line should in theory break non SCI object, but
-        # it doesn't ...
-        # field :_type, type: String, default: model_name
+        field :_type, type: String, default: -> { model_name }
       end
     end
 
