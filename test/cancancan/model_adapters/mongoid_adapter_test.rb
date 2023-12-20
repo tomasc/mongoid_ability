@@ -41,12 +41,20 @@ module CanCan
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
             it { _(MySubject2.accessible_by(ability, :read).to_a).must_include my_subject2 }
 
-            it 'works for non sci classes' do
+            it 'works for unlocked non sci classes' do
               MyFlatSubject.default_lock MyLock, :read, true
               flat_subject = MyFlatSubject.create!
 
               _(MyFlatSubject.accessible_by(ability, :read).to_a)
                 .must_include flat_subject
+            end
+
+            it 'works for locked non sci classes' do
+              MyFlatSubject.default_lock MyLock, :read, false
+              flat_subject = MyFlatSubject.create!
+
+              _(MyFlatSubject.accessible_by(ability, :read).to_a)
+                .wont_include flat_subject
             end
           end
 
