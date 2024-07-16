@@ -76,6 +76,7 @@ module CanCan
       def open_conditions
         @open_conditions ||= begin
           condition_rules.select(&:base_behavior).each_with_object([]) do |rule, res|
+            next if open_subject_types.include?(rule.subjects.first)
             rule.conditions.each do |key, value|
               key = id_key if %i[id _id].include?(key.to_sym)
               res <<  case value

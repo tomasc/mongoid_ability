@@ -229,9 +229,6 @@ module CanCan
 
             _(selector).must_equal(
               {
-                '$or' => [
-                  { 'subject_id' => my_subject1.id },
-                ],
                 '$and' =>[
                   { 'subject_id'=> { '$nin' => [my_subject2.id] } }
                 ]
