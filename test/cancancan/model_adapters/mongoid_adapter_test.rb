@@ -23,6 +23,21 @@ module CanCan
           my_subject21.save!
         end
 
+        it "works with superclass locks of multiple types" do
+          MySubject.default_lock MyLock, :read, true
+
+          new_subject = MySubject.create!
+          another_subject = MySubject.create!
+          lock1 = MyLock.new(subject: new_subject, action: :read, outcome: true)
+          lock2 = MyLock.new(subject: another_subject, action: :read, outcome: false)
+          new_role = MyRole.create!(my_locks: [lock1, lock2])
+          new_owner = MyOwner.create!(my_roles: [new_role])
+          new_ability = MongoidAbility::Ability.new(new_owner)
+          final_subject = MySubject1.create!
+
+          _(MySubject1.accessible_by(new_ability, :read).to_a).must_include final_subject
+        end
+
         describe 'subject type locks' do
           describe 'default open locks' do
             before do
