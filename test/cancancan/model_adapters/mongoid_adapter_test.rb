@@ -23,6 +23,21 @@ module CanCan
           my_subject21.save!
         end
 
+        it "works with superclass locks of multiple types" do
+          MySubject.default_lock MyLock, :read, true
+
+          new_subject = MySubject.create!
+          another_subject = MySubject.create!
+          lock1 = MyLock.new(subject: new_subject, action: :read, outcome: true)
+          lock2 = MyLock.new(subject: another_subject, action: :read, outcome: false)
+          new_role = MyRole.create!(my_locks: [lock1, lock2])
+          new_owner = MyOwner.create!(my_roles: [new_role])
+          new_ability = MongoidAbility::Ability.new(new_owner)
+          final_subject = MySubject1.create!
+
+          _(MySubject1.accessible_by(new_ability, :read).to_a).must_include final_subject
+        end
+
         describe 'subject type locks' do
           describe 'default open locks' do
             before do
@@ -41,12 +56,20 @@ module CanCan
             it { _(MySubject2.accessible_by(ability, :read).to_a).wont_include my_subject1 }
             it { _(MySubject2.accessible_by(ability, :read).to_a).must_include my_subject2 }
 
-            it 'works for non sci classes' do
+            it 'works for unlocked non sci classes' do
               MyFlatSubject.default_lock MyLock, :read, true
               flat_subject = MyFlatSubject.create!
 
               _(MyFlatSubject.accessible_by(ability, :read).to_a)
                 .must_include flat_subject
+            end
+
+            it 'works for locked non sci classes' do
+              MyFlatSubject.default_lock MyLock, :read, false
+              flat_subject = MyFlatSubject.create!
+
+              _(MyFlatSubject.accessible_by(ability, :read).to_a)
+                .wont_include flat_subject
             end
           end
 
@@ -137,11 +160,13 @@ module CanCan
               let(:lock_1) { MyLock.new(subject_type: MySubject, action: :read, outcome: false) }
               let(:lock_2) { MyLock.new(subject: my_subject, action: :read, outcome: true) }
               let(:lock_3) { MyLock.new(subject: my_subject1, action: :read, outcome: true) }
+              let(:lock_4) { MyLock.new(subject_type: MySubject2, action: :read, outcome: true) }
 
-              let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3]) }
+              let(:owner) { MyOwner.new(my_locks: [lock_1, lock_2, lock_3, lock_4]) }
 
               it { _(MySubject.accessible_by(ability, :read)).must_include my_subject }
               it { _(MySubject.accessible_by(ability, :read)).must_include my_subject1 }
+              it { _(MySubject2.accessible_by(ability, :read)).must_include my_subject2 }
             end
           end
 
@@ -204,10 +229,6 @@ module CanCan
 
             _(selector).must_equal(
               {
-                '$or' => [
-                  { 'subject_type' => { '$nin' => [] } },
-                  { 'subject_id' => my_subject1.id },
-                ],
                 '$and' =>[
                   { 'subject_id'=> { '$nin' => [my_subject2.id] } }
                 ]
